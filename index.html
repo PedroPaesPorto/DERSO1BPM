@@ -4,6 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Formulário de Solicitação de Derso - 1º BPM</title>
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCO1wXe1bBfTdHohs5AkfPVG-Fun8gyzKc",
+    authDomain: "derso-1-bpm.firebaseapp.com",
+    projectId: "derso-1-bpm",
+    storageBucket: "derso-1-bpm.appspot.com",
+    messagingSenderId: "752412283176",
+    appId: "1:752412283176:web:d61d28b6cfd5516229001d",
+    measurementId: "G-6T7PVJ86QN"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@chenfengyuan/datepicker/dist/datepicker.min.css">
 </head>
@@ -33,7 +56,7 @@
                 <option value="72H">72H</option>
                 <option value="1ª FOLGA">1ª FOLGA</option>
                 <option value="2ª FOLGA">2ª FOLGA</option>
-                <option value="GP">GP</option>
+                <option value="Expediente">EXPEDIENTE</option>
             </select>
         </div>
         <div class="form-group">
@@ -55,12 +78,10 @@
                 <label class="form-check-label" for="tj_cal">TJ CAL</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="emeron_6h" name="policiamento[]" value="emeron_6h">
-                <label class="form-check-label" for="emeron_6h">Emeron - 6H</label>
             </div>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox" id="emeron_8h" name="policiamento[]" value="emeron_8h">
-                <label class="form-check-label" for="emeron_8h">Emeron - 8H</label>
+                <label class="form-check-label" for="emeron_8h">Emeron</label>
             </div>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox" id="comercio_seguro" name="policiamento[]" value="comercio_seguro">
@@ -123,3 +144,4 @@
 </script>
 </body>
 </html>
+
