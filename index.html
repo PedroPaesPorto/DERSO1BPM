@@ -104,11 +104,11 @@
         event.preventDefault(); // Impede o envio padrão do formulário
         const reInput = document.getElementById('re');
         const reValue = reInput.value.trim();
-        const reRegex = /^1000\d{6}$/; // Expressão regular para o formato '1000******'
+        const reRegex = /^1000\d{5}$/; // Expressão regular para o formato '1000*****'
 
         if (!reRegex.test(reValue)) {
             // Se o valor não corresponder ao formato especificado
-            alert('O campo RE deve estar no formato 1000******, com exatamente 10 dígitos.');
+            alert('O campo RE deve estar no formato 1000*****, com exatamente 10 dígitos.');
             return;
         }
 
