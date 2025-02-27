@@ -16,6 +16,7 @@
       if (!num.startsWith("1000")) {
         num = "1000" + num;
       }
+      console.log("Matrícula padronizada:", num);
       return num;
     }
 
@@ -25,11 +26,11 @@
       fetch(listURL)
         .then(response => response.json())
         .then(data => {
-          window.employeeList = data; // armazena globalmente
+          window.employeeList = data;
+          console.log("Lista de funcionários carregada:", data);
         })
         .catch(error => {
           console.error("Erro ao carregar a lista de funcionários:", error);
-          // Em caso de erro, para testes, defina uma lista fixa:
           window.employeeList = { "100012345": "João Silva", "100098765": "Maria Oliveira" };
         });
     }
@@ -39,16 +40,18 @@
       const matriculaInput = document.getElementById("matricula");
       const nomeInput = document.getElementById("nome");
       const errorMsg = document.getElementById("matriculaError");
-
+      
       let standardized = standardizeMatricula(matriculaInput.value);
       matriculaInput.value = standardized;
-
-      if (window.employeeList[standardized]) {
+      
+      if (window.employeeList && window.employeeList[standardized]) {
         nomeInput.value = window.employeeList[standardized];
         errorMsg.textContent = "";
+        console.log("Matrícula encontrada:", standardized, "->", window.employeeList[standardized]);
       } else {
         nomeInput.value = "";
         errorMsg.textContent = "Matrícula não encontrada!";
+        console.warn("Matrícula não encontrada:", standardized);
       }
     }
 
@@ -60,25 +63,42 @@
       let lastDayNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0);
       dateInput.min = nextMonth.toISOString().split("T")[0];
       dateInput.max = lastDayNextMonth.toISOString().split("T")[0];
+      console.log("Data mínima:", dateInput.min, "Data máxima:", dateInput.max);
     }
 
-    // Envia os dados para o Google Apps Script
+    // Converte uma data do formato "aaaa-mm-dd" para "dd/mm/aaaa"
+    function formatDateToBR(dateStr) {
+      let parts = dateStr.split("-");
+      return parts[2] + "/" + parts[1] + "/" + parts[0];
+    }
+
+    // Envia os dados para o Google Apps Script com timestamp e data formatados
     function submitForm(event) {
       event.preventDefault();
       const form = document.getElementById("dersoForm");
       const formData = new FormData(form);
-      formData.append("timestamp", new Date().toISOString());
-
+      
+      // Formata o timestamp: data e hora no formato pt-BR (por exemplo: "27/02/2025 14:30:15")
+      let timestamp = new Date().toLocaleString('pt-BR', { hour12: false });
+      formData.set("timestamp", timestamp);
+      
+      // Converte o valor do campo de data para dd/mm/aaaa
+      let dataValue = document.getElementById("data").value;
+      if (dataValue) {
+        formData.set("data", formatDateToBR(dataValue));
+      }
+      
       const scriptURL = "https://script.google.com/macros/s/AKfycbykc9e6mbm4bGIoZcD4B2IzBpPUAICbC4w4JZ7AHriyg0L900gUUGArsilReZBIC6NwUA/exec";
       
       fetch(scriptURL, { method: "POST", body: formData })
         .then(response => {
           alert("Solicitação enviada com sucesso!");
           form.reset();
+          console.log("Dados enviados com sucesso.");
         })
         .catch(error => {
           alert("Erro ao enviar solicitação!");
-          console.error("Error:", error);
+          console.error("Erro no envio:", error);
         });
     }
 
