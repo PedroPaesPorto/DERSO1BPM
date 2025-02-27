@@ -2,10 +2,20 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Solicitação de Folga - DERSO</title>
+  <title>Teste - Solicitação de Folga DERSO</title>
+  <style>
+    /* Apenas para visualização */
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    label { display: inline-block; width: 100px; }
+    input, select { margin-bottom: 10px; }
+    .error { color: red; }
+  </style>
   <script>
-    // Variável global para armazenar a lista de funcionários
-    let employeeList = {};
+    // Modo teste: use uma lista fixa de funcionários
+    const employeeList = {
+      "100012345": "João Silva",
+      "100098765": "Maria Oliveira"
+    };
 
     // Função para padronizar a matrícula: remove caracteres não numéricos e adiciona "1000" se necessário
     function standardizeMatricula(matricula) {
@@ -16,20 +26,6 @@
       return num;
     }
 
-    // Função para carregar a lista de funcionários a partir do Google Apps Script
-    function loadEmployeeList() {
-      // URL do seu web app do Google Apps Script – substitua SEU_SCRIPT_ID
-      const listURL = "https://script.google.com/macros/s/SEU_SCRIPT_ID/exec?action=lista";
-      fetch(listURL)
-        .then(response => response.json())
-        .then(data => {
-          employeeList = data;
-        })
-        .catch(error => {
-          console.error("Erro ao carregar a lista de funcionários:", error);
-        });
-    }
-
     // Verifica a matrícula e preenche o nome automaticamente
     function checkMatricula() {
       const matriculaInput = document.getElementById("matricula");
@@ -38,7 +34,7 @@
 
       let standardized = standardizeMatricula(matriculaInput.value);
       matriculaInput.value = standardized;
-      
+
       if (employeeList[standardized]) {
         nomeInput.value = employeeList[standardized];
         errorMsg.textContent = "";
@@ -48,120 +44,72 @@
       }
     }
 
-    // Função para obter o período de solicitação: da 1ª segunda-feira à penúltima sexta-feira do mês atual
-    function getSubmissionPeriod() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth(); // mês atual (0 a 11)
-
-      // Calcula a primeira segunda-feira do mês atual
-      let firstMonday = new Date(year, month, 1);
-      while (firstMonday.getDay() !== 1) {
-        firstMonday.setDate(firstMonday.getDate() + 1);
-      }
-
-      // Calcula a última sexta-feira do mês atual
-      let lastDayOfMonth = new Date(year, month + 1, 0);
-      let lastFriday = new Date(lastDayOfMonth);
-      while (lastFriday.getDay() !== 5) {
-        lastFriday.setDate(lastFriday.getDate() - 1);
-      }
-      // Penúltima sexta-feira: última sexta menos 7 dias
-      let penultimateFriday = new Date(lastFriday);
-      penultimateFriday.setDate(penultimateFriday.getDate() - 7);
-
-      return { start: firstMonday, end: penultimateFriday };
-    }
-
-    // Configura o formulário e o campo de data
-    function initializeForm() {
-      const period = getSubmissionPeriod();
-      const today = new Date();
-      const formularioDiv = document.getElementById("formulario");
-
-      // Se hoje estiver fora do período de solicitação, exibe mensagem e não mostra o formulário
-      if (today < period.start) {
-        formularioDiv.innerHTML = `<h3>O período de solicitação ainda não começou. Iniciará em ${period.start.toLocaleDateString("pt-BR")}.</h3>`;
-        return;
-      } else if (today > period.end) {
-        formularioDiv.innerHTML = `<h3>O período de solicitação encerrou em ${period.end.toLocaleDateString("pt-BR")}.</h3>`;
-        return;
-      }
-
-      // Configura o campo de data para aceitar somente datas do próximo mês
+    // Configura o campo de data para aceitar somente datas do próximo mês
+    function setDateLimits() {
       const dateInput = document.getElementById("data");
-      let current = new Date();
-      // Próximo mês
-      let nextMonth = new Date(current.getFullYear(), current.getMonth() + 1, 1);
-      let lastDayNextMonth = new Date(current.getFullYear(), current.getMonth() + 2, 0);
+      let today = new Date();
+      // Calcula o primeiro e o último dia do próximo mês
+      let nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      let lastDayNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0);
       dateInput.min = nextMonth.toISOString().split("T")[0];
       dateInput.max = lastDayNextMonth.toISOString().split("T")[0];
     }
 
-    // Envia os dados para o Google Apps Script (que salvará na aba correspondente)
+    // Função de envio simulada: apenas mostra os dados no console
     function submitForm(event) {
       event.preventDefault();
-      const formData = new FormData(document.getElementById("dersoForm"));
-      
-      // Adiciona um timestamp
+      const form = document.getElementById("dersoForm");
+      const formData = new FormData(form);
       formData.append("timestamp", new Date().toISOString());
 
-      // URL do seu web app do Google Apps Script – substitua SEU_SCRIPT_ID
-      const scriptURL = "https://script.google.com/macros/s/SEU_SCRIPT_ID/exec";
-      
-      fetch(scriptURL, { method: "POST", body: formData })
-        .then(response => {
-          alert("Solicitação enviada com sucesso!");
-          document.getElementById("dersoForm").reset();
-        })
-        .catch(error => {
-          alert("Erro ao enviar solicitação!");
-          console.error("Error!", error.message);
-        });
+      // Mostra os dados no console para testes
+      console.log("Dados a enviar:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key + ": " + value);
+      }
+      alert("Simulação de envio bem-sucedida!");
+      form.reset();
     }
 
     document.addEventListener("DOMContentLoaded", function(){
-      loadEmployeeList();
-      initializeForm();
+      setDateLimits();
       document.getElementById("matricula").addEventListener("blur", checkMatricula);
     });
   </script>
 </head>
 <body>
-  <div id="formulario">
-    <h2>Solicitação de Folga - DERSO</h2>
-    <form id="dersoForm" onsubmit="submitForm(event)">
-      <label for="email">E-mail:</label>
-      <input type="email" id="email" name="email" required>
-      <br><br>
-      
-      <label for="matricula">Matrícula:</label>
-      <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
-      <span id="matriculaError" style="color:red;"></span>
-      <br><br>
-      
-      <label for="nome">Nome:</label>
-      <input type="text" id="nome" name="nome" readonly required>
-      <br><br>
-      
-      <label for="folga">Folga:</label>
-      <select id="folga" name="folga" required>
-        <option value="">Selecione</option>
-        <option value="24H">24H</option>
-        <option value="48H">48H</option>
-        <option value="72H">72H</option>
-        <option value="1ª FOLGA">1ª FOLGA</option>
-        <option value="2ª FOLGA">2ª FOLGA</option>
-        <option value="EXPEDIENTE">EXPEDIENTE</option>
-      </select>
-      <br><br>
-      
-      <label for="data">Data:</label>
-      <input type="date" id="data" name="data" required>
-      <br><br>
-      
-      <button type="submit">Enviar Solicitação</button>
-    </form>
-  </div>
+  <h2>Teste - Solicitação de Folga DERSO</h2>
+  <form id="dersoForm" onsubmit="submitForm(event)">
+    <label for="email">E-mail:</label>
+    <input type="email" id="email" name="email" required>
+    <br>
+    
+    <label for="matricula">Matrícula:</label>
+    <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
+    <span id="matriculaError" class="error"></span>
+    <br>
+    
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" name="nome" readonly required>
+    <br>
+    
+    <label for="folga">Folga:</label>
+    <select id="folga" name="folga" required>
+      <option value="">Selecione</option>
+      <option value="24H">24H</option>
+      <option value="48H">48H</option>
+      <option value="72H">72H</option>
+      <option value="1ª FOLGA">1ª FOLGA</option>
+      <option value="2ª FOLGA">2ª FOLGA</option>
+      <option value="EXPEDIENTE">EXPEDIENTE</option>
+    </select>
+    <br>
+    
+    <label for="data">Data:</label>
+    <input type="date" id="data" name="data" required>
+    <br>
+    
+    <button type="submit">Enviar Solicitação</button>
+  </form>
 </body>
 </html>
