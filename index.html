@@ -106,10 +106,13 @@
         window.employeeList = {};
         const emailProviders = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "terra.com.br", "bol.com.br"];
 
-        function updateEmailDatalist() {
+function updateEmailDatalist() {
     const emailInput = document.getElementById("email");
     const datalist = document.getElementById("emailProviders");
-    const value = emailInput.value;
+
+    if (!emailInput) return; // 🚨 Evita erro caso o campo não exista
+
+    const value = emailInput.value || ""; // 👈 Agora 'value' sempre existirá
     const atIndex = value.indexOf("@");
 
     if (atIndex === -1) {
@@ -117,27 +120,17 @@
         return;
     }
 
-    const prefix = value.slice(0, atIndex + 1);  // Mantém "usuario@"
     const domainPart = value.slice(atIndex + 1).toLowerCase();
     const filtered = emailProviders.filter(provider => provider.startsWith(domainPart));
 
     datalist.innerHTML = "";
     filtered.forEach(provider => {
         const option = document.createElement("option");
-        option.value = prefix + provider;  // Agora sugere emails completos
+        option.value = value.split("@")[0] + "@" + provider; // Mantém o nome digitado
         datalist.appendChild(option);
     });
 }
 
-            const domainPart = value.slice(atIndex + 1).toLowerCase();
-            const filtered = emailProviders.filter(provider => provider.startsWith(domainPart));
-
-            datalist.innerHTML = "";
-            filtered.forEach(provider => {
-                const option = document.createElement("option");
-                option.value = provider;
-                datalist.appendChild(option);
-            });
         function formatDateToBR(dateString) {
             if (!dateString || !dateString.includes("-")) return "";
             let parts = dateString.split("-");
