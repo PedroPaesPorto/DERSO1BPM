@@ -76,13 +76,16 @@
       border-radius: 4px;
       transition: background-color 0.3s ease;
     }
-    .button:hover {
-      background-color: #0056b3;
-    }
-    .error {
-      color: red;
-      margin-top: 5px;
-    }
+   .button:hover {
+   background-color: #004494; /* Azul mais escuro */
+}
+   .error {
+   color: red;
+   font-size: 14px;
+   margin-top: 5px;
+   font-weight: bold;
+}
+
     .required-star {
       color: red;
       margin-left: 4px;
@@ -104,15 +107,27 @@
         const emailProviders = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "terra.com.br", "bol.com.br"];
 
         function updateEmailDatalist() {
-            const emailInput = document.getElementById("email");
-            const datalist = document.getElementById("emailProviders");
-            const value = emailInput.value;
-            const atIndex = value.indexOf("@");
+    const emailInput = document.getElementById("email");
+    const datalist = document.getElementById("emailProviders");
+    const value = emailInput.value;
+    const atIndex = value.indexOf("@");
 
-            if (atIndex === -1) {
-                datalist.innerHTML = "";
-                return;
-            }
+    if (atIndex === -1) {
+        datalist.innerHTML = "";
+        return;
+    }
+
+    const prefix = value.slice(0, atIndex + 1);  // Mantém "usuario@"
+    const domainPart = value.slice(atIndex + 1).toLowerCase();
+    const filtered = emailProviders.filter(provider => provider.startsWith(domainPart));
+
+    datalist.innerHTML = "";
+    filtered.forEach(provider => {
+        const option = document.createElement("option");
+        option.value = prefix + provider;  // Agora sugere emails completos
+        datalist.appendChild(option);
+    });
+}
 
             const domainPart = value.slice(atIndex + 1).toLowerCase();
             const filtered = emailProviders.filter(provider => provider.startsWith(domainPart));
@@ -132,9 +147,10 @@
         }
 
         function standardizeMatricula(matricula) {
-            let num = matricula.replace(/\D/g, '');
-            return num.startsWith("1000") ? num : "1000" + num;
-        }
+    let num = matricula.replace(/\D/g, ''); // Remove caracteres não numéricos
+    if (num.length < 5) return ""; // Evita números muito curtos
+    return num.startsWith("1000") ? num : "1000" + num;
+}
 
         function loadEmployeeList() {
             fetch(SCRIPT_URL + "?action=lista")
@@ -150,37 +166,43 @@
         }
 
         function checkMatricula() {
-            const matriculaInput = document.getElementById("matricula");
-            const nomeInput = document.getElementById("nome");
-            const errorMsg = document.getElementById("matriculaError");
-            
-            let standardized = standardizeMatricula(matriculaInput.value);
-            matriculaInput.value = standardized;
+    const matriculaInput = document.getElementById("matricula");
+    const nomeInput = document.getElementById("nome");
+    const errorMsg = document.getElementById("matriculaError");
 
-            if (window.employeeList && window.employeeList[standardized]) {
-                nomeInput.value = window.employeeList[standardized];
-                errorMsg.textContent = "";
-            } else {
-                nomeInput.value = "";
-                errorMsg.textContent = "Matrícula não encontrada!";
-            }
-        }
+    let standardized = standardizeMatricula(matriculaInput.value);
+    matriculaInput.value = standardized;
+
+    if (window.employeeList && window.employeeList[standardized]) {
+        nomeInput.value = window.employeeList[standardized];
+        errorMsg.textContent = "";
+        matriculaInput.style.border = "1px solid #ccc"; // Remove erro visual
+    } else {
+        nomeInput.value = "";
+        errorMsg.textContent = "Matrícula não encontrada!";
+        matriculaInput.style.border = "2px solid red"; // Destaca o erro no campo
+    }
+}
+
 
         function getFolgaValue() {
             let selected = document.querySelector("input[name='folga']:checked");
             return selected ? selected.value : null;
         }
 
-        async function checkDuplicate(matricula, dataValue) {
-            try {
-                let response = await fetch(`${ACTION_URL}?action=check&matricula=${encodeURIComponent(matricula)}&data=${encodeURIComponent(dataValue)}&nocache=${Date.now()}`);
-                let result = await response.json();
-                return result.duplicate;
-            } catch (error) {
-                console.error("Erro na verificação de duplicata:", error);
-                return false;
-            }
-        }
+       async function checkDuplicate(matricula, dataValue) {
+    try {
+        let response = await fetch(`${ACTION_URL}?action=check&matricula=${encodeURIComponent(matricula)}&data=${encodeURIComponent(dataValue)}&nocache=${Date.now()}`);
+        if (!response.ok) throw new Error("Erro ao verificar duplicatas!");
+        
+        let result = await response.json();
+        return result.duplicate;
+    } catch (error) {
+        console.error("Erro na verificação de duplicata:", error);
+        alert("Erro ao verificar duplicatas. Tente novamente!");
+        return false; // Retorna `false` para evitar travamento do formulário
+    }
+}
 
         async function submitForm(event) {
             event.preventDefault();
@@ -230,7 +252,7 @@
 </head>
 <body>
   <div class="container" id="formulario">
-    <h2>DERSO 1º BPM</h2>
+    <h2>DERSO 1º BPM - TESTES</h2>
     <p class="subtitle" id="subtitle"></p>
     <form id="dersoForm" onsubmit="submitForm(event)">
       <div class="form-group">
