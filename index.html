@@ -294,13 +294,20 @@ async function submitForm(event) {
     }
     formData.set("folga", folgaValue);
 
-    // Verifica duplicidade: mesma matrícula + mesma data
-    let duplicate = await checkDuplicateInSheet(matricula, dataBR);
-    if (duplicate) {
-        document.getElementById("duplicateError").textContent = "Já existe solicitação para essa data com essa matrícula!";
+    // Obtém o nome da aba e verifica duplicidade
+    try {
+        const sheetName = await getNextMonthSheetNameFromServer();
+        const duplicate = await checkDuplicateInSheet(matricula, dataBR, sheetName);
+        if (duplicate) {
+            document.getElementById("duplicateError").textContent = "Já existe solicitação para essa data com essa matrícula!";
+            return;
+        } else {
+            document.getElementById("duplicateError").textContent = "";
+        }
+    } catch (error) {
+        console.error("Erro ao obter nome da aba ou verificar duplicidade:", error);
+        alert("Erro ao verificar duplicidade. Tente novamente.");
         return;
-    } else {
-        document.getElementById("duplicateError").textContent = "";
     }
 
     // Envia os dados via POST
@@ -317,9 +324,8 @@ async function submitForm(event) {
 }
 
 // Nova função para verificar duplicidade na planilha
-async function checkDuplicateInSheet(matricula, data) {
-    let mesAno = getNextMonthSheetName(); // Obtém o nome da aba correta
-    let url = SCRIPT_URL + "?action=check&matricula=" + matricula + "&data=" + data + "&aba=" + mesAno;
+async function checkDuplicateInSheet(matricula, data, sheetName) {
+    let url = SCRIPT_URL + "?action=check&matricula=" + matricula + "&data=" + data + "&aba=" + sheetName;
 
     try {
         const response = await fetch(url);
@@ -330,6 +336,20 @@ async function checkDuplicateInSheet(matricula, data) {
         return false; // Retorna false em caso de erro
     }
 }
+
+// Nova função para obter o nome da aba do servidor
+async function getNextMonthSheetNameFromServer() {
+    let url = SCRIPT_URL + "?action=getsheetname";
+    try {
+        const response = await fetch(url);
+        const result = await response.json();
+        return result.sheetName;
+    } catch (error) {
+        console.error("Erro ao obter nome da aba:", error);
+        throw error; // Propaga o erro
+    }
+}
+
     
     document.addEventListener("DOMContentLoaded", function(){
       initializeForm();
