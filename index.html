@@ -304,7 +304,9 @@ async function submitForm(event) {
         } else {
             document.getElementById("duplicateError").textContent = "";
         }
-    } catch (error) {
+    } 
+    
+    catch (error) {
         console.error("Erro ao obter nome da aba ou verificar duplicidade:", error);
         alert("Erro ao verificar duplicidade. Tente novamente.");
         return;
