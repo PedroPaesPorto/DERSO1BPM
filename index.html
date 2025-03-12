@@ -1,407 +1,98 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Solicitação de Folga - DERSO</title>
-  <style>
-    body {
-      background-color: #f7f7f7;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 600px;
-      margin: 30px auto;
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 10px;
-    }
-    .subtitle {
-      text-align: center;
-      color: #555;
-      margin-bottom: 20px;
-      font-size: 15px;
-      line-height: 1.4;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      color: #555;
-      font-weight: bold;
-    }
-    .form-group input,
-    .form-group button,
-    .form-group select {
-      width: 100%;
-      padding: 8px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .radio-group {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .radio-group label {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-bottom: 8px;
-      cursor: pointer;
-      white-space: nowrap;
-      font-size: 16px;
-      color: #555;
-    }
-    .radio-group input[type="radio"] {
-      margin-right: 6px;
-    }
-    .button {
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 4px;
-      transition: background-color 0.3s ease;
-    }
-    .button:hover {
-      background-color: #0056b3;
-    }
-    .error {
-      color: red;
-      margin-top: 5px;
-    }
-    .required-star {
-      color: red;
-      margin-left: 4px;
-    }
-    .destaque-encerrou {
-      color: red;
-      font-weight: bold;
-    }
-    .destaque-iniciara {
-      color: green;
-      font-weight: bold;
-    }
-  </style>
-  <script>
-    // URL do Apps Script (use a URL publicada que termina em /exec)
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykc9e6mbm4bGIoZcD4B2IzBpPUAICbC4w4JZ7AHriyg0L900gUUGArsilReZBIC6NwUA/exec";
-    
-    // Lista global de funcionários (será carregada via GET action=lista)
-    window.employeeList = {};
-    
-    // Array de provedores para sugestões de e-mail
-    const emailProviders = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "terra.com.br", "bol.com.br"];
-    
-    // Atualiza o datalist de provedores após o "@" ser digitado
-    function updateEmailDatalist() {
-      const emailInput = document.getElementById("email");
-      const datalist = document.getElementById("emailProviders");
-      const value = emailInput.value;
-      const atIndex = value.indexOf("@");
-      if (atIndex === -1) {
-        datalist.innerHTML = "";
-        return;
-      }
-      const domainPart = value.slice(atIndex + 1).toLowerCase();
-      const filtered = emailProviders.filter(provider => provider.startsWith(domainPart));
-      datalist.innerHTML = "";
-      filtered.forEach(provider => {
-        const option = document.createElement("option");
-        option.value = provider;
-        datalist.appendChild(option);
-      });
-    }
-    
-    // Calcula o período de solicitação para um determinado mês (0–11)
-    // Ex: Se hoje for março de 2025, as solicitações para abril serão feitas no período da primeira segunda de março à penúltima sexta de março.
-    function getPeriod(year, month) {
-      let firstMonday = new Date(year, month, 1);
-      while (firstMonday.getDay() !== 1) {
-        firstMonday.setDate(firstMonday.getDate() + 1);
-      }
-      let lastDay = new Date(year, month + 1, 0);
-      let lastFriday = new Date(lastDay);
-      while (lastFriday.getDay() !== 5) {
-        lastFriday.setDate(lastFriday.getDate() - 1);
-      }
-      let penultimateFriday = new Date(lastFriday);
-      penultimateFriday.setDate(penultimateFriday.getDate() - 7);
-      return { start: firstMonday, end: penultimateFriday };
-    }
-    
-    // Inicializa o formulário: se estiver fora do período ativo, exibe mensagem; senão, mantém o formulário.
-    // O período ativo é calculado para o mês atual, para solicitações do próximo mês.
-    function initializeForm() {
-      const formularioDiv = document.getElementById("formulario");
-      const today = new Date();
-      const period = getPeriod(today.getFullYear(), today.getMonth());
-      const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-                          "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-      const requestedMonth = monthNames[(today.getMonth() + 1) % 12];
-      
-      if (today < period.start || today > period.end) {
-        let mensagem = "";
-        if (today < period.start) {
-          mensagem = `<h3>O período de solicitações para ${requestedMonth} iniciará em <span class="destaque-iniciara">${period.start.toLocaleDateString("pt-BR")}</span>.</h3>`;
-        } else if (today > period.end) {
-          const nextDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-          const nextPeriod = getPeriod(nextDate.getFullYear(), nextDate.getMonth());
-          const requestedMonthNext = monthNames[(nextDate.getMonth() + 1) % 12];
-          mensagem = `<h3>O período de solicitações para ${requestedMonth} encerrou em <span class="destaque-encerrou">${period.end.toLocaleDateString("pt-BR")}</span>.<br>
-                      As solicitações para ${requestedMonthNext} serão iniciadas em <span class="destaque-iniciara">${nextPeriod.start.toLocaleDateString("pt-BR")}</span>.</h3>`;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Solicitações</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
         }
-        formularioDiv.innerHTML = mensagem;
-        return;
-      }
-    }
-    
-    // Padroniza a matrícula removendo caracteres não numéricos e adicionando "1000"
-    function standardizeMatricula(matricula) {
-      let num = matricula.replace(/\D/g, '');
-      if (!num.startsWith("1000")) {
-        num = "1000" + num;
-      }
-      return num;
-    }
-    
-    // Carrega a lista de funcionários (action=lista)
-    function loadEmployeeList() {
-      const listURL = SCRIPT_URL + "?action=lista";
-      fetch(listURL)
-        .then(response => response.json())
-        .then(data => {
-          window.employeeList = data;
-          console.log("Lista carregada:", data);
-          console.log("Total funcionários: " + Object.keys(data).length);
-        })
-        .catch(error => {
-          console.error("Erro ao carregar a lista:", error);
-          window.employeeList = {};
-        });
-    }
-    
-    // Preenche o campo "Nome" com base na matrícula digitada
-    function checkMatricula() {
-      const matriculaInput = document.getElementById("matricula");
-      const nomeInput = document.getElementById("nome");
-      const errorMsg = document.getElementById("matriculaError");
-      let standardized = standardizeMatricula(matriculaInput.value);
-      matriculaInput.value = standardized;
-      if (window.employeeList && window.employeeList[standardized]) {
-        nomeInput.value = window.employeeList[standardized];
-        errorMsg.textContent = "";
-      } else {
-        nomeInput.value = "";
-        errorMsg.textContent = "Matrícula não encontrada!";
-      }
-    }
-    
-    // Configura o campo de data para aceitar somente datas do próximo mês
-    function setDateLimits() {
-      const dateInput = document.getElementById("data");
-      let today = new Date();
-      let nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-      let lastDayNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-      dateInput.min = nextMonth.toISOString().split("T")[0];
-      dateInput.max = lastDayNextMonth.toISOString().split("T")[0];
-    }
-    
-    // Converte data de "yyyy-mm-dd" para "dd/MM/yyyy"
-    function formatDateToBR(dateStr) {
-      let parts = dateStr.split("-");
-      return parts[2] + "/" + parts[1] + "/" + parts[0];
-    }
-    
-    // Retorna o valor selecionado para "Folga"
-    function getFolgaValue() {
-      let selected = document.querySelector("input[name='folga']:checked");
-      return selected ? selected.value : "";
-    }
-    
-    // Gera o timestamp no formato "dd/MM/yyyy HH:mm:ss" (sem vírgula)
-    function getFormattedTimestamp() {
-      let now = new Date();
-      let datePart = now.toLocaleDateString('pt-BR');
-      let timePart = now.toLocaleTimeString('pt-BR', { hour12: false });
-      return datePart + " " + timePart;
-    }
-    
-    // Verifica duplicidade: mesma matrícula + mesma data (formato "dd/MM/yyyy")
- function checkDuplicate(matricula, data) {
-    let dataObj = new Date(data.split("/").reverse().join("-")); // Convertendo dd/mm/aaaa para Date
-    let mesAno = dataObj.toLocaleString("pt-BR", { month: "long" }).charAt(0).toUpperCase() +
-                 dataObj.toLocaleString("pt-BR", { month: "long" }).slice(1) +
-                 String(dataObj.getFullYear()).slice(-2); // Formata "Abril25"
-    
-    let url = `https://script.google.com/macros/s/AKfycbwsIMa4U7n1wnT1kU_WU-sAZv-RfyteZEif6Lf6T-5M/exec`;
-    let params = new URLSearchParams({
-        action: "check",
-        matricula: matricula,
-        data: data,
-        aba: mesAno, // Nome correto da aba
-        nocache: new Date().getTime() // Evita cache
-    });
-
-    fetch(`${url}?${params}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log("Resposta da API:", data);
-            if (data.duplicate) {
-                alert("Matrícula já registrada nesta data.");
-            }
-        })
-        .catch(error => console.error("Erro ao analisar JSON:", error));
-}
-   
-    // Submete o formulário com validação: se duplicado, exibe mensagem na página
-async function submitForm(event) {
-    event.preventDefault();
-    const form = document.getElementById("dersoForm");
-    const formData = new FormData(form);
-
-    // Gera o timestamp e adiciona
-    let timestamp = getFormattedTimestamp();
-    formData.set("timestamp", timestamp);
-
-    // Converte a data para "dd/MM/yyyy" e adiciona
-    let dataValue = document.getElementById("data").value;
-    let dataBR = formatDateToBR(dataValue);
-    formData.set("data", dataBR);
-
-    // Padroniza a matrícula e adiciona
-    let matricula = standardizeMatricula(document.getElementById("matricula").value);
-
-    // Verifica se a opção de folga foi selecionada
-    let folgaValue = getFolgaValue();
-    if (!folgaValue) {
-        document.getElementById("duplicateError").textContent = "Por favor, selecione uma opção de folga.";
-        return;
-    }
-    formData.set("folga", folgaValue);
-
-    // Obtém o nome da aba e verifica duplicidade
-    try {
-        const sheetName = await getNextMonthSheetNameFromServer();
-        const duplicate = await checkDuplicateInSheet(matricula, dataBR, sheetName);
-        if (duplicate) {
-            document.getElementById("duplicateError").textContent = "Já existe solicitação para essa data com essa matrícula!";
-            return;
-        } else {
-            document.getElementById("duplicateError").textContent = "";
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
         }
-    } 
-    
-    catch (error) {
-        console.error("Erro ao obter nome da aba ou verificar duplicidade:", error);
-        alert("Erro ao verificar duplicidade. Tente novamente.");
-        return;
-    }
-
-    // Envia os dados via POST
-    fetch(SCRIPT_URL, { method: "POST", body: formData })
-        .then(response => {
-            alert("Solicitação enviada com sucesso!");
-            form.reset();
-            document.getElementById("duplicateError").textContent = "";
-        })
-        .catch(error => {
-            alert("Erro ao enviar solicitação!");
-            console.error("Erro no envio:", error);
-        });
-}
-
-// Nova função para verificar duplicidade na planilha
-async function checkDuplicateInSheet(matricula, data, sheetName) {
-    let url = SCRIPT_URL + "?action=check&matricula=" + matricula + "&data=" + data + "&aba=" + sheetName;
-
-    try {
-        const response = await fetch(url);
-        const result = await response.json();
-        return result.duplicate;
-    } catch (error) {
-        console.error("Erro ao verificar duplicidade:", error);
-        return false; // Retorna false em caso de erro
-    }
-}
-
-// Nova função para obter o nome da aba do servidor
-async function getNextMonthSheetNameFromServer() {
-    let url = SCRIPT_URL + "?action=getsheetname";
-    try {
-        const response = await fetch(url);
-        const result = await response.json();
-        return result.sheetName;
-    } catch (error) {
-        console.error("Erro ao obter nome da aba:", error);
-        throw error; // Propaga o erro
-    }
-}
-
-    
-    document.addEventListener("DOMContentLoaded", function(){
-      initializeForm();
-      loadEmployeeList();
-      setDateLimits();
-      document.getElementById("matricula").addEventListener("blur", checkMatricula);
-      document.getElementById("email").addEventListener("input", updateEmailDatalist);
-    });
-    
-  </script>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
-  <div class="container" id="formulario">
-    <h2>DERSO 1º BPM</h2>
-    <p class="subtitle" id="subtitle"></p>
-    <form id="dersoForm" onsubmit="submitForm(event)">
-      <div class="form-group">
-        <label for="email">E-mail:</label>
-        <input type="email" id="email" name="email" list="emailProviders" required>
-        <datalist id="emailProviders"></datalist>
-      </div>
-      <div class="form-group">
-        <label for="matricula">Matrícula:</label>
-        <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
-        <div id="matriculaError" class="error"></div>
-      </div>
-      <div class="form-group">
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" name="nome" readonly required>
-      </div>
-      <div class="form-group">
-        <label>Folga<span class="required-star">*</span>:</label>
-        <div class="radio-group">
-          <label><input type="radio" name="folga" value="24H" required>24H</label>
-          <label><input type="radio" name="folga" value="48H">48H</label>
-          <label><input type="radio" name="folga" value="72H">72H</label>
-          <label><input type="radio" name="folga" value="1ª FOLGA">1ª FOLGA</label>
-          <label><input type="radio" name="folga" value="2ª FOLGA">2ª FOLGA</label>
-          <label><input type="radio" name="folga" value="EXPEDIENTE">EXPEDIENTE</label>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="data">Data:</label>
-        <input type="date" id="data" name="data" required>
-      </div>
-      <div class="form-group">
-        <button type="submit" class="button">Enviar Solicitação</button>
-      </div>
-    </form>
-    <div id="duplicateError" class="error"></div>
-  </div>
+
+    <h2>Consultar Solicitações</h2>
+    <label for="matricula">Matrícula:</label>
+    <input type="text" id="matricula" placeholder="Digite sua matrícula">
+    <button onclick="buscarSolicitacoes()">Buscar</button>
+
+    <table id="resultado" style="display:none;">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Detalhes</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaDados"></tbody>
+    </table>
+
+    <script>
+        function buscarSolicitacoes() {
+            let matricula = document.getElementById("matricula").value.trim();
+            if (!matricula) {
+                alert("Por favor, insira sua matrícula.");
+                return;
+            }
+
+            let url = "https://script.google.com/macros/s/AKfycbwsIMa4U7n1wnT1kU_WU-sAZv-RfyteZEif6Lf6T-5M/exec";
+            let params = new URLSearchParams({
+                action: "buscar",
+                matricula: matricula,
+                nocache: new Date().getTime() // Evita cache
+            });
+
+            fetch(`${url}?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Dados recebidos:", data);
+                    if (data.success && data.registros.length > 0) {
+                        preencherTabela(data.registros);
+                    } else {
+                        alert("Nenhuma solicitação encontrada para esta matrícula.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao buscar os dados:", error);
+                    alert("Falha na comunicação com o servidor.");
+                });
+        }
+
+        function preencherTabela(registros) {
+            let tabela = document.getElementById("tabelaDados");
+            let resultado = document.getElementById("resultado");
+            tabela.innerHTML = "";
+
+            registros.forEach(registro => {
+                let linha = `<tr>
+                                <td>${registro.data}</td>
+                                <td>${registro.detalhes}</td>
+                             </tr>`;
+                tabela.innerHTML += linha;
+            });
+
+            resultado.style.display = "table"; // Exibe a tabela
+        }
+    </script>
+
 </body>
 </html>
