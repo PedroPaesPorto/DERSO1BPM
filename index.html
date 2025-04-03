@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitação de Folga - DERSO</title>
     <style>
         body {
@@ -113,32 +112,17 @@
             font-weight: bold;
         }
 
-        /* Estilos da tabela de consulta */
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        #requests-container {
             margin-top: 20px;
         }
 
-        th,
-        td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-
-        #loading {
-            display: none;
-            font-size: 16px;
-            color: blue;
+        #add-request-button {
+            margin-top: 10px;
         }
     </style>
     <script>
         // URL do Apps Script (use a URL publicada que termina em /exec)
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykc9e6mbm4bGIoZcD4B2IzBpPUAICbC4w4JZ7AHriyg0L900gUUGArsilReZBIC6NwUA/exec";
-
-        // URL do proxy CORS
-        const corsUrl = "https://derso-1bpm.glitch.me/proxy";
 
         // Lista global de funcionários (será carregada via GET action=lista)
         window.employeeList = {};
@@ -146,177 +130,103 @@
         // Array de provedores para sugestões de e-mail
         const emailProviders = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "terra.com.br", "bol.com.br"];
 
-        // Função para atualizar o datalist de provedores de e-mail
+        // Atualiza o datalist de provedores após o "@" ser digitado
         function updateEmailDatalist() {
             const emailInput = document.getElementById("email");
             const datalist = document.getElementById("emailProviders");
             const value = emailInput.value;
             const atIndex = value.indexOf("@");
-
             if (atIndex === -1) {
                 datalist.innerHTML = "";
                 return;
             }
-
             const domainPart = value.slice(atIndex + 1).toLowerCase();
             const filtered = emailProviders.filter(provider => provider.startsWith(domainPart));
             datalist.innerHTML = "";
-
             filtered.forEach(provider => {
                 const option = document.createElement("option");
-                option.value = value.slice(0, atIndex + 1) + provider; // Mantém o que foi digitado antes do @
+                option.value = provider;
                 datalist.appendChild(option);
             });
         }
 
-        // Função para padronizar a matrícula
-        function standardizeMatricula(matricula) {
-            let num = matricula.replace(/\D/g, '');
-            return num.startsWith("1000") ? num : "1000" + num;
-        }
-
-        // Função para buscar o nome do funcionário
-        function fetchEmployeeName() {
-            let matricula = document.getElementById("matricula").value.trim();
-            let nomeInput = document.getElementById("nome");
-
-            if (!matricula) {
-                nomeInput.value = "";
-                return;
-            }
-
-            matricula = standardizeMatricula(matricula);
-            document.getElementById("matricula").value = matricula;
-
-            if (window.employeeList[matricula]) {
-                nomeInput.value = window.employeeList[matricula];
-            } else {
-                nomeInput.value = "Funcionário não encontrado";
-            }
-        }
-
-        // Função para formatar a data no padrão BR (DD/MM/AAAA)
-        function formatDateToBR(dateStr) {
-            let parts = dateStr.split("-");
-            return parts[2] + "/" + parts[1] + "/" + parts[0];
-        }
-
-        // Função para obter timestamp formatado
-        function getFormattedTimestamp() {
-            let now = new Date();
-            let datePart = now.toLocaleDateString('pt-BR');
-            let timePart = now.toLocaleTimeString('pt-BR', {
-                hour12: false
-            });
-            return datePart + " " + timePart;
-        }
-
-        // Função para calcular o período de solicitação
+        // Calcula o período de solicitação para um determinado mês (0–11)
         function getPeriod(referenceDate) {
-            const refMonth = referenceDate.getMonth() - 1;
+            // Definir o mês de referência (um mês antes do solicitado)
+            const refMonth = referenceDate.getMonth() - 1; // Pegamos o mês anterior
             const refYear = referenceDate.getFullYear();
 
+            // Obter o primeiro dia do mês de referência
             const firstDay = new Date(refYear, refMonth, 1);
+
+            // Encontrar a primeira segunda-feira do mês de referência
             const firstMonday = new Date(firstDay);
             firstMonday.setDate(firstDay.getDate() + ((1 - firstDay.getDay() + 7) % 7));
 
+            // Encontrar a penúltima sexta-feira do mês de referência
             const lastDay = new Date(refYear, refMonth + 1, 0);
             const lastFriday = new Date(lastDay);
             lastFriday.setDate(lastDay.getDate() - ((lastDay.getDay() + 2) % 7));
 
+            // Retornar as datas
             return {
                 start: firstMonday,
                 end: lastFriday
             };
         }
 
-        // Função para carregar as solicitações
-        function loadSolicitacoesList(matricula) {
-            const url = `${corsUrl}?targetUrl=${encodeURIComponent(SCRIPT_URL)}&action=solicitacoes&matricula=${matricula}`;
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeForm();
+        });
 
-            return fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Resposta recebida:", data);
-                    if (data && data.result) {
-                        return data.result; // Retorne a lista de solicitações
-                    } else {
-                        console.error("Dados inválidos recebidos:", data);
-                        return [];
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar as solicitações:', error);
-                    return [];
-                });
+        function initializeForm() {
+            // Não há mais lógica de período, então não precisamos disso por enquanto
+            // Mas mantemos a função para futuras expansões
+            setDateFieldsToNextMonth();
         }
 
-        // Função para filtrar a tabela com base na matrícula
-        function filtrarTabela() {
-            const matriculaInput = document.getElementById("matriculaConsulta"); // Usando ID específico para consulta
-            const matricula = matriculaInput.value.trim();
-            const tbody = document.getElementById("tabelaConsulta").getElementsByTagName("tbody")[0]; // Usando ID específico para consulta
-            const loadingText = document.getElementById("loading");
-
-            tbody.innerHTML = ""; // Limpa a tabela antes de adicionar novas linhas
-            if (!matricula) {
-                alert("Por favor, insira uma matrícula.");
-                return;
-            }
-
-            const matriculaPadronizada = standardizeMatricula(matricula);
-            matriculaInput.value = matriculaPadronizada;
-            loadingText.style.display = "block"; // Exibe a mensagem de carregamento
-
-            loadSolicitacoesList(matriculaPadronizada).then(solicitacoesList => {
-                loadingText.style.display = "none"; // Esconde a mensagem de carregamento
-                if (solicitacoesList.length === 0) {
-                    alert("Nenhuma solicitação encontrada para a matrícula informada.");
-                } else {
-                    solicitacoesList.forEach(dado => {
-                        const row = tbody.insertRow();
-                        row.insertCell(0).textContent = dado.D || "N/A"; // E-mail
-                        row.insertCell(1).textContent = dado.A || "N/A"; // Nome
-                        row.insertCell(2).textContent = dado.E || "N/A"; // Folga
-                        row.insertCell(3).textContent = dado.F || "N/A"; // Data
-                    });
-                }
-            });
+        function setDateFieldsToNextMonth() {
+            const today = new Date();
+            const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+            const nextMonthString = nextMonth.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+            document.getElementById('data').value = nextMonthString;
         }
 
-        // Validação do formulário e submissão
+        // Validação do formulário antes de submeter
         async function submitForm(event) {
             event.preventDefault();
             const form = document.getElementById("dersoForm");
             const formData = new FormData(form);
 
-            let matricula = standardizeMatricula(document.getElementById("matricula").value);
-            let nome = document.getElementById("nome").value;
-
-            if (nome === "Funcionário não encontrado" || nome === "") {
-                document.getElementById("matriculaError").textContent = "Matrícula inválida.";
-                return;
-            } else {
-                document.getElementById("matriculaError").textContent = "";
-            }
-
-            let dataValue = document.getElementById("data").value;
-            formData.set("data", formatDateToBR(dataValue));
-
             let timestamp = getFormattedTimestamp();
             formData.set("timestamp", timestamp);
 
-            let folgaValue = document.querySelector("input[name='folga']:checked");
+            let email = document.getElementById("email").value;
+            formData.set("email", email); // Envia o email
+
+            let dataValue = document.getElementById("data").value;
+            let dataBR = formatDateToBR(dataValue);
+            formData.set("data", dataBR);
+
+            let matricula = standardizeMatricula(document.getElementById("matricula").value);
+
+            let folgaValue = getFolgaValue();
             if (!folgaValue) {
                 document.getElementById("duplicateError").textContent = "Por favor, selecione uma opção de folga.";
                 return;
             }
-            formData.set("folga", folgaValue.value);
+            formData.set("folga", folgaValue);
 
-            // Adiciona as datas extras
-            const extraDates = document.querySelectorAll("input[name='data[]']");
+            // Coleta as datas e folgas adicionais
+            const extraDates = document.querySelectorAll("input[name='extraData[]']");
+            const extraFolgas = document.querySelectorAll("input[name='extraFolga[]']:checked");
+
             extraDates.forEach((dateInput, index) => {
-                formData.append(`data${index + 2}`, formatDateToBR(dateInput.value)); // data2, data3, etc.
+                formData.append(`extraData${index + 1}`, formatDateToBR(dateInput.value));
+            });
+
+            extraFolgas.forEach((folgaInput, index) => {
+                formData.append(`extraFolga${index + 1}`, folgaInput.value);
             });
 
             fetch(SCRIPT_URL, {
@@ -327,6 +237,8 @@
                     alert("Solicitação enviada com sucesso!");
                     form.reset();
                     document.getElementById("duplicateError").textContent = "";
+                    setDateFieldsToNextMonth(); // Reseta a data principal para o próximo mês
+                    clearExtraRequests(); // Limpa os campos extras
                 })
                 .catch(error => {
                     alert("Erro ao enviar solicitação!");
@@ -334,128 +246,103 @@
                 });
         }
 
-     // Inicialização da página
-document.addEventListener('DOMContentLoaded', function() {
-    initializePage();
-    loadEmployeeList();
-});
-
-function initializePage() {
-    const submitButton = document.querySelector("button[type='submit']");
-    submitButton.disabled = false; // Garante que o botão esteja sempre habilitado
-}
-
-            const today = new Date();
-            const requestedMonthDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-            const period = getPeriod(requestedMonthDate);
-
-            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-            ];
-            const requestedMonth = monthNames[requestedMonthDate.getMonth()];
-
-            const submitButton = document.querySelector("button[type='submit']");
-
-            if (today < period.start || today > period.end) {
-                let mensagem = "";
-
-                if (today < period.start) {
-                    mensagem = `<h3>O período de solicitações para ${requestedMonth} iniciará em <span class="destaque-iniciara">${period.start.toLocaleDateString("pt-BR")}</span>.</h3>`;
-                } else if (today > period.end) {
-                    const nextRequestedMonthDate = new Date(today.getFullYear(), today.getMonth() + 2, 1);
-                    const nextPeriod = getPeriod(nextRequestedMonthDate);
-                    const nextRequestedMonth = monthNames[nextRequestedMonthDate.getMonth()];
-
-                    mensagem = `<h3>O período de solicitações para ${requestedMonth} encerrou em <span class="destaque-encerrou">${period.end.toLocaleDateString("pt-BR")}</span>.<br>
-                        As solicitações para ${nextRequestedMonth} serão iniciadas em <span class="destaque-iniciara">${nextPeriod.start.toLocaleDateString("pt-BR")}</span>.</h3>`;
-                }
-
-                formularioDiv.innerHTML = mensagem;
-                submitButton.disabled = true;
-                return;
-            }
-
-            submitButton.disabled = false;
+        // Funções auxiliares para data e duplicidade
+        function formatDateToBR(dateStr) {
+            let parts = dateStr.split("-");
+            return parts[2] + "/" + parts[1] + "/" + parts[0];
         }
 
-        function loadEmployeeList() {
-            fetch(SCRIPT_URL + "?action=lista")
-                .then(response => response.json())
-                .then(data => {
-                    window.employeeList = data;
-                })
-                .catch(error => console.error("Erro ao carregar lista de funcionários:", error));
+        function getFormattedTimestamp() {
+            let now = new Date();
+            let datePart = now.toLocaleDateString('pt-BR');
+            let timePart = now.toLocaleTimeString('pt-BR', {
+                hour12: false
+            });
+            return datePart + " " + timePart;
+        }
+
+        function standardizeMatricula(matricula) {
+            let num = matricula.replace(/\D/g, '');
+            return num.startsWith("1000") ? num : "1000" + num;
+        }
+
+        function getFolgaValue() {
+            let folga = document.querySelector("input[name='folga']:checked");
+            return folga ? folga.value : null;
         }
 
         function addRequestFields() {
             const requestsContainer = document.getElementById("requests-container");
-            if (requestsContainer.children.length >= 3) {
-                alert("Você só pode fazer até três solicitações por vez.");
-                return;
-            }
-
-            const newRequest = document.createElement("div");
-            newRequest.classList.add("form-group");
-            newRequest.innerHTML = `
-                <label for="data">Data:</label>
-                <input type="date" name="data[]" required>
+            const newRequestDiv = document.createElement("div");
+            newRequestDiv.classList.add("form-group");
+            newRequestDiv.innerHTML = `
+                <label for="extraData">Data Adicional:</label>
+                <input type="date" name="extraData[]" class="extra-date" required>
+                <label>Folga Adicional<span class="required-star">*</span>:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="extraFolga[]" value="24H" required>24H</label>
+                    <label><input type="radio" name="extraFolga[]" value="48H">48H</label>
+                    <label><input type="radio" name="extraFolga[]" value="72H">72H</label>
+                    <label><input type="radio" name="extraFolga[]" value="1ª FOLGA">1ª FOLGA</label>
+                    <label><input type="radio" name="extraFolga[]" value="2ª FOLGA">2ª FOLGA</label>
+                    <label><input type="radio" name="extraFolga[]" value="EXPEDIENTE">EXPEDIENTE</label>
+                </div>
             `;
-            requestsContainer.appendChild(newRequest);
+            requestsContainer.appendChild(newRequestDiv);
+            setDateFieldsToNextMonth(); // Garante que as novas datas também sejam do próximo mês
+        }
+
+        function clearExtraRequests() {
+            const requestsContainer = document.getElementById("requests-container");
+            requestsContainer.innerHTML = ""; // Limpa os campos extras
         }
     </script>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container" id="formulario">
         <h2>DERSO 1º BPM</h2>
         <p class="subtitle" id="subtitle"></p>
-
-        <div id="formulario">
-            <form id="dersoForm" onsubmit="submitForm(event)">
-                <div class="form-group">
-                    <label for="email">E-mail:</label>
-                    <input type="email" id="email" name="email" list="emailProviders" required>
-                    <datalist id="emailProviders"></datalist>
+        <form id="dersoForm" onsubmit="submitForm(event)">
+            <div class="form-group">
+                <label for="email">E-mail:</label>
+                <input type="email" id="email" name="email" list="emailProviders" required>
+                <datalist id="emailProviders"></datalist>
+            </div>
+            <div class="form-group">
+                <label for="matricula">Matrícula:</label>
+                <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
+                <div id="matriculaError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="nome" readonly required>
+            </div>
+            <div class="form-group">
+                <label>Folga<span class="required-star">*</span>:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="folga" value="24H" required>24H</label>
+                    <label><input type="radio" name="folga" value="48H">48H</label>
+                    <label><input type="radio" name="folga" value="72H">72H</label>
+                    <label><input type="radio" name="folga" value="1ª FOLGA">1ª FOLGA</label>
+                    <label><input type="radio" name="folga" value="2ª FOLGA">2ª FOLGA</label>
+                    <label><input type="radio" name="folga" value="EXPEDIENTE">EXPEDIENTE</label>
                 </div>
+            </div>
+            <div class="form-group">
+                <label for="data">Data:</label>
+                <input type="date" id="data" name="data" required>
+            </div>
 
-                <div class="form-group">
-                    <label for="matricula">Matrícula:</label>
-                    <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345"
-                        onblur="fetchEmployeeName()">
-                    <div id="matriculaError" class="error"></div>
-                </div>
+            <div id="requests-container"></div>
+            <button type="button" class="button" id="add-request-button" onclick="addRequestFields()">Adicionar Outra
+                Solicitação</button>
 
-                <div class="form-group">
-                    <label for="nome">Nome:</label>
-                    <input type="text" id="nome" name="nome" readonly required>
-                </div>
-
-                <div class="form-group">
-                    <label>Folga<span class="required-star">*</span>:</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="folga" value="24H" required>24H</label>
-                        <label><input type="radio" name="folga" value="48H">48H</label>
-                        <label><input type="radio" name="folga" value="72H">72H</label>
-                        <label><input type="radio" name="folga" value="1ª FOLGA">1ª FOLGA</label>
-                        <label><input type="radio" name="folga" value="2ª FOLGA">2ª FOLGA</label>
-                        <label><input type="radio" name="folga" value="EXPEDIENTE">EXPEDIENTE</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="data">Data:</label>
-                    <input type="date" id="data" name="data" required>
-                </div>
-
-                <div id="requests-container"></div>
-                <button type="button" class="button" onclick="addRequestFields()">Adicionar Outra Solicitação</button>
-
-                <div class="form-group">
-                    <button type="submit" class="button">Enviar Solicitação</button>
-                    <div id="duplicateError" class="error"></div>
-                </div>
-            </form>
-        </div>
+            <div class="form-group">
+                <button type="submit" class="button">Enviar Solicitação</button>
+            </div>
+        </form>
+        <div id="duplicateError" class="error"></div>
     </div>
 </body>
 
