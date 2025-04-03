@@ -62,8 +62,14 @@
 
     // Função para padronizar a matrícula
     function standardizeMatricula(matricula) {
-        let num = matricula.replace(/\D/g, '');
-        return num.startsWith("1000") ? num : "1000" + num;
+        let num = matricula.replace(/\D/g, ''); // Remove caracteres não numéricos
+        return num.startsWith("1000") ? num : "1000" + num; // Adiciona "1000" caso não tenha
+    }
+
+    // Aplica a padronização ao sair do campo de matrícula
+    function formatarMatriculaInput() {
+        let matriculaInput = document.getElementById("matricula");
+        matriculaInput.value = standardizeMatricula(matriculaInput.value);
     }
 
     // Validação do formulário antes de submeter
@@ -104,7 +110,7 @@
     <form id="dersoForm" onsubmit="submitForm(event)">
       <div class="form-group">
         <label for="matricula">Matrícula:</label>
-        <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
+        <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345" onblur="formatarMatriculaInput()">
       </div>
       <div class="form-group">
         <label for="data">Data:</label>
