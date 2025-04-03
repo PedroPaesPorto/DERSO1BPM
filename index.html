@@ -224,43 +224,52 @@ document.addEventListener('DOMContentLoaded', function () {
 </head>
 <body>
      <h2>DERSO 1º BPM</h2>
-    <p class="subtitle" id="subtitle"></p>
-    <form id="dersoForm" onsubmit="submitForm(event)">
-      <div class="form-group">
-        <label for="email">E-mail:</label>
-        <input type="email" id="email" name="email" list="emailProviders" required>
-        <datalist id="emailProviders"></datalist>
-      </div>
-      <div class="form-group">
-        <label for="matricula">Matrícula:</label>
-        <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
-        <div id="matriculaError" class="error"></div>
-      </div>
-      <div class="form-group">
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" name="nome" readonly required>
-      </div>
-      <div class="form-group">
-        <label>Folga<span class="required-star">*</span>:</label>
-        <div class="radio-group">
-          <label><input type="radio" name="folga" value="24H" required>24H</label>
-          <label><input type="radio" name="folga" value="48H">48H</label>
-          <label><input type="radio" name="folga" value="72H">72H</label>
-          <label><input type="radio" name="folga" value="1ª FOLGA">1ª FOLGA</label>
-          <label><input type="radio" name="folga" value="2ª FOLGA">2ª FOLGA</label>
-          <label><input type="radio" name="folga" value="EXPEDIENTE">EXPEDIENTE</label>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="data">Data:</label>
-        <input type="date" id="data" name="data" required>
-      </div>
-      <div class="form-group">
-        <button type="submit" class="button">Enviar Solicitação</button>
-      </div>
-    </form>
-    <div id="duplicateError" class="error"></div>
+<p class="subtitle" id="subtitle"></p>
+<form id="dersoForm" onsubmit="submitForm(event)">
+  <div class="form-group">
+    <label for="email">E-mail:</label>
+    <input type="email" id="email" name="email" list="emailProviders" required>
+    <datalist id="emailProviders"></datalist>
   </div>
+
+  <div class="form-group">
+    <label for="matricula">Matrícula:</label>
+    <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
+    <div id="matriculaError" class="error"></div>
+  </div>
+
+  <div class="form-group">
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" name="nome" readonly required>
+  </div>
+
+  <div class="form-group">
+    <label>Folga<span class="required-star">*</span>:</label>
+    <div class="radio-group">
+      <label><input type="radio" name="folga" value="24H" required>24H</label>
+      <label><input type="radio" name="folga" value="48H">48H</label>
+      <label><input type="radio" name="folga" value="72H">72H</label>
+      <label><input type="radio" name="folga" value="1ª FOLGA">1ª FOLGA</label>
+      <label><input type="radio" name="folga" value="2ª FOLGA">2ª FOLGA</label>
+      <label><input type="radio" name="folga" value="EXPEDIENTE">EXPEDIENTE</label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="data">Data:</label>
+    <input type="date" id="data" name="data" required>
+  </div>
+
+  <div id="requests-container"></div>
+  <button type="button" class="button" onclick="addRequestFields()">Adicionar Outra Solicitação</button>
+
+  <div class="form-group">
+    <button type="submit" class="button">Enviar Solicitação</button>
+  </div>
+</form>
+
+<div id="duplicateError" class="error"></div>
+
 </body>
 </html>
 
