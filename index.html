@@ -3,94 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consultar Solicitações - 2</title>
+    <title>Solicitação de Folga</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            text-align: center;
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f4f4f4;
         }
-        input, button {
-            padding: 10px;
-            margin: 10px;
-            font-size: 16px;
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
-        table {
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, button {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid black;
             padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
-        th {
-            background-color: #f2f2f2;
+        button {
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
 
-    <h2>Consultar Solicitações - 2</h2>
-    <label for="matricula">Matrícula:</label>
-    <input type="text" id="matricula" placeholder="Digite sua matrícula">
-    <button onclick="buscarSolicitacoes()">Buscar</button>
+    <h2>Solicitação de Folga</h2>
 
-    <table id="resultado" style="display:none;">
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Detalhes</th>
-            </tr>
-        </thead>
-        <tbody id="tabelaDados"></tbody>
-    </table>
+    <form id="dersoForm">
+        <label for="matricula">Matrícula:</label>
+        <input type="text" id="matricula" required>
+
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" required>
+
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" required>
+
+        <h3>Solicitações de Folga</h3>
+
+        <div class="folga-group">
+            <label>Data 1:</label>
+            <input type="date" id="data1">
+            <label>Folga:</label>
+            <select id="folga1">
+                <option value="">Selecione</option>
+                <option value="Folga A">Folga A</option>
+                <option value="Folga B">Folga B</option>
+            </select>
+        </div>
+
+        <div class="folga-group">
+            <label>Data 2:</label>
+            <input type="date" id="data2">
+            <label>Folga:</label>
+            <select id="folga2">
+                <option value="">Selecione</option>
+                <option value="Folga A">Folga A</option>
+                <option value="Folga B">Folga B</option>
+            </select>
+        </div>
+
+        <div class="folga-group">
+            <label>Data 3:</label>
+            <input type="date" id="data3">
+            <label>Folga:</label>
+            <select id="folga3">
+                <option value="">Selecione</option>
+                <option value="Folga A">Folga A</option>
+                <option value="Folga B">Folga B</option>
+            </select>
+        </div>
+
+        <button type="submit">Enviar</button>
+    </form>
 
     <script>
-        function buscarSolicitacoes() {
+        const SCRIPT_URL = "URL_DO_SEU_GOOGLE_APPS_SCRIPT_AQUI";
+
+        document.getElementById("dersoForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
             let matricula = document.getElementById("matricula").value.trim();
-            if (!matricula) {
-                alert("Por favor, insira sua matrícula.");
+            let email = document.getElementById("email").value.trim();
+            let nome = document.getElementById("nome").value.trim();
+
+            if (!matricula || !email || !nome) {
+                alert("Preencha todos os campos obrigatórios!");
                 return;
             }
 
-            let url = "https://script.google.com/macros/s/AKfycbykc9e6mbm4bGIoZcD4B2IzBpPUAICbC4w4JZ7AHriyg0L900gUUGArsilReZBIC6NwUA/exec";
-            let params = new URLSearchParams({
-                action: "buscar",
-                matricula: matricula,
-                nocache: new Date().getTime() // Evita cache
-            });
+            let solicitacoes = [];
+            for (let i = 1; i <= 3; i++) {
+                let data = document.getElementById(`data${i}`).value;
+                let folga = document.getElementById(`folga${i}`).value;
 
-            fetch(`${url}?${params}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Dados recebidos:", data);
-                    if (data.success && data.registros.length > 0) {
-                        preencherTabela(data.registros);
-                    } else {
-                        alert("Nenhuma solicitação encontrada para esta matrícula.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Erro ao buscar os dados:", error);
-                    alert("Falha na comunicação com o servidor.");
-                });
+                if (data && folga) {
+                    solicitacoes.push({ data, folga });
+                }
+            }
+
+            if (solicitacoes.length === 0) {
+                alert("Selecione pelo menos uma Data e Folga.");
+                return;
+            }
+
+            for (let sol of solicitacoes) {
+                let dataBR = formatDateToBR(sol.data);
+                let timestamp = getFormattedTimestamp();
+
+                let formData = new FormData();
+                formData.append("timestamp", timestamp);
+                formData.append("matricula", matricula);
+                formData.append("email", email);
+                formData.append("nome", nome);
+                formData.append("data", dataBR);
+                formData.append("folga", sol.folga);
+
+                try {
+                    await fetch(SCRIPT_URL, { method: "POST", body: formData });
+                    console.log(`Solicitação enviada: ${dataBR} - ${sol.folga}`);
+                } catch (error) {
+                    console.error(`Erro ao enviar solicitação:`, error);
+                }
+            }
+
+            alert("Solicitações enviadas com sucesso!");
+            document.getElementById("dersoForm").reset();
+        });
+
+        function formatDateToBR(date) {
+            let [year, month, day] = date.split("-");
+            return `${day}/${month}/${year}`;
         }
 
-        function preencherTabela(registros) {
-            let tabela = document.getElementById("tabelaDados");
-            let resultado = document.getElementById("resultado");
-            tabela.innerHTML = "";
-
-            registros.forEach(registro => {
-                let linha = `<tr>
-                                <td>${registro.data}</td>
-                                <td>${registro.detalhes}</td>
-                             </tr>`;
-                tabela.innerHTML += linha;
-            });
-
-            resultado.style.display = "table"; // Exibe a tabela
+        function getFormattedTimestamp() {
+            let now = new Date();
+            return now.toLocaleString("pt-BR");
         }
     </script>
 
