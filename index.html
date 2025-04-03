@@ -1,276 +1,430 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Solicitação de Folga - DERSO</title>
-   <style>
-    body {
-      background-color: #f7f7f7;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 600px;
-      margin: 30px auto;
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 10px;
-    }
-    .subtitle {
-      text-align: center;
-      color: #555;
-      margin-bottom: 20px;
-      font-size: 15px;
-      line-height: 1.4;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      color: #555;
-      font-weight: bold;
-    }
-    .form-group input,
-    .form-group button,
-    .form-group select {
-      width: 100%;
-      padding: 8px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .radio-group {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .radio-group label {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-bottom: 8px;
-      cursor: pointer;
-      white-space: nowrap;
-      font-size: 16px;
-      color: #555;
-    }
-    .radio-group input[type="radio"] {
-      margin-right: 6px;
-    }
-    .button {
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 4px;
-      transition: background-color 0.3s ease;
-    }
-    .button:hover {
-      background-color: #0056b3;
-    }
-    .error {
-      color: red;
-      margin-top: 5px;
-    }
-    .required-star {
-      color: red;
-      margin-left: 4px;
-    }
-    .destaque-encerrou {
-      color: red;
-      font-weight: bold;
-    }
-    .destaque-iniciara {
-      color: green;
-      font-weight: bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitação de Folga - DERSO</title>
+    <style>
+        body {
+            background-color: #f7f7f7;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
 
-  <script>
-   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7gr6dyCUsi1QCbLlJaFVGxe8EYLPRF8XC-PCm8He3YL6AmM5qjTKpOyqyvrtPmd5iQg/exec";
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
 
-// Lista global de funcionários (será carregada via GET action=lista)
-window.employeeList = {};
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
 
-// Array de provedores para sugestões de e-mail
-const emailProviders = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "terra.com.br", "bol.com.br"];
+        .subtitle {
+            text-align: center;
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
 
-// Atualiza o datalist de provedores após o "@" ser digitado
-function updateEmailDatalist() {
-    const emailInput = document.getElementById("email");
-    const datalist = document.getElementById("emailProviders");
-    const value = emailInput.value;
-    const atIndex = value.indexOf("@");
+        .form-group {
+            margin-bottom: 15px;
+        }
 
-    if (atIndex === -1) {
-        datalist.innerHTML = "";
-        return;
-    }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
 
-    const domainPart = value.slice(atIndex + 1).toLowerCase();
-    const filtered = emailProviders.filter(provider => provider.startsWith(domainPart));
-    datalist.innerHTML = "";
+        .form-group input,
+        .form-group button,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
 
-    filtered.forEach(provider => {
-        const option = document.createElement("option");
-        option.value = value.slice(0, atIndex + 1) + provider;
-        datalist.appendChild(option);
-    });
-}
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
 
-// Padroniza a matrícula
-function standardizeMatricula(matricula) {
-    let num = matricula.replace(/\D/g, '');
-    return num.startsWith("1000") ? num : "1000" + num;
-}
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 16px;
+            color: #555;
+        }
 
-// Preenche o nome automaticamente ao inserir a matrícula
-function fetchEmployeeName() {
-    let matricula = document.getElementById("matricula").value.trim();
-    let nomeInput = document.getElementById("nome");
+        .radio-group input[type="radio"] {
+            margin-right: 6px;
+        }
 
-    if (!matricula) {
-        nomeInput.value = "";
-        return;
-    }
+        .button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
 
-    matricula = standardizeMatricula(matricula);
-    document.getElementById("matricula").value = matricula;
+        .button:hover {
+            background-color: #0056b3;
+        }
 
-    if (window.employeeList[matricula]) {
-        nomeInput.value = window.employeeList[matricula];
-    } else {
-        nomeInput.value = "Funcionário não encontrado";
-    }
-}
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
 
-// Função para formatar a data no padrão BR (DD/MM/AAAA)
-function formatDateToBR(dateStr) {
-    let parts = dateStr.split("-");
-    return parts[2] + "/" + parts[1] + "/" + parts[0];
-}
+        .required-star {
+            color: red;
+            margin-left: 4px;
+        }
 
-// Função para obter timestamp formatado
-function getFormattedTimestamp() {
-    let now = new Date();
-    let datePart = now.toLocaleDateString('pt-BR');
-    let timePart = now.toLocaleTimeString('pt-BR', { hour12: false });
-    return datePart + " " + timePart;
-}
+        .destaque-encerrou {
+            color: red;
+            font-weight: bold;
+        }
 
-// Validação do formulário e submissão
-async function submitForm(event) {
-    event.preventDefault();
-    const form = document.getElementById("dersoForm");
-    const formData = new FormData(form);
+        .destaque-iniciara {
+            color: green;
+            font-weight: bold;
+        }
 
-    let matricula = standardizeMatricula(document.getElementById("matricula").value);
-    let nome = document.getElementById("nome").value;
+        /* Estilos da tabela de consulta */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
 
-    if (nome === "Funcionário não encontrado" || nome === "") {
-        document.getElementById("matriculaError").textContent = "Matrícula inválida.";
-        return;
-    } else {
-        document.getElementById("matriculaError").textContent = "";
-    }
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
 
-    let dataValue = document.getElementById("data").value;
-    formData.set("data", formatDateToBR(dataValue));
+        #loading {
+            display: none;
+            font-size: 16px;
+            color: blue;
+        }
+    </style>
+    <script>
+        // URL do Apps Script (use a URL publicada que termina em /exec)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7gr6dyCUsi1QCbLlJaFVGxe8EYLPRF8XC-PCm8He3YL6AmM5qjTKpOyqyvrtPmd5iQg/exec";
 
-    let timestamp = getFormattedTimestamp();
-    formData.set("timestamp", timestamp);
+        // URL do proxy CORS
+        const corsUrl = "https://derso-1bpm.glitch.me/proxy";
 
-    let folgaValue = document.querySelector("input[name='folga']:checked");
-    if (!folgaValue) {
-        document.getElementById("duplicateError").textContent = "Por favor, selecione uma opção de folga.";
-        return;
-    }
-    formData.set("folga", folgaValue.value);
+        // Lista global de funcionários (será carregada via GET action=lista)
+        window.employeeList = {};
 
-    fetch(SCRIPT_URL, { method: "POST", body: formData })
-        .then(response => {
-            alert("Solicitação enviada com sucesso!");
-            form.reset();
-            document.getElementById("duplicateError").textContent = "";
-        })
-        .catch(error => {
-            alert("Erro ao enviar solicitação!");
-            console.error("Erro no envio:", error);
+        // Array de provedores para sugestões de e-mail
+        const emailProviders = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "terra.com.br", "bol.com.br"];
+
+        // Função para atualizar o datalist de provedores de e-mail
+        function updateEmailDatalist() {
+            const emailInput = document.getElementById("email");
+            const datalist = document.getElementById("emailProviders");
+            const value = emailInput.value;
+            const atIndex = value.indexOf("@");
+
+            if (atIndex === -1) {
+                datalist.innerHTML = "";
+                return;
+            }
+
+            const domainPart = value.slice(atIndex + 1).toLowerCase();
+            const filtered = emailProviders.filter(provider => provider.startsWith(domainPart));
+            datalist.innerHTML = "";
+
+            filtered.forEach(provider => {
+                const option = document.createElement("option");
+                option.value = value.slice(0, atIndex + 1) + provider; // Mantém o que foi digitado antes do @
+                datalist.appendChild(option);
+            });
+        }
+
+        // Função para padronizar a matrícula
+        function standardizeMatricula(matricula) {
+            let num = matricula.replace(/\D/g, '');
+            return num.startsWith("1000") ? num : "1000" + num;
+        }
+
+        // Função para buscar o nome do funcionário
+        function fetchEmployeeName() {
+            let matricula = document.getElementById("matricula").value.trim();
+            let nomeInput = document.getElementById("nome");
+
+            if (!matricula) {
+                nomeInput.value = "";
+                return;
+            }
+
+            matricula = standardizeMatricula(matricula);
+            document.getElementById("matricula").value = matricula;
+
+            if (window.employeeList[matricula]) {
+                nomeInput.value = window.employeeList[matricula];
+            } else {
+                nomeInput.value = "Funcionário não encontrado";
+            }
+        }
+
+        // Função para formatar a data no padrão BR (DD/MM/AAAA)
+        function formatDateToBR(dateStr) {
+            let parts = dateStr.split("-");
+            return parts[2] + "/" + parts[1] + "/" + parts[0];
+        }
+
+        // Função para obter timestamp formatado
+        function getFormattedTimestamp() {
+            let now = new Date();
+            let datePart = now.toLocaleDateString('pt-BR');
+            let timePart = now.toLocaleTimeString('pt-BR', {
+                hour12: false
+            });
+            return datePart + " " + timePart;
+        }
+
+        // Função para calcular o período de solicitação
+        function getPeriod(referenceDate) {
+            const refMonth = referenceDate.getMonth() - 1;
+            const refYear = referenceDate.getFullYear();
+
+            const firstDay = new Date(refYear, refMonth, 1);
+            const firstMonday = new Date(firstDay);
+            firstMonday.setDate(firstDay.getDate() + ((1 - firstDay.getDay() + 7) % 7));
+
+            const lastDay = new Date(refYear, refMonth + 1, 0);
+            const lastFriday = new Date(lastDay);
+            lastFriday.setDate(lastDay.getDate() - ((lastDay.getDay() + 2) % 7));
+
+            return {
+                start: firstMonday,
+                end: lastFriday
+            };
+        }
+
+        // Função para carregar as solicitações
+        function loadSolicitacoesList(matricula) {
+            const url = `<span class="math-inline">\{corsUrl\}?targetUrl\=</span>{encodeURIComponent(SCRIPT_URL)}&action=solicitacoes&matricula=${matricula}`;
+
+            return fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Resposta recebida:", data);
+                    if (data && data.result) {
+                        return data.result; // Retorne a lista de solicitações
+                    } else {
+                        console.error("Dados inválidos recebidos:", data);
+                        return [];
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar as solicitações:', error);
+                    return [];
+                });
+        }
+
+        // Função para filtrar a tabela com base na matrícula
+        function filtrarTabela() {
+            const matriculaInput = document.getElementById("matriculaConsulta"); // Usando ID específico para consulta
+            const matricula = matriculaInput.value.trim();
+            const tbody = document.getElementById("tabelaConsulta").getElementsByTagName("tbody")[0]; // Usando ID específico para consulta
+            const loadingText = document.getElementById("loading");
+
+            tbody.innerHTML = ""; // Limpa a tabela antes de adicionar novas linhas
+            if (!matricula) {
+                alert("Por favor, insira uma matrícula.");
+                return;
+            }
+
+            const matriculaPadronizada = standardizeMatricula(matricula);
+            matriculaInput.value = matriculaPadronizada;
+            loadingText.style.display = "block"; // Exibe a mensagem de carregamento
+
+            loadSolicitacoesList(matriculaPadronizada).then(solicitacoesList => {
+                loadingText.style.display = "none"; // Esconde a mensagem de carregamento
+                if (solicitacoesList.length === 0) {
+                    alert("Nenhuma solicitação encontrada para a matrícula informada.");
+                } else {
+                    solicitacoesList.forEach(dado => {
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = dado.D || "N/A"; // E-mail
+                        row.insertCell(1).textContent = dado.A || "N/A"; // Nome
+                        row.insertCell(2).textContent = dado.E || "N/A"; // Folga
+                        row.insertCell(3).textContent = dado.F || "N/A"; // Data
+                    });
+                }
+            });
+        }
+
+        // Validação do formulário e submissão
+        async function submitForm(event) {
+            event.preventDefault();
+            const form = document.getElementById("dersoForm");
+            const formData = new FormData(form);
+
+            let matricula = standardizeMatricula(document.getElementById("matricula").value);
+            let nome = document.getElementById("nome").value;
+
+            if (nome === "Funcionário não encontrado" || nome === "") {
+                document.getElementById("matriculaError").textContent = "Matrícula inválida.";
+                return;
+            } else {
+                document.getElementById("matriculaError").textContent = "";
+            }
+
+            let dataValue = document.getElementById("data").value;
+            formData.set("data", formatDateToBR(dataValue));
+
+            let timestamp = getFormattedTimestamp();
+            formData.set("timestamp", timestamp);
+
+            let folgaValue = document.querySelector("input[name='folga']:checked");
+            if (!folgaValue) {
+                document.getElementById("duplicateError").textContent = "Por favor, selecione uma opção de folga.";
+                return;
+            }
+            formData.set("folga", folgaValue.value);
+
+            fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    alert("Solicitação enviada com sucesso!");
+                    form.reset();
+                    document.getElementById("duplicateError").textContent = "";
+                })
+                .catch(error => {
+                    alert("Erro ao enviar solicitação!");
+                    console.error("Erro no envio:", error);
+                });
+        }
+
+        // Inicialização da página
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadEmployeeList();
         });
-}
 
-// Carrega lista de funcionários ao iniciar a página
-document.addEventListener('DOMContentLoaded', function () {
-    fetch(SCRIPT_URL + "?action=lista")
-        .then(response => response.json())
-        .then(data => {
-            window.employeeList = data;
-        })
-        .catch(error => console.error("Erro ao carregar lista de funcionários:", error));
-});
+        function initializePage() {
+            const formularioDiv = document.getElementById("formulario");
+            if (!formularioDiv) {
+                console.error('Elemento com ID "formulario" não encontrado.');
+                return;
+            }
 
-  </script>
+            const today = new Date();
+            const requestedMonthDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+            const period = getPeriod(requestedMonthDate);
+
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            ];
+            const requestedMonth = monthNames[requestedMonthDate.getMonth()];
+
+            const submitButton = document.querySelector("button[type='submit']");
+
+            if (today < period.start || today > period.end) {
+                let mensagem = "";
+
+                if (today < period.start) {
+                    mensagem = `<h3>O período de solicitações para <span class="math-inline">\{requestedMonth\} iniciará em <span class\="destaque\-iniciara"\></span>{period.start.toLocaleDateString("pt-BR")}</span>.</h3>`;
+                } else if (today > period.end) {
+                    const nextRequestedMonthDate = new Date(today.getFullYear(), today.getMonth() + 2, 1);
+                    const nextPeriod = getPeriod(nextRequestedMonthDate);
+                    const nextRequestedMonth = monthNames[nextRequestedMonthDate.getMonth()];
+
+                    mensagem = `<h3>O período de solicitações para <span class="math-inline">\{requestedMonth\} encerrou em <span class\="destaque\-encerrou"\></span>{period.end.toLocaleDateString("pt-BR")}</span>.<br>
+                        As solicitações para <span class="math-inline">\{nextRequestedMonth\} serão iniciadas em <span class\="destaque\-iniciara"\></span>{nextPeriod.start.toLocaleDateString("pt-BR")}</span>.</h3>`;
+                }
+
+                formularioDiv.innerHTML = mensagem;
+                submitButton.disabled = true;
+                return;
+            }
+
+            submitButton.disabled = false;
+        }
+
+        function loadEmployeeList() {
+            fetch(SCRIPT_URL + "?action=lista")
+                .then(response => response.json())
+                .then(data => {
+                    window.employeeList = data;
+                })
+                .catch(error => console.error("Erro ao carregar lista de funcionários:", error));
+        }
+    </script>
 </head>
 <body>
-     <h2>DERSO 1º BPM</h2>
-<p class="subtitle" id="subtitle"></p>
-<form id="dersoForm" onsubmit="submitForm(event)">
-  <div class="form-group">
-    <label for="email">E-mail:</label>
-    <input type="email" id="email" name="email" list="emailProviders" required>
-    <datalist id="emailProviders"></datalist>
-  </div>
+    <div class="container">
+        <h2>DERSO 1º BPM</h2>
+        <p class="subtitle" id="subtitle"></p>
 
-  <div class="form-group">
-    <label for="matricula">Matrícula:</label>
-    <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
-    <div id="matriculaError" class="error"></div>
-  </div>
+        <!-- Adicionado um div para exibir mensagens do período de solicitação -->
+        <div id="formulario">
+            <form id="dersoForm" onsubmit="submitForm(event)">
+                <div class="form-group">
+                    <label for="email">E-mail:</label>
+                    <input type="email" id="email" name="email" list="emailProviders" required>
+                    <datalist id="emailProviders"></datalist>
+                </div>
 
-  <div class="form-group">
-    <label for="nome">Nome:</label>
-    <input type="text" id="nome" name="nome" readonly required>
-  </div>
+                <div class="form-group">
+                    <label for="matricula">Matrícula:</label>
+                    <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345" onblur="fetchEmployeeName()">
+                    <div id="matriculaError" class="error"></div>
+                </div>
 
-  <div class="form-group">
-    <label>Folga<span class="required-star">*</span>:</label>
-    <div class="radio-group">
-      <label><input type="radio" name="folga" value="24H" required>24H</label>
-      <label><input type="radio" name="folga" value="48H">48H</label>
-      <label><input type="radio" name="folga" value="72H">72H</label>
-      <label><input type="radio" name="folga" value="1ª FOLGA">1ª FOLGA</label>
-      <label><input type="radio" name="folga" value="2ª FOLGA">2ª FOLGA</label>
-      <label><input type="radio" name="folga" value="EXPEDIENTE">EXPEDIENTE</label>
+                <div class="form-group">
+                    <label for="nome">Nome:</label>
+                    <input type="text" id="nome" name="nome" readonly required>
+                </div>
+
+                <div class="form-group">
+                    <label>Folga<span class="required-star">*</span>:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="folga" value="Sim"> Sim</label>
+                        <label><input type="radio" name="folga" value="Não"> Não</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="data">Data:</label>
+                    <input type="date" id="data" name="data" required>
+                </div>
+
+                <button type="submit" class="button">Enviar Solicitação</button>
+                <div id="duplicateError" class="error"></div>
+            </form>
+        </div>
     </div>
-  </div>
-
-  <div class="form-group">
-    <label for="data">Data:</label>
-    <input type="date" id="data" name="data" required>
-  </div>
-
-  <div id="requests-container"></div>
-  <button type="button" class="button" onclick="addRequestFields()">Adicionar Outra Solicitação</button>
-
-  <div class="form-group">
-    <button type="submit" class="button">Enviar Solicitação</button>
-  </div>
-</form>
-
-<div id="duplicateError" class="error"></div>
-
 </body>
-</html>
-
-
