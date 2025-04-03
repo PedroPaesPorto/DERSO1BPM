@@ -334,18 +334,16 @@
                 });
         }
 
-        // Inicialização da página
-        document.addEventListener('DOMContentLoaded', function() {
-            initializePage();
-            loadEmployeeList();
-        });
+     // Inicialização da página
+document.addEventListener('DOMContentLoaded', function() {
+    initializePage();
+    loadEmployeeList();
+});
 
-        function initializePage() {
-            const formularioDiv = document.getElementById("formulario");
-            if (!formularioDiv) {
-                console.error('Elemento com ID "formulario" não encontrado.');
-                return;
-            }
+function initializePage() {
+    const submitButton = document.querySelector("button[type='submit']");
+    submitButton.disabled = false; // Garante que o botão esteja sempre habilitado
+}
 
             const today = new Date();
             const requestedMonthDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
