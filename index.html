@@ -72,30 +72,54 @@
         matriculaInput.value = standardizeMatricula(matriculaInput.value);
     }
 
-    // Validação do formulário antes de submeter
-    async function submitForm(event) {
-      event.preventDefault();
-      const form = document.getElementById("dersoForm");
-      const formData = new FormData(form);
-
-      let matriculaInput = document.getElementById("matricula");
-      let matricula = standardizeMatricula(matriculaInput.value);
-      matriculaInput.value = matricula;
-      formData.set("matricula", matricula);
-
-      let dataValue = document.getElementById("data").value;
-      formData.set("data", formatDateToBR(dataValue));
-
-      fetch(SCRIPT_URL, { method: "POST", body: formData })
-        .then(response => {
-          alert("Solicitação enviada com sucesso!");
-          form.reset();
-        })
-        .catch(error => {
-          alert("Erro ao enviar solicitação!");
-          console.error("Erro no envio:", error);
-        });
+     function getFormattedTimestamp() {
+      let now = new Date();
+      return now.toLocaleDateString('pt-BR') + " " + now.toLocaleTimeString('pt-BR', { hour12: false });
     }
+
+
+    // Validação do formulário antes de submeter
+     async function submitForm(event) {
+    event.preventDefault();
+    const form = document.getElementById("dersoForm");
+    const formData = new FormData(form);
+
+    let timestamp = getFormattedTimestamp();
+    formData.set("timestamp", timestamp);
+
+    let dataValue = document.getElementById("data").value;
+    let dataBR = formatDateToBR(dataValue);
+    formData.set("data", dataBR);
+
+    let matricula = standardizeMatricula(document.getElementById("matricula").value);
+    
+    let folgaValue = getFolgaValue();
+    if (!folgaValue) {
+      document.getElementById("duplicateError").textContent = "Por favor, selecione uma opção de folga.";
+      return;
+    }
+    formData.set("folga", folgaValue);
+
+    let duplicate = await checkDuplicate(matricula, dataBR);
+    if (duplicate) {
+      document.getElementById("duplicateError").textContent = "Já existe solicitação para essa data com essa matrícula!";
+      return;
+    } else {
+      document.getElementById("duplicateError").textContent = "";
+    }
+
+    fetch(SCRIPT_URL, { method: "POST", body: formData })
+      .then(response => {
+        alert("Solicitação enviada com sucesso!");
+        form.reset();
+        document.getElementById("duplicateError").textContent = "";
+      })
+      .catch(error => {
+        alert("Erro ao enviar solicitação!");
+        console.error("Erro no envio:", error);
+      });
+  }
+
 
     // Função para formatar data no padrão BR (DD/MM/AAAA)
     function formatDateToBR(dateStr) {
@@ -106,11 +130,33 @@
 </head>
 <body>
   <div class="container">
-    <h2>DERSO 1º BPM</h2>
+        <h2>DERSO 1º BPM</h2>
+    <p class="subtitle" id="subtitle"></p>
     <form id="dersoForm" onsubmit="submitForm(event)">
       <div class="form-group">
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" list="emailProviders" required>
+        <datalist id="emailProviders"></datalist>
+      </div>
+      <div class="form-group">
         <label for="matricula">Matrícula:</label>
-        <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345" onblur="formatarMatriculaInput()">
+        <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
+        <div id="matriculaError" class="error"></div>
+      </div>
+      <div class="form-group">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" readonly required>
+      </div>
+      <div class="form-group">
+        <label>Folga<span class="required-star">*</span>:</label>
+        <div class="radio-group">
+          <label><input type="radio" name="folga" value="24H" required>24H</label>
+          <label><input type="radio" name="folga" value="48H">48H</label>
+          <label><input type="radio" name="folga" value="72H">72H</label>
+          <label><input type="radio" name="folga" value="1ª FOLGA">1ª FOLGA</label>
+          <label><input type="radio" name="folga" value="2ª FOLGA">2ª FOLGA</label>
+          <label><input type="radio" name="folga" value="EXPEDIENTE">EXPEDIENTE</label>
+        </div>
       </div>
       <div class="form-group">
         <label for="data">Data:</label>
@@ -120,6 +166,8 @@
         <button type="submit" class="button">Enviar Solicitação</button>
       </div>
     </form>
+    <div id="duplicateError" class="error"></div>
   </div>
 </body>
 </html>
+
