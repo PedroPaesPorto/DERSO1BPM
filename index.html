@@ -232,7 +232,7 @@
 
         // Função para carregar as solicitações
         function loadSolicitacoesList(matricula) {
-            const url = `<span class="math-inline">\{corsUrl\}?targetUrl\=</span>{encodeURIComponent(SCRIPT_URL)}&action=solicitacoes&matricula=${matricula}`;
+            const url = `${corsUrl}?targetUrl=${encodeURIComponent(SCRIPT_URL)}&action=solicitacoes&matricula=${matricula}`;
 
             return fetch(url)
                 .then(response => response.json())
@@ -313,6 +313,12 @@
             }
             formData.set("folga", folgaValue.value);
 
+            // Adiciona as datas extras
+            const extraDates = document.querySelectorAll("input[name='data[]']");
+            extraDates.forEach((dateInput, index) => {
+                formData.append(`data${index + 2}`, formatDateToBR(dateInput.value)); // data2, data3, etc.
+            });
+
             fetch(SCRIPT_URL, {
                     method: "POST",
                     body: formData
@@ -356,14 +362,14 @@
                 let mensagem = "";
 
                 if (today < period.start) {
-                    mensagem = `<h3>O período de solicitações para <span class="math-inline">\{requestedMonth\} iniciará em <span class\="destaque\-iniciara"\></span>{period.start.toLocaleDateString("pt-BR")}</span>.</h3>`;
+                    mensagem = `<h3>O período de solicitações para ${requestedMonth} iniciará em <span class="destaque-iniciara">${period.start.toLocaleDateString("pt-BR")}</span>.</h3>`;
                 } else if (today > period.end) {
                     const nextRequestedMonthDate = new Date(today.getFullYear(), today.getMonth() + 2, 1);
                     const nextPeriod = getPeriod(nextRequestedMonthDate);
                     const nextRequestedMonth = monthNames[nextRequestedMonthDate.getMonth()];
 
-                    mensagem = `<h3>O período de solicitações para <span class="math-inline">\{requestedMonth\} encerrou em <span class\="destaque\-encerrou"\></span>{period.end.toLocaleDateString("pt-BR")}</span>.<br>
-                        As solicitações para <span class="math-inline">\{nextRequestedMonth\} serão iniciadas em <span class\="destaque\-iniciara"\></span>{nextPeriod.start.toLocaleDateString("pt-BR")}</span>.</h3>`;
+                    mensagem = `<h3>O período de solicitações para ${requestedMonth} encerrou em <span class="destaque-encerrou">${period.end.toLocaleDateString("pt-BR")}</span>.<br>
+                        As solicitações para ${nextRequestedMonth} serão iniciadas em <span class="destaque-iniciara">${nextPeriod.start.toLocaleDateString("pt-BR")}</span>.</h3>`;
                 }
 
                 formularioDiv.innerHTML = mensagem;
@@ -382,14 +388,30 @@
                 })
                 .catch(error => console.error("Erro ao carregar lista de funcionários:", error));
         }
+
+        function addRequestFields() {
+            const requestsContainer = document.getElementById("requests-container");
+            if (requestsContainer.children.length >= 3) {
+                alert("Você só pode fazer até três solicitações por vez.");
+                return;
+            }
+
+            const newRequest = document.createElement("div");
+            newRequest.classList.add("form-group");
+            newRequest.innerHTML = `
+                <label for="data">Data:</label>
+                <input type="date" name="data[]" required>
+            `;
+            requestsContainer.appendChild(newRequest);
+        }
     </script>
 </head>
+
 <body>
     <div class="container">
         <h2>DERSO 1º BPM</h2>
         <p class="subtitle" id="subtitle"></p>
 
-        <!-- Adicionado um div para exibir mensagens do período de solicitação -->
         <div id="formulario">
             <form id="dersoForm" onsubmit="submitForm(event)">
                 <div class="form-group">
@@ -400,7 +422,8 @@
 
                 <div class="form-group">
                     <label for="matricula">Matrícula:</label>
-                    <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345" onblur="fetchEmployeeName()">
+                    <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345"
+                        onblur="fetchEmployeeName()">
                     <div id="matriculaError" class="error"></div>
                 </div>
 
@@ -412,8 +435,12 @@
                 <div class="form-group">
                     <label>Folga<span class="required-star">*</span>:</label>
                     <div class="radio-group">
-                        <label><input type="radio" name="folga" value="Sim"> Sim</label>
-                        <label><input type="radio" name="folga" value="Não"> Não</label>
+                        <label><input type="radio" name="folga" value="24H" required>24H</label>
+                        <label><input type="radio" name="folga" value="48H">48H</label>
+                        <label><input type="radio" name="folga" value="72H">72H</label>
+                        <label><input type="radio" name="folga" value="1ª FOLGA">1ª FOLGA</label>
+                        <label><input type="radio" name="folga" value="2ª FOLGA">2ª FOLGA</label>
+                        <label><input type="radio" name="folga" value="EXPEDIENTE">EXPEDIENTE</label>
                     </div>
                 </div>
 
@@ -422,9 +449,16 @@
                     <input type="date" id="data" name="data" required>
                 </div>
 
-                <button type="submit" class="button">Enviar Solicitação</button>
-                <div id="duplicateError" class="error"></div>
+                <div id="requests-container"></div>
+                <button type="button" class="button" onclick="addRequestFields()">Adicionar Outra Solicitação</button>
+
+                <div class="form-group">
+                    <button type="submit" class="button">Enviar Solicitação</button>
+                    <div id="duplicateError" class="error"></div>
+                </div>
             </form>
         </div>
     </div>
 </body>
+
+</html>
