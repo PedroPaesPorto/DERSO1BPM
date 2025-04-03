@@ -191,60 +191,109 @@
             const nextMonthString = nextMonth.toISOString().split('T')[0]; // Formato YYYY-MM-DD
             document.getElementById('data').value = nextMonthString;
         }
+        
+        function standardizeMatricula(matricula) {
+    let num = matricula.replace(/\D/g, '');
+    return num.startsWith("1000") ? num : "1000" + num;
+}
+        document.getElementById("matricula").addEventListener("blur", function () {
+    let matricula = standardizeMatricula(this.value);
+    this.value = matricula; // Atualiza a matrícula formatada
+
+    let nomeInput = document.getElementById("nome");
+    
+    fetch(`${SCRIPT_URL}?matricula=${matricula}`)
+        .then(response => response.text())
+        .then(data => {
+            nomeInput.value = data ? data : "Nome não encontrado";
+        })
+        .catch(error => {
+            console.error("Erro ao buscar o nome:", error);
+            nomeInput.value = "Erro na busca";
+        });
+});
+
 
         // Validação do formulário antes de submeter
         async function submitForm(event) {
-            event.preventDefault();
-            const form = document.getElementById("dersoForm");
-            const formData = new FormData(form);
+    event.preventDefault();
+    const form = document.getElementById("dersoForm");
+    const formData = new FormData(form);
 
-            let timestamp = getFormattedTimestamp();
-            formData.set("timestamp", timestamp);
+    let timestamp = getFormattedTimestamp();
+    formData.set("timestamp", timestamp);
 
-            let email = document.getElementById("email").value;
-            formData.set("email", email); // Envia o email
+    let matricula = document.getElementById("matricula").value.trim();
+    matricula = standardizeMatricula(matricula);
+    formData.set("matricula", matricula);
 
-            let dataValue = document.getElementById("data").value;
-            let dataBR = formatDateToBR(dataValue);
-            formData.set("data", dataBR);
+    let email = document.getElementById("email").value.trim();
+    formData.set("email", email);
 
-            let matricula = standardizeMatricula(document.getElementById("matricula").value);
-
-            let folgaValue = getFolgaValue();
-            if (!folgaValue) {
-                document.getElementById("duplicateError").textContent = "Por favor, selecione uma opção de folga.";
-                return;
-            }
-            formData.set("folga", folgaValue);
-
-            // Coleta as datas e folgas adicionais
-            const extraDates = document.querySelectorAll("input[name='extraData[]']");
-            const extraFolgas = document.querySelectorAll("input[name='extraFolga[]']:checked");
-
-            extraDates.forEach((dateInput, index) => {
-                formData.append(`extraData${index + 1}`, formatDateToBR(dateInput.value));
+    let nomeInput = document.getElementById("nome");
+    
+    // Buscar o nome se ainda não estiver preenchido
+    if (!nomeInput.value || nomeInput.value === "Nome não encontrado") {
+        await fetch(`${SCRIPT_URL}?matricula=${matricula}`)
+            .then(response => response.text())
+            .then(data => {
+                if (data) {
+                    nomeInput.value = data;
+                    formData.set("nome", data);
+                } else {
+                    nomeInput.value = "Nome não encontrado";
+                    formData.set("nome", "Desconhecido");
+                }
+            })
+            .catch(error => {
+                console.error("Erro ao buscar o nome:", error);
+                nomeInput.value = "Erro na busca";
             });
+    } else {
+        formData.set("nome", nomeInput.value);
+    }
 
-            extraFolgas.forEach((folgaInput, index) => {
-                formData.append(`extraFolga${index + 1}`, folgaInput.value);
-            });
+    let dataValue = document.getElementById("data").value;
+    formData.set("data", formatDateToBR(dataValue));
 
-            fetch(SCRIPT_URL, {
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => {
-                    alert("Solicitação enviada com sucesso!");
-                    form.reset();
-                    document.getElementById("duplicateError").textContent = "";
-                    setDateFieldsToNextMonth(); // Reseta a data principal para o próximo mês
-                    clearExtraRequests(); // Limpa os campos extras
-                })
-                .catch(error => {
-                    alert("Erro ao enviar solicitação!");
-                    console.error("Erro no envio:", error);
-                });
-        }
+    let folgaValue = getFolgaValue();
+    if (!folgaValue) {
+        document.getElementById("duplicateError").textContent = "Por favor, selecione uma opção de folga.";
+        return;
+    }
+    formData.set("folga", folgaValue);
+
+    // Coleta solicitações extras e garante que são salvas corretamente
+    const extraDates = document.querySelectorAll("input[name='extraData[]']");
+    const extraFolgas = document.querySelectorAll("input[name='extraFolga[]']:checked");
+
+    extraDates.forEach((dateInput, index) => {
+        formData.append(`extraData${index + 1}`, formatDateToBR(dateInput.value));
+    });
+
+    extraFolgas.forEach((folgaInput, index) => {
+        formData.append(`extraFolga${index + 1}`, folgaInput.value);
+    });
+
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.text())
+    .then(responseText => {
+        console.log("Resposta do servidor:", responseText);
+        alert("Solicitação enviada com sucesso!");
+        form.reset();
+        document.getElementById("duplicateError").textContent = "";
+        setDateFieldsToNextMonth();
+        clearExtraRequests();
+    })
+    .catch(error => {
+        alert("Erro ao enviar solicitação!");
+        console.error("Erro no envio:", error);
+    });
+}
+
 
         // Funções auxiliares para data e duplicidade
         function formatDateToBR(dateStr) {
