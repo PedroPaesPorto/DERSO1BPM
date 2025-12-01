@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solicitação de Folga - DERSO</title>
 
   <style>
@@ -20,7 +20,7 @@
       font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
       color: #333;
       margin: 0;
-      padding: 10px;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -37,6 +37,40 @@
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
+      position: relative;
+    }
+
+    /* Barra de progresso */
+    #progressBarContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background-color: #e0e0e0;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+    }
+
+    #progressBar {
+      width: 0%;
+      height: 100%;
+      background-color: var(--azul-principal);
+      transition: width 0.4s ease;
+    }
+
+    /* Logos */
+    .logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .logos img {
+      height: 70px;
+      object-fit: contain;
     }
 
     h2, .subtitle {
@@ -94,11 +128,6 @@
     input[readonly] {
       background-color: #e9ecef;
       cursor: not-allowed;
-      transition: background-color 0.3s ease;
-    }
-
-    input[readonly]:hover {
-      background-color: #dee2e6;
     }
 
     input[id="matricula"]::placeholder {
@@ -108,7 +137,7 @@
     .radio-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 15px;
       margin-top: 10px;
     }
 
@@ -146,11 +175,6 @@
       transform: translateY(0);
     }
 
-    .button.loading {
-      opacity: 0.7;
-      cursor: wait;
-    }
-
     .error {
       color: var(--erro);
       margin-top: 5px;
@@ -163,4 +187,229 @@
       margin-left: 2px;
     }
 
-    .destaque-encerrou {
+    .info-message {
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .info-message.success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .info-message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 12px;
+      color: #5a5a5a;
+    }
+
+    @media (max-width: 576px) {
+      .container { padding: 20px; }
+      h2 { font-size: 20px; }
+      .subtitle { font-size: 13px; }
+      .form-group input:not([type="radio"]), .form-group select { font-size: 14px; }
+      .button { font-size: 14px; padding: 12px 15px; }
+      .radio-group { flex-direction: column; gap: 10px; }
+      .logos img { height: 50px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="formulario">
+    <div id="progressBarContainer"><div id="progressBar"></div></div>
+
+    <div class="logos">
+      <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
+      <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1º BPM">
+    </div>
+
+    <h2>DERSO 1º BPM</h2>
+    <p class="subtitle">Formulário de Solicitação de Folga</p>
+
+    <form id="dersoForm" style="display: none;">
+      <div class="form-group">
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" list="emailProviders" required autofocus>
+        <datalist id="emailProviders"></datalist>
+      </div>
+
+      <div class="form-group">
+        <label for="matricula">Matrícula:</label>
+        <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
+        <div id="matriculaError" class="error"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" readonly required>
+      </div>
+
+      <fieldset>
+        <legend>Tipo de Folga<span class="required-star">*</span>:</legend>
+        <div class="radio-group">
+          <label><input type="radio" name="folga" value="24H">24H</label>
+          <label><input type="radio" name="folga" value="48H">48H</label>
+          <label><input type="radio" name="folga" value="72H">72H</label>
+          <label><input type="radio" name="folga" value="96H">96H</label>
+          <label><input type="radio" name="folga" value="FOLGA LE">FOLGA LE</label>
+          <label><input type="radio" name="folga" value="1ª Folga">1ª FOLGA</label>
+          <label><input type="radio" name="folga" value="2ª Folga">2ª FOLGA</label>
+          <label><input type="radio" name="folga" value="Expediente">EXPEDIENTE</label>
+        </div>
+        <div id="duplicateError" class="error"></div>
+      </fieldset>
+
+      <div class="form-group">
+        <label for="data">Data:</label>
+        <input type="date" id="data" name="data" required>
+      </div>
+
+      <button type="submit" class="button">Enviar Solicitação</button>
+    </form>
+
+    <div id="statusMessage" class="info-message"></div>
+
+    <div class="footer" id="footerText"></div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvXdbm_hZW8KUfg-1ifd754dkebUiOc9sf0xoQDF2NCswP9CaUG0vYjiF1wFxep20lUA/exec";
+    const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br"];
+    window.employeeList = {};
+
+    const progressBar = document.getElementById("progressBar");
+
+    function setProgress(percent) {
+      progressBar.style.width = percent + "%";
+    }
+
+    function updateEmailDatalist() {
+      const emailInput = document.getElementById("email");
+      const datalist = document.getElementById("emailProviders");
+      const value = emailInput.value;
+      const atIndex = value.indexOf("@");
+      if (atIndex === -1) { datalist.innerHTML = ""; return; }
+      const domainPart = value.slice(atIndex + 1).toLowerCase();
+      const filtered = emailProviders.filter(p => p.startsWith(domainPart));
+      datalist.innerHTML = "";
+      filtered.forEach(p => { const option = document.createElement("option"); option.value = value.slice(0, atIndex+1)+p; datalist.appendChild(option); });
+    }
+
+    function standardizeMatricula(m) {
+      let num = m.replace(/\D/g,'').slice(0,9);
+      return num.startsWith("1000") ? num : "1000"+num;
+    }
+
+    function loadEmployeeList() {
+      setProgress(20);
+      fetch(SCRIPT_URL+"?action=lista")
+      .then(r => r.json())
+      .then(data => {
+        if(data.error) throw new Error(data.error);
+        window.employeeList = data;
+        setProgress(40);
+      }).catch(()=>{document.getElementById("matriculaError").textContent="Erro ao carregar lista de funcionários."});
+    }
+
+    function checkMatricula() {
+      const m = document.getElementById("matricula");
+      const n = document.getElementById("nome");
+      const e = document.getElementById("matriculaError");
+      const standardized = standardizeMatricula(m.value);
+      m.value = standardized;
+      if(window.employeeList[standardized]) { n.value=window.employeeList[standardized]; e.textContent=""; }
+      else { n.value=""; e.textContent="Matrícula não encontrada!"; }
+    }
+
+    function setDateLimits() {
+      const dateInput = document.getElementById("data");
+      const today = new Date();
+      let nextMonth = new Date(today.getFullYear(), today.getMonth()+1,1);
+      let lastDay = new Date(today.getFullYear(), today.getMonth()+2,0);
+      dateInput.min = nextMonth.toISOString().split("T")[0];
+      dateInput.max = lastDay.toISOString().split("T")[0];
+    }
+
+    function formatDateBR(d) {
+      if(!d) return "";
+      const [y,m,day] = d.split("-");
+      return `${day}/${m}/${y}`;
+    }
+
+    function showMessage(msg,type="success") {
+      const div = document.getElementById("statusMessage");
+      div.className="info-message "+type;
+      div.textContent=msg;
+      div.style.display="block";
+      setTimeout(()=>{div.style.display="none";},5000);
+    }
+
+    function submitForm(e){
+      e.preventDefault();
+      const form = document.getElementById("dersoForm");
+      const fd = new FormData(form);
+      const dataValue = document.getElementById("data").value;
+      fd.set("data",formatDateBR(dataValue));
+      const folga = document.querySelector('input[name="folga"]:checked');
+      if(!folga){document.getElementById("duplicateError").textContent="Selecione uma folga."; return;}
+      fd.set("folga",folga.value);
+      document.getElementById("duplicateError").textContent="";
+      if(document.getElementById("nome").value.trim()===""){document.getElementById("matriculaError").textContent="Matrícula inválida."; return;}
+      const btn = document.querySelector(".button");
+      btn.disabled=true;
+      setProgress(60);
+
+      fetch(SCRIPT_URL,{method:"POST",body:new URLSearchParams(fd)})
+      .then(r=>r.json())
+      .then(data=>{
+        if(data.success){showMessage("✅ Solicitação enviada com sucesso!","success"); form.reset(); }
+        else showMessage("⚠️ "+(data.error||"Erro ao enviar."),"error");
+      }).catch(()=>showMessage("⚠️ Falha na conexão.","error"))
+      .finally(()=>{
+        btn.disabled=false;
+        setProgress(100);
+        setTimeout(()=>setProgress(0),1500);
+      });
+    }
+
+    function initializeForm(){
+      loadEmployeeList();
+      setDateLimits();
+      const formDiv = document.getElementById("dersoForm");
+      fetch(SCRIPT_URL+"?action=datas")
+      .then(r=>r.json())
+      .then(data=>{
+        const agora = new Date();
+        const abertura = new Date(data.abertura);
+        const fechamento = new Date(data.fechamento);
+        if(agora<abertura || agora>fechamento){
+          document.getElementById("statusMessage").innerHTML = agora<abertura
+            ? `⏳ O período abrirá em ${abertura.toLocaleString("pt-BR")}`
+            : `⛔ O período encerrou em ${fechamento.toLocaleString("pt-BR")}`;
+        } else formDiv.style.display="block";
+      });
+      const footer = document.getElementById("footerText");
+      const now = new Date();
+      const mes = now.getMonth()+1; const ano = now.getFullYear();
+      footer.textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${mes.toString().padStart(2,'0')}/${ano}`;
+    }
+
+    document.addEventListener("DOMContentLoaded",()=>{
+      initializeForm();
+      document.getElementById("matricula").addEventListener("blur",checkMatricula);
+      document.getElementById("email").addEventListener("input",updateEmailDatalist);
+      document.getElementById("dersoForm").addEventListener("submit",submitForm);
+    });
+  </script>
+</body>
+</html>
+
