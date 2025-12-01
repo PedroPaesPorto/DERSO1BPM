@@ -458,26 +458,44 @@
     }
 
     function initializeForm(){
-      loadEmployeeList();
-      setDateLimits();
-      const formDiv = document.getElementById("dersoForm");
-      fetch(SCRIPT_URL+"?action=datas")
-      .then(r=>r.json())
-      .then(data=>{
-        const agora = new Date();
-        const abertura = new Date(data.abertura);
-        const fechamento = new Date(data.fechamento);
-        if(agora<abertura || agora>fechamento){
-          document.getElementById("statusMessage").innerHTML = agora<abertura
-            ? `⏳ O período abrirá em ${abertura.toLocaleString("pt-BR")}`
-            : `⛔ O período encerrou em ${fechamento.toLocaleString("pt-BR")}`;
-        } else formDiv.style.display="block";
-      });
-      const footer = document.getElementById("footerText");
-      const now = new Date();
-      const mes = now.getMonth()+1; const ano = now.getFullYear();
-      footer.textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${mes.toString().padStart(2,'0')}/${ano}`;
+  loadEmployeeList();
+  setDateLimits();
+  const formDiv = document.getElementById("dersoForm");
+  const statusMessage = document.getElementById("statusMessage");
+  const footer = document.getElementById("footerText");
+
+  fetch(SCRIPT_URL+"?action=datas")
+  .then(r=>r.json())
+  .then(data=>{
+    const agora = new Date();
+    const abertura = new Date(data.abertura);
+    const fechamento = new Date(data.fechamento);
+
+    if(agora < abertura || agora > fechamento){
+      // Período Fechado
+      statusMessage.className = "info-message error";
+      statusMessage.style.display = "block";
+      statusMessage.innerHTML = agora < abertura
+          ? `⏳ **Abertura:** ${abertura.toLocaleString("pt-BR")}`
+          : `⛔ **Encerrado:** ${fechamento.toLocaleString("pt-BR")}`;
+    } else {
+      // Período Aberto: Calculando e mostrando o tempo restante
+      formDiv.style.display = "block";
+      
+      const diffTime = fechamento.getTime() - agora.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      // Adiciona a mensagem de tempo limite ao statusMessage (ou em outro lugar)
+      statusMessage.className = "info-message success";
+      statusMessage.style.display = "block";
+      statusMessage.innerHTML = `🚨 **Atenção!** Restam **${diffDays} dia(s)** para o fechamento do formulário em ${fechamento.toLocaleDateString("pt-BR")} às ${fechamento.toLocaleTimeString("pt-BR")}.`;
     }
+  });
+
+  const now = new Date();
+  const mes = now.getMonth()+1; const ano = now.getFullYear();
+  footer.textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${mes.toString().padStart(2,'0')}/${ano}`;
+}
 
     document.addEventListener("DOMContentLoaded",()=>{
       initializeForm();
