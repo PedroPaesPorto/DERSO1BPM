@@ -134,22 +134,54 @@
       color: #aaa;
     }
 
-    .radio-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-top: 10px;
-    }
+  /* Novo CSS para os botões de alternância (Toggle Buttons) */
+.radio-group-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
 
-    .radio-group label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      cursor: pointer;
-      user-select: none;
-      color: var(--cinza-texto);
-    }
+.radio-group-buttons input[type="radio"] {
+  /* Esconde o radio button nativo */
+  display: none;
+}
+
+.radio-group-buttons label {
+  /* Estiliza o label como um botão */
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  user-select: none;
+  text-transform: uppercase; /* Para manter o estilo original das opções */
+}
+
+.radio-group-buttons input[type="radio"]:checked + label {
+  /* Estilo quando o botão está selecionado */
+  background-color: var(--azul-principal);
+  color: #fff;
+  border-color: var(--azul-principal);
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+}
+
+.radio-group-buttons label:hover {
+  /* Estilo ao passar o mouse */
+  background-color: var(--cinza-claro);
+  border-color: var(--azul-principal);
+}
+
+/* Garante que em telas pequenas as opções continuem organizadas */
+@media (max-width: 576px) {
+  /* Ajuste para que as opções continuem em linha, se houver espaço, ou quebrem */
+  .radio-group-buttons {
+    justify-content: center; /* Centraliza no móvel */
+  }
+}
 
     .button {
       background-color: var(--azul-principal);
@@ -248,25 +280,25 @@
         <div id="matriculaError" class="error"></div>
       </div>
 
-      <div class="form-group">
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" name="nome" readonly required>
-      </div>
+     <div class="form-group">
+  <label for="nome">Nome:</label>
+  <input type="text" id="nome" name="nome" readonly disabled required>
+</div>
 
-      <fieldset>
-        <legend>Tipo de Folga<span class="required-star">*</span>:</legend>
-        <div class="radio-group">
-          <label><input type="radio" name="folga" value="24H">24H</label>
-          <label><input type="radio" name="folga" value="48H">48H</label>
-          <label><input type="radio" name="folga" value="72H">72H</label>
-          <label><input type="radio" name="folga" value="96H">96H</label>
-          <label><input type="radio" name="folga" value="FOLGA LE">FOLGA LE</label>
-          <label><input type="radio" name="folga" value="1ª Folga">1ª FOLGA</label>
-          <label><input type="radio" name="folga" value="2ª Folga">2ª FOLGA</label>
-          <label><input type="radio" name="folga" value="Expediente">EXPEDIENTE</label>
-        </div>
-        <div id="duplicateError" class="error"></div>
-      </fieldset>
+<fieldset>
+  <legend>Tipo de Folga<span class="required-star">*</span>:</legend>
+  <div class="radio-group-buttons">
+    <input type="radio" id="folga24H" name="folga" value="24H" required><label for="folga24H">24H</label>
+    <input type="radio" id="folga48H" name="folga" value="48H"><label for="folga48H">48H</label>
+    <input type="radio" id="folga72H" name="folga" value="72H"><label for="folga72H">72H</label>
+    <input type="radio" id="folga96H" name="folga" value="96H"><label for="folga96H">96H</label>
+    <input type="radio" id="folgaLE" name="folga" value="FOLGA LE"><label for="folgaLE">FOLGA LE</label>
+    <input type="radio" id="folga1" name="folga" value="1ª Folga"><label for="folga1">1ª FOLGA</label>
+    <input type="radio" id="folga2" name="folga" value="2ª Folga"><label for="folga2">2ª FOLGA</label>
+    <input type="radio" id="folgaExp" name="folga" value="Expediente"><label for="folgaExp">EXPEDIENTE</label>
+  </div>
+  <div id="duplicateError" class="error"></div>
+</fieldset>
 
       <div class="form-group">
         <label for="data">Data:</label>
@@ -310,15 +342,24 @@
     }
 
     function loadEmployeeList() {
-      setProgress(20);
-      fetch(SCRIPT_URL+"?action=lista")
-      .then(r => r.json())
-      .then(data => {
-        if(data.error) throw new Error(data.error);
-        window.employeeList = data;
-        setProgress(40);
-      }).catch(()=>{document.getElementById("matriculaError").textContent="Erro ao carregar lista de funcionários."});
-    }
+  setProgress(20);
+  const matriculaInput = document.getElementById("matricula");
+  matriculaInput.disabled = true; // Desabilita enquanto carrega
+  matriculaInput.placeholder = "Carregando lista de funcionários...";
+
+  fetch(SCRIPT_URL+"?action=lista")
+  .then(r => r.json())
+  .then(data => {
+    if(data.error) throw new Error(data.error);
+    window.employeeList = data;
+    setProgress(40);
+    // Habilita e restaura o placeholder ao terminar
+    matriculaInput.disabled = false; 
+    matriculaInput.placeholder = "Ex: 12345 ou 100012345";
+  }).catch(()=>{
+    document.getElementById("matriculaError").textContent="Erro ao carregar lista de funcionários. Tente novamente.";
+  });
+}
 
     function checkMatricula() {
       const m = document.getElementById("matricula");
