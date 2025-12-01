@@ -457,6 +457,25 @@
       });
     }
 
+  // Função para mostrar mensagens temporárias (sucesso/erro do submit)
+function showMessage(msg, type = "success") {
+  const div = document.getElementById("statusMessage");
+  div.className = "info-message " + type;
+  div.innerHTML = msg; // Usamos innerHTML para suportar negrito/emojis
+  div.style.display = "block";
+  // A mensagem TEMPORÁRIA é oculta após 5 segundos
+  setTimeout(() => { div.style.display = "none"; }, 5000); 
+}
+
+// NOVO: Função para mostrar a mensagem de PRAZO (deve ser persistente)
+function showPersistentMessage(msg, type = "success") {
+  const div = document.getElementById("statusMessage");
+  div.className = "info-message " + type;
+  div.innerHTML = msg;
+  div.style.display = "block";
+  // A mensagem PERSISTENTE não é oculta.
+}  
+    
     function initializeForm(){
   loadEmployeeList();
   setDateLimits();
