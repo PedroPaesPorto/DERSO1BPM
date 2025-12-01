@@ -421,14 +421,6 @@
       return `${day}/${m}/${y}`;
     }
 
-    function showMessage(msg,type="success") {
-      const div = document.getElementById("statusMessage");
-      div.className="info-message "+type;
-      div.textContent=msg;
-      div.style.display="block";
-      setTimeout(()=>{div.style.display="none";},5000);
-    }
-
     function submitForm(e){
       e.preventDefault();
       const form = document.getElementById("dersoForm");
@@ -476,46 +468,47 @@ function showPersistentMessage(msg, type = "success") {
   // A mensagem PERSISTENTE não é oculta.
 }  
     
-    function initializeForm(){
-  loadEmployeeList();
-  setDateLimits();
-  const formDiv = document.getElementById("dersoForm");
-  const statusMessage = document.getElementById("statusMessage");
-  const footer = document.getElementById("footerText");
+ function initializeForm(){
+  loadEmployeeList();
+  setDateLimits();
+  const formDiv = document.getElementById("dersoForm");
+  const footer = document.getElementById("footerText"); // Removi statusMessage daqui, pois showPersistentMessage já a referencia
 
-  fetch(SCRIPT_URL+"?action=datas")
-  .then(r=>r.json())
-  .then(data=>{
-    const agora = new Date();
-    const abertura = new Date(data.abertura);
-    const fechamento = new Date(data.fechamento);
+  fetch(SCRIPT_URL+"?action=datas")
+  .then(r=>r.json())
+  .then(data=>{
+    const agora = new Date();
+    const abertura = new Date(data.abertura);
+    const fechamento = new Date(data.fechamento);
 
-    if(agora < abertura || agora > fechamento){
-      // Período Fechado
-      statusMessage.className = "info-message error";
-      statusMessage.style.display = "block";
-      statusMessage.innerHTML = agora < abertura
-          ? `⏳ **Abertura:** ${abertura.toLocaleString("pt-BR")}`
-          : `⛔ **Encerrado:** ${fechamento.toLocaleString("pt-BR")}`;
-    } else {
-      // Período Aberto: Calculando e mostrando o tempo restante
-      formDiv.style.display = "block";
-      
-      const diffTime = fechamento.getTime() - agora.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      // Adiciona a mensagem de tempo limite ao statusMessage (ou em outro lugar)
-      statusMessage.className = "info-message success";
-      statusMessage.style.display = "block";
-      statusMessage.innerHTML = `🚨 **Atenção!** Restam **${diffDays} dia(s)** para o fechamento do formulário em ${fechamento.toLocaleDateString("pt-BR")} às ${fechamento.toLocaleTimeString("pt-BR")}.`;
-    }
-  });
+    if(agora < abertura || agora > fechamento){
+      // Período Fechado
+      const msg = agora < abertura
+          ? `⏳ **Abertura:** ${abertura.toLocaleString("pt-BR")}`
+          : `⛔ **Encerrado:** ${fechamento.toLocaleString("pt-BR")}`;
+      
+      // *** MUDANÇA: Usando a função persistente ***
+      showPersistentMessage(msg, "error");
+      formDiv.style.display = "none"; // Garante que o formulário não aparece
+    } else {
+      // Período Aberto: Calculando e mostrando o tempo restante
+      formDiv.style.display = "block";
+      
+      const diffTime = fechamento.getTime() - agora.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      const msg = `🚨 **Atenção!** Restam **${diffDays} dia(s)** para o fechamento do formulário em ${fechamento.toLocaleDateString("pt-BR")} às ${fechamento.toLocaleTimeString("pt-BR")}.`;
 
-  const now = new Date();
-  const mes = now.getMonth()+1; const ano = now.getFullYear();
-  footer.textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${mes.toString().padStart(2,'0')}/${ano}`;
+      // *** MUDANÇA: Usando a função persistente ***
+      showPersistentMessage(msg, "success");
+    }
+  });
+
+  const now = new Date();
+  const mes = now.getMonth()+1; const ano = now.getFullYear();
+  footer.textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${mes.toString().padStart(2,'0')}/${ano}`;
 }
-
+    
     document.addEventListener("DOMContentLoaded",()=>{
       initializeForm();
       document.getElementById("matricula").addEventListener("blur",checkMatricula);
