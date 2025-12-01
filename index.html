@@ -183,6 +183,17 @@
   }
 }
 
+    /* Feedback visual para campos */
+.form-group input.is-valid {
+  border-color: var(--sucesso) !important;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2) !important; /* Cor de sucesso */
+}
+
+.form-group input.is-invalid {
+  border-color: var(--erro) !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2) !important; /* Cor de erro */
+}
+
     .button {
       background-color: var(--azul-principal);
       color: #fff;
@@ -300,10 +311,11 @@
   <div id="duplicateError" class="error"></div>
 </fieldset>
 
-      <div class="form-group">
-        <label for="data">Data:</label>
-        <input type="date" id="data" name="data" required>
-      </div>
+    <div class="form-group">
+  <label for="data">Data:</label>
+  <input type="date" id="data" name="data" required>
+  <div id="dateLimitMessage" class="subtitle" style="margin-top: 5px; margin-bottom: 0; font-size: 12px; text-align: left;"></div>
+</div>
 
       <button type="submit" class="button">Enviar Solicitação</button>
     </form>
@@ -361,24 +373,47 @@
   });
 }
 
-    function checkMatricula() {
-      const m = document.getElementById("matricula");
-      const n = document.getElementById("nome");
-      const e = document.getElementById("matriculaError");
-      const standardized = standardizeMatricula(m.value);
-      m.value = standardized;
-      if(window.employeeList[standardized]) { n.value=window.employeeList[standardized]; e.textContent=""; }
-      else { n.value=""; e.textContent="Matrícula não encontrada!"; }
-    }
+   function checkMatricula() {
+  const m = document.getElementById("matricula");
+  const n = document.getElementById("nome");
+  const e = document.getElementById("matriculaError");
+  const standardized = standardizeMatricula(m.value);
+  
+  // Limpa classes anteriores
+  m.classList.remove("is-valid", "is-invalid");
+
+  m.value = standardized;
+  if(window.employeeList[standardized]) { 
+    n.value = window.employeeList[standardized]; 
+    e.textContent = ""; 
+    m.classList.add("is-valid"); // Adiciona sucesso
+  }
+  else { 
+    n.value = ""; 
+    e.textContent = "Matrícula não encontrada!"; 
+    m.classList.add("is-invalid"); // Adiciona erro
+  }
+}
 
     function setDateLimits() {
-      const dateInput = document.getElementById("data");
-      const today = new Date();
-      let nextMonth = new Date(today.getFullYear(), today.getMonth()+1,1);
-      let lastDay = new Date(today.getFullYear(), today.getMonth()+2,0);
-      dateInput.min = nextMonth.toISOString().split("T")[0];
-      dateInput.max = lastDay.toISOString().split("T")[0];
-    }
+  const dateInput = document.getElementById("data");
+  const messageDiv = document.getElementById("dateLimitMessage"); // Novo elemento
+
+  const today = new Date();
+  let nextMonthStart = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+  let nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+
+  dateInput.min = nextMonthStart.toISOString().split("T")[0];
+  dateInput.max = nextMonthEnd.toISOString().split("T")[0];
+
+  // Formata as datas para exibição na mensagem
+  const startDay = nextMonthStart.getDate().toString().padStart(2, '0');
+  const startMonth = (nextMonthStart.getMonth() + 1).toString().padStart(2, '0');
+  const endDay = nextMonthEnd.getDate().toString().padStart(2, '0');
+  const endMonth = (nextMonthEnd.getMonth() + 1).toString().padStart(2, '0');
+
+  messageDiv.textContent = `Período de folga permitido: ${startDay}/${startMonth} a ${endDay}/${endMonth}.`;
+}
 
     function formatDateBR(d) {
       if(!d) return "";
