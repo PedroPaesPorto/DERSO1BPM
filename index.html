@@ -290,6 +290,43 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* NOVO ESTILO PARA O BOTÃO DE CONSULTA E HISTÓRICO */
+        #btnConsultarHistorico {
+            background-color: #5a5a5a; /* Cinza escuro para diferenciar do botão principal */
+            font-weight: 500;
+            padding: 10px;
+            margin-top: -10px; /* Sobe um pouco para ficar mais próximo do campo Nome */
+            font-size: 15px; /* Fonte ligeiramente menor */
+        }
+        #btnConsultarHistorico:hover {
+            background-color: #333;
+        }
+
+        #historicoLista {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e6f7ff; /* Fundo azul claro suave */
+            border: 1px solid #b3e0ff;
+            border-radius: 4px;
+            font-size: 14px;
+            display: none; /* Inicia oculto */
+        }
+        #historicoLista ul {
+            list-style: none; /* Remove bolinhas */
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+        #historicoLista li {
+            padding: 3px 0;
+            border-bottom: 1px dashed #cccccc;
+        }
+        #historicoLista li:last-child {
+            border-bottom: none;
+        }
+        #historicoLista strong {
+            color: var(--azul-marinho);
+        }
+
         /* Media Queries */
         @media (max-width: 576px) {
             .container { padding: 20px; }
@@ -344,7 +381,14 @@
                 <label for="nome">Nome:</label>
                 <input type="text" id="nome" name="nome" readonly required>
             </div>
-
+            
+            <div class="form-group" id="historicoContainer">
+                <button type="button" id="btnConsultarHistorico" class="button" style="background-color: #5a5a5a; font-weight: 500; padding: 10px; font-size: 15px;">
+                    Consultar Minhas Folgas para este Mês
+                </button>
+                <div id="historicoLista" style="margin-top: 10px;">
+                    </div>
+            </div>
             <fieldset>
                 <legend>Tipo de Folga<span class="required-star">*</span>:</legend>
                 <div class="radio-group-buttons">
@@ -434,7 +478,7 @@
                 setProgress(40);
                 matriculaInput.disabled = false; 
                 matriculaInput.placeholder = "Ex: 12345 ou 100012345";
-                checkMatricula(); // Para atualizar o estado inicial do campo
+                // Checagem inicial removida para evitar erro vazio
             }).catch(()=>{
                 document.getElementById("matriculaError").textContent="Erro ao carregar lista de funcionários.";
                 showPersistentMessage("⚠️ Erro grave ao carregar dados de funcionários. Tente recarregar a página.", "error");
@@ -443,67 +487,88 @@
             });
         }
 
-       function checkMatricula() {
-    const m = document.getElementById("matricula");
-    const n = document.getElementById("nome");
-    const e = document.getElementById("matriculaError");
-    
-    // --- 🎯 CORREÇÃO 1: Trata campo vazio primeiro ---
-    // Se o campo estiver vazio, limpa tudo e não exibe erro.
-    if (!m.value.trim()) {
-        n.value = "";
-        e.textContent = ""; 
-        m.classList.remove("is-valid", "is-invalid");
-        return; // Sai da função
-    }
-    // ------------------------------------------------
+        function checkMatricula() {
+            const m = document.getElementById("matricula");
+            const n = document.getElementById("nome");
+            const e = document.getElementById("matriculaError");
+            
+            // --- CORREÇÃO: Trata campo vazio primeiro ---
+            if (!m.value.trim()) {
+                n.value = "";
+                e.textContent = ""; 
+                m.classList.remove("is-valid", "is-invalid");
+                return; 
+            }
+            // ------------------------------------------------
 
-    const standardized = standardizeMatricula(m.value);
-    
-    // --- 🎯 CORREÇÃO 2: Padroniza APENAS se houver valor ---
-    m.value = standardized;
-    // ------------------------------------------------
+            const standardized = standardizeMatricula(m.value);
+            
+            // --- CORREÇÃO: Padroniza APENAS se houver valor ---
+            m.value = standardized;
+            // ------------------------------------------------
 
-    m.classList.remove("is-valid", "is-invalid");
+            m.classList.remove("is-valid", "is-invalid");
 
-    if(window.employeeList[standardized]) { 
-        n.value = window.employeeList[standardized]; 
-        e.textContent = ""; 
-        m.classList.add("is-valid"); 
-    }
-    else { 
-        n.value = ""; 
-        // --- A mensagem de erro agora só aparece se houver valor (corrigido no if inicial)
-        e.textContent = "Matrícula não encontrada!"; 
-        m.classList.add("is-invalid"); 
-    }
-}
+            if(window.employeeList[standardized]) { 
+                n.value = window.employeeList[standardized]; 
+                e.textContent = ""; 
+                m.classList.add("is-valid"); 
+            }
+            else { 
+                n.value = ""; 
+                e.textContent = "Matrícula não encontrada!"; 
+                m.classList.add("is-invalid"); 
+            }
+        }
 
-// --- 🎯 CORREÇÃO 3: Remover chamada imediata do loadEmployeeList ---
-// No loadEmployeeList, vamos remover a chamada final para checkMatricula()
+        // 🎯 NOVA FUNÇÃO DE CONSULTA DE HISTÓRICO
+        async function consultarHistorico() {
+            const matriculaInput = document.getElementById("matricula");
+            const historicoListaDiv = document.getElementById("historicoLista");
+            const btn = document.getElementById("btnConsultarHistorico");
+            const matricula = matriculaInput.value;
+            const nomeValue = document.getElementById("nome").value.trim();
 
-function loadEmployeeList() {
-    setProgress(20);
-    const matriculaInput = document.getElementById("matricula");
-    matriculaInput.disabled = true; 
-    matriculaInput.placeholder = "Carregando lista de funcionários...";
+            if (!matricula || nomeValue === "") {
+                historicoListaDiv.style.display = 'block';
+                historicoListaDiv.innerHTML = '<p style="color:var(--erro); margin:0;">⚠️ Por favor, preencha e valide sua **Matrícula** primeiro.</p>';
+                return;
+            }
 
-    fetch(SCRIPT_URL+"?action=lista")
-    .then(r => r.json())
-    .then(data => {
-        if(data.error) throw new Error(data.error);
-        window.employeeList = data;
-        setProgress(40);
-        matriculaInput.disabled = false; 
-        matriculaInput.placeholder = "Ex: 12345 ou 100012345";
-        // REMOVER: checkMatricula(); 
-    }).catch(()=>{
-        document.getElementById("matriculaError").textContent="Erro ao carregar lista de funcionários.";
-        showPersistentMessage("⚠️ Erro grave ao carregar dados de funcionários. Tente recarregar a página.", "error");
-        initialLoadingDiv.style.display = "none";
-        formDiv.style.display = "none";
-    });
-}
+            btn.disabled = true;
+            btn.textContent = "Carregando...";
+            historicoListaDiv.style.display = 'block';
+            historicoListaDiv.innerHTML = '<p style="text-align:center; margin:0; color: var(--azul-marinho);">Buscando dados...</p>';
+
+            try {
+                // Se for usar a estrutura multibatalhão, substitua SCRIPT_URL por getCurrentScriptUrl() aqui.
+                const url = `${SCRIPT_URL}?action=historico&matricula=${matricula}`; 
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                let html = '';
+                if (data.historico && data.historico.length > 0) {
+                    html += `<strong>Folgas Solicitadas para o período (${data.periodo || 'Mês Atual'}):</strong><ul>`;
+                    data.historico.forEach(item => {
+                        html += `<li>📅 ${item.data} - **${item.tipo}**</li>`;
+                    });
+                    html += '</ul>';
+                } else {
+                    html = '<p style="margin:0;">🎉 Nenhuma folga encontrada para você neste período.</p>';
+                }
+                historicoListaDiv.innerHTML = html;
+
+            } catch (e) {
+                console.error("Erro ao consultar histórico:", e);
+                historicoListaDiv.innerHTML = '<p style="color:var(--erro); margin:0;">❌ Falha ao carregar histórico. Tente novamente.</p>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Consultar Minhas Folgas para este Mês";
+            }
+        }
+        // 🎯 FIM NOVA FUNÇÃO DE CONSULTA DE HISTÓRICO
+
         function setDateLimits() {
             const dateInput = document.getElementById("data");
             const messageDiv = document.getElementById("dateLimitMessage"); 
@@ -673,6 +738,8 @@ function loadEmployeeList() {
             document.getElementById("matricula").addEventListener("blur",checkMatricula);
             document.getElementById("email").addEventListener("input",updateEmailDatalist);
             document.getElementById("dersoForm").addEventListener("submit",submitForm);
+            // 🎯 CONEXÃO DO NOVO BOTÃO DE CONSULTA
+            document.getElementById("btnConsultarHistorico").addEventListener("click", consultarHistorico);
         });
     </script>
 </body>
