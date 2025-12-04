@@ -384,7 +384,7 @@
             
             <div class="form-group" id="historicoContainer">
                 <button type="button" id="btnConsultarHistorico" class="button" style="background-color: #5a5a5a; font-weight: 500; padding: 10px; font-size: 15px;">
-                    Consultar Minhas Folgas para este Mês
+                    Consultar Minhas Solicitações para este Mês
                 </button>
                 <div id="historicoLista" style="margin-top: 10px;">
                     </div>
@@ -549,7 +549,7 @@
 
                 let html = '';
                 if (data.historico && data.historico.length > 0) {
-                    html += `<strong>Folgas Solicitadas para o período (${data.periodo || 'Mês Atual'}):</strong><ul>`;
+                    html += `<strong> Solicitações para o período (${data.periodo || 'Mês Atual'}):</strong><ul>`;
                     data.historico.forEach(item => {
                         html += `<li>📅 ${item.data} - **${item.tipo}**</li>`;
                     });
@@ -564,7 +564,7 @@
                 historicoListaDiv.innerHTML = '<p style="color:var(--erro); margin:0;">❌ Falha ao carregar histórico. Tente novamente.</p>';
             } finally {
                 btn.disabled = false;
-                btn.textContent = "Consultar Minhas Folgas para este Mês";
+                btn.textContent = "Consultar Minhas Solicitações para este Mês";
             }
         }
         // 🎯 FIM NOVA FUNÇÃO DE CONSULTA DE HISTÓRICO
