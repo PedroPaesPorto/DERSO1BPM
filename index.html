@@ -1,4 +1,756 @@
-<script>
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Solicitação de Folga - DERSO</title>
+
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+
+
+    <style>
+
+        /* 1. PALETA DE CORES INSTITUCIONAL */
+
+        :root {
+
+            --azul-marinho: #0C3667; /* Azul Escuro / Azul Noturno (Forte) */
+
+            --dourado-amarelo: #FFD700; /* Amarelo Forte para destaque/progresso */
+
+            --azul-claro-hover: #1a5ca7; /* Para hover/botões */
+
+            --erro: #b00020; /* Vermelho mais profundo para alertas */
+
+            --sucesso: #388e3c; /* Verde mais escuro */
+
+            --cinza-fundo: #f4f7f9; /* Fundo mais suave */
+
+            --cinza-texto: #333333; /* Texto escuro com alto contraste */
+
+            --borda-campo: #aaa;
+
+        }
+
+
+
+        /* 2. TIPOGRAFIA E FUNDO */
+
+        body {
+
+            background-color: var(--cinza-fundo);
+
+            font-family: 'Roboto', Arial, sans-serif;
+
+            color: var(--cinza-texto);
+
+            margin: 0;
+
+            padding: 0;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            min-height: 100vh;
+
+        }
+
+
+
+        .container {
+
+            width: 95%;
+
+            max-width: 500px;
+
+            background-color: #ffffff; /* Fundo branco puro para efeito "papel" */
+
+            border-radius: 8px;
+
+            padding: 30px;
+
+            /* Sombra mais forte e borda sutil */
+
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+
+            border: 1px solid #ccc;
+
+            box-sizing: border-box;
+
+            display: flex;
+
+            flex-direction: column;
+
+            position: relative;
+
+        }
+
+
+
+        /* Barra de progresso (Agora DOURADA e sutil) */
+
+        #progressBarContainer {
+
+            position: absolute;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 4px;
+
+            background-color: #e0e0e0;
+
+            border-radius: 8px 8px 0 0;
+
+            overflow: hidden;
+
+        }
+
+
+
+        #progressBar {
+
+            width: 0%;
+
+            height: 100%;
+
+            background-color: var(--dourado-amarelo); /* Dourado para destaque */
+
+            transition: width 0.4s ease;
+
+        }
+
+
+
+        /* Logos */
+
+        .logos {
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+
+        .logos img {
+
+            height: 70px;
+
+            object-fit: contain;
+
+        }
+
+
+
+        /* 3. ESTILO DO TÍTULO COM AUTORIDADE */
+
+        h2 {
+
+            font-family: 'Merriweather', serif;
+
+            text-align: center;
+
+            color: var(--azul-marinho);
+
+            font-size: 28px;
+
+            font-weight: 700;
+
+            margin-bottom: 10px;
+
+            line-height: 1.2;
+
+            letter-spacing: -0.5px;
+
+            /* Linha divisória de destaque DOURADA */
+
+            border-bottom: 2px solid var(--dourado-amarelo);
+
+            padding-bottom: 5px;
+
+        }
+
+
+
+        .subtitle {
+
+            text-align: center;
+
+            color: var(--cinza-texto);
+
+            font-size: 16px;
+
+            margin-bottom: 25px;
+
+        }
+
+
+
+        .form-group, fieldset {
+
+            margin-bottom: 20px;
+
+            width: 100%;
+
+            border: none;
+
+            padding: 0;
+
+        }
+
+
+
+        label, legend {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: var(--cinza-texto);
+
+            font-weight: 500;
+
+            font-size: 15px;
+
+        }
+
+
+
+        /* 4. ESTILO DOS CAMPOS (Mais formais) */
+
+        .form-group input:not([type="radio"]),
+
+        .form-group select {
+
+            width: 100%;
+
+            padding: 12px 15px;
+
+            font-size: 15px;
+
+            border: 1px solid var(--borda-campo);
+
+            border-radius: 4px; /* Menos arredondado */
+
+            box-sizing: border-box;
+
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+        }
+
+
+
+        .form-group input:not([type="radio"]):focus,
+
+        .form-group select:focus {
+
+            border-color: var(--azul-claro-hover);
+
+            outline: none;
+
+            /* Foco mais discreto */
+
+            box-shadow: 0 0 0 2px rgba(12, 54, 103, 0.2);
+
+        }
+
+
+
+        input[readonly] {
+
+            background-color: #e9ecef;
+
+            cursor: not-allowed;
+
+        }
+
+
+
+        /* Estilo para os botões de alternância (Toggle Buttons) */
+
+        .radio-group-buttons {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 8px; /* Menor gap */
+
+            margin-top: 10px;
+
+        }
+
+
+
+        .radio-group-buttons input[type="radio"] {
+
+            display: none;
+
+        }
+
+
+
+        .radio-group-buttons label {
+
+            padding: 8px 10px; /* Padding menor */
+
+            border: 1px solid #ccc;
+
+            border-radius: 4px;
+
+            cursor: pointer;
+
+            font-size: 13px; /* Fonte menor */
+
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+
+            user-select: none;
+
+            text-transform: uppercase;
+
+            font-weight: 500;
+
+        }
+
+
+
+        .radio-group-buttons input[type="radio"]:checked + label {
+
+            /* Cor de Seleção: Azul Marinho com texto DOURADO */
+
+            background-color: var(--azul-marinho);
+
+            color: var(--dourado-amarelo);
+
+            border-color: var(--azul-marinho);
+
+            font-weight: 700;
+
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+        }
+
+
+
+        .radio-group-buttons label:hover {
+
+            background-color: #e0e0e0;
+
+            border-color: var(--azul-claro-hover);
+
+        }
+
+
+
+        /* Feedback visual para campos */
+
+        .form-group input.is-valid {
+
+            border-color: var(--sucesso) !important;
+
+            box-shadow: 0 0 0 3px rgba(56, 142, 60, 0.2) !important;
+
+        }
+
+
+
+        .form-group input.is-invalid {
+
+            border-color: var(--erro) !important;
+
+            box-shadow: 0 0 0 3px rgba(176, 0, 32, 0.2) !important;
+
+        }
+
+
+
+        /* 5. ESTILO DO BOTÃO DE AÇÃO */
+
+        .button {
+
+            background-color: var(--azul-claro-hover);
+
+            color: #fff;
+
+            border: none;
+
+            cursor: pointer;
+
+            padding: 14px 20px;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            border-radius: 4px;
+
+            transition: background-color 0.3s ease, transform 0.2s ease;
+
+            display: block;
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            text-transform: uppercase;
+
+        }
+
+
+
+        .button:hover {
+
+            background-color: var(--azul-marinho); /* Azul Marinho no hover */
+
+            transform: translateY(-1px);
+
+        }
+
+
+
+        .button:active {
+
+            transform: translateY(0);
+
+        }
+
+
+
+        /* 6. ESTILO DAS MENSAGENS DE ERRO/STATUS (Mais proeminentes) */
+
+        .error {
+
+            color: var(--erro);
+
+            margin-top: 5px;
+
+            font-size: 13px;
+
+            font-weight: 600; /* Mais negrito */
+
+            padding-left: 5px;
+
+        }
+
+
+
+        .info-message {
+
+            text-align: center;
+
+            border-radius: 4px;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            line-height: 1.4;
+
+            display: none;
+
+            margin-bottom: 25px;
+
+            padding: 12px 15px;
+
+            border-left: 5px solid; /* Adiciona barra lateral de destaque */
+
+        }
+
+
+
+        .info-message.success {
+
+            background-color: #e8f5e9; /* Fundo verde claro */
+
+            color: var(--sucesso);
+
+            border-left-color: var(--sucesso);
+
+        }
+
+
+
+        .info-message.error {
+
+            background-color: #fce4ec; /* Fundo vermelho claro */
+
+            color: var(--erro);
+
+            border-left-color: var(--erro);
+
+        }
+
+
+
+        .footer {
+
+            text-align: center;
+
+            margin-top: 25px;
+
+            font-size: 12px;
+
+            color: #777;
+
+        }
+
+
+
+        /* 7. LOADING OVERLAY (para submissão) */
+
+        #loadingOverlay {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            background-color: rgba(255, 255, 255, 0.9); /* Quase opaco */
+
+            display: none;
+
+            justify-content: center;
+
+            align-items: center;
+
+            z-index: 1000;
+
+            font-size: 18px;
+
+            color: var(--azul-marinho);
+
+            flex-direction: column;
+
+            text-align: center;
+
+        }
+
+
+
+        .spinner {
+
+            border: 4px solid rgba(12, 54, 103, 0.2);
+
+            border-top: 4px solid var(--azul-claro-hover); /* Cor de destaque no spinner */
+
+            border-radius: 50%;
+
+            width: 30px;
+
+            height: 30px;
+
+            animation: spin 1s linear infinite;
+
+            margin-top: 15px;
+
+        }
+
+        @keyframes spin {
+
+            0% { transform: rotate(0deg); }
+
+            100% { transform: rotate(360deg); }
+
+        }
+
+
+
+        /* Media Queries */
+
+        @media (max-width: 576px) {
+
+            .container { padding: 20px; }
+
+            h2 { font-size: 24px; }
+
+            .subtitle { font-size: 14px; }
+
+            .form-group input:not([type="radio"]), .form-group select { font-size: 14px; }
+
+            .button { font-size: 15px; padding: 12px 15px; }
+
+            .radio-group-buttons { justify-content: flex-start; } /* Deixa as opções à esquerda no móvel */
+
+            .logos img { height: 50px; }
+
+        }
+
+
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="loadingOverlay">
+
+        <p>Enviando solicitação. Aguarde...</p>
+
+        <div class="spinner"></div>
+
+    </div>
+
+
+
+    <div class="container" id="formulario">
+
+        <div id="progressBarContainer"><div id="progressBar"></div></div>
+
+        
+
+        <div class="logos">
+
+            <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
+
+            <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1º BPM">
+
+        </div>
+
+
+
+        <h2>DERSO 1º BPM</h2>
+
+        <p class="subtitle">Formulário de Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO </p>
+
+
+
+        <div id="prazoMessage" class="info-message success" style="margin-bottom: 25px;"></div>
+
+
+
+        <div id="initialLoading" style="text-align: center; padding: 50px; color: var(--azul-marinho);">
+
+            <p>Carregando dados do sistema...</p>
+
+            <div class="spinner"></div>
+
+        </div>
+
+
+
+        <form id="dersoForm" style="display: none;">
+
+            <div class="form-group">
+
+                <label for="email">E-mail:</label>
+
+                <input type="email" id="email" name="email" list="emailProviders" required autofocus>
+
+                <datalist id="emailProviders"></datalist>
+
+            </div>
+
+
+
+            <div class="form-group">
+
+                <label for="matricula">Matrícula:</label>
+
+                <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
+
+                <div id="matriculaError" class="error"></div>
+
+            </div>
+
+
+
+            <div class="form-group">
+
+                <label for="nome">Nome:</label>
+
+                <input type="text" id="nome" name="nome" readonly required>
+
+            </div>
+
+
+
+            <fieldset>
+
+                <legend>Tipo de Folga<span class="required-star">*</span>:</legend>
+
+                <div class="radio-group-buttons">
+
+                    <input type="radio" id="folga24H" name="folga" value="24H" required><label for="folga24H">24H</label>
+
+                    <input type="radio" id="folga48H" name="folga" value="48H"><label for="folga48H">48H</label>
+
+                    <input type="radio" id="folga72H" name="folga" value="72H"><label for="folga72H">72H</label>
+
+                    <input type="radio" id="folga96H" name="folga" value="96H"><label for="folga96H">96H</label>
+
+                    <input type="radio" id="folgaLE" name="folga" value="FOLGA LE"><label for="folgaLE">FOLGA LE</label>
+
+                    <input type="radio" id="folga1" name="folga" value="1ª Folga"><label for="folga1">1ª FOLGA</label>
+
+                    <input type="radio" id="folga2" name="folga" value="2ª Folga"><label for="folga2">2ª FOLGA</label>
+
+                    <input type="radio" id="folgaExp" name="folga" value="Expediente"><label for="folgaExp">EXPEDIENTE</label>
+
+                </div>
+
+                <div id="duplicateError" class="error"></div>
+
+            </fieldset>
+
+
+
+            <div class="form-group">
+
+                <label for="data">Data:</label>
+
+                <input type="date" id="data" name="data" required>
+
+                <div id="dateLimitMessage" class="subtitle" style="margin-top: 5px; margin-bottom: 0; font-size: 13px; text-align: left;"></div>
+
+            </div>
+
+
+
+            <button type="submit" class="button">Enviar Solicitação</button>
+
+        </form>
+
+        
+
+        <div id="statusMessage" class="info-message"></div>
+
+
+
+        <div class="footer" id="footerText"></div>
+
+    </div>
+
+
+
+   <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwe2vseE23YEgIwPxOHiXlv3COUfJYVRsMSTYov0v78zSgDZtOeTCYx1J8GOzlzKhwDFg/exec";
         const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br"];
         window.employeeList = {};
@@ -285,3 +1037,7 @@
             document.getElementById("dersoForm").addEventListener("submit",submitForm);
         });
     </script>
+
+</body>
+
+</html>
