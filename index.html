@@ -572,17 +572,21 @@
 
                 initialLoadingDiv.style.display = "none";
                 
-                if(agora < abertura || agora > fechamento){
-                    // Período Fechado
-                    const msg = agora < abertura
-                        ? `⏳ **Abertura:** ${abertura.toLocaleString("pt-BR")}`
-                        : `⛔ **Encerrado:** ${fechamento.toLocaleString("pt-BR")}`;
-                    
-                    showPersistentMessage(msg, "error");
-                    formDiv.style.display = "flex"; 
-                } else {
-                    // Período Aberto
-                  const diffTime = fechamento.getTime() - agora.getTime();
+              if(agora < abertura || agora > fechamento){
+    // Período Fechado
+    const msg = agora < abertura
+        ? `⏳ **Abertura:** ${abertura.toLocaleString("pt-BR")}`
+        : `⛔ **Encerrado:** ${fechamento.toLocaleString("pt-BR")}`;
+    
+    showPersistentMessage(msg, "error");
+    // ✅ CORREÇÃO: Deve ser "none" quando FECHADO
+    formDiv.style.display = "none";
+} else {
+    // Período Aberto
+    // 🛑 ADICIONE ESTA LINHA: Torna o formulário visível
+    formDiv.style.display = "flex";
+
+    const diffTime = fechamento.getTime() - agora.getTime();
 
 let msg = "";
 if (diffTime < (1000 * 60 * 60 * 48)) { // Se faltar menos de 48 horas
