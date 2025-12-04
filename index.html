@@ -579,7 +579,7 @@
                         : `⛔ **Encerrado:** ${fechamento.toLocaleString("pt-BR")}`;
                     
                     showPersistentMessage(msg, "error");
-                    formDiv.style.display = "none"; 
+                    formDiv.style.display = "block"; 
                 } else {
                     // Período Aberto
                   const diffTime = fechamento.getTime() - agora.getTime();
