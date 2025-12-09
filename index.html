@@ -453,8 +453,32 @@
         document.getElementById('matricula').addEventListener('input', debouncedCheckMatricula);
         document.getElementById('email').addEventListener('input', updateEmailDatalist);
         document.getElementById('dersoForm').addEventListener('submit', submitForm);
-        document.getElementById('btnPreview').addEventListener('click', ()=>{
-            const m = document.getElementById('matricula').value; const n = document.getElementById('nome').value; const email = document.getElementById('email').value; const data = document.getElementById('data').value; const folga = document.querySelector('#folgaGroup [aria-checked="true"]');
+        document.getElementById('btnPreview').addEventListener('click', async ()=>{
+    const matricula = document.getElementById('matricula').value.trim();
+    if(!matricula){
+        showMessage("Digite a matrícula para visualizar o resumo.", "error");
+        return;
+    }
+
+    try {
+        const resp = await fetch(`https://script.google.com/macros/s/AKfycbxXXXXXXXXXXXXXXX/exec?matricula=${encodeURIComponent(matricula)}&action=historico`);
+        const dados = await resp.json();
+
+        if(!dados || dados.length === 0){
+            showMessage("Nenhuma solicitação encontrada para essa matrícula.", "info");
+            return;
+        }
+
+        showSummaryModal({
+            matricula,
+            historico: dados
+        });
+
+    } catch(e){
+        console.error(e);
+        showMessage("Erro ao buscar informações. Tente novamente.", "error");
+    }
+});
             if(!m || !n || !data || !folga){ showMessage('Preencha matrícula, nome, data e tipo de folga para visualizar.','error'); return; }
             showSummaryModal({matricula:m,nome:n,email, data:formatBR(data), folga:folga.dataset.value});
         });
