@@ -13,10 +13,13 @@
             --dourado:#C9A400; /* escurecido para contraste */
             --azul-hover:#1a5ca7;
             --erro:#b00020;
+            --alerta-prazo:#D36400; /* Laranja para prazo apertado */
             --sucesso:#388e3c;
             --cinza-fundo:#f4f7f9;
             --cinza-texto:#222;
             --borda:#bdbdbd;
+            --padding-md: 12px;
+            --font-size-sm: 13px;
         }
         *{box-sizing:border-box}
         body{margin:0;font-family:'Roboto',Arial,Helvetica,sans-serif;background:var(--cinza-fundo);color:var(--cinza-texto);display:flex;justify-content:center;align-items:flex-start;padding:24px}
@@ -29,36 +32,55 @@
         h1{font-family:'Merriweather',serif;color:var(--azul-marinho);font-size:20px;margin:0}
         .subtitle{font-size:14px;color:#444;margin-top:6px}
         form{margin-top:14px}
-        fieldset{border:1px solid var(--borda);padding:12px;border-radius:8px;margin-bottom:16px}
+        fieldset{border:1px solid var(--borda);padding:var(--padding-md);border-radius:8px;margin-bottom:16px}
         legend{font-weight:600;padding:0 6px}
         .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        label{display:block;font-size:13px;margin-bottom:6px}
+        label{display:block;font-size:var(--font-size-sm);margin-bottom:6px}
         input[type=text],input[type=email],input[type=date],select{width:100%;padding:10px;border:1px solid var(--borda);border-radius:6px;font-size:14px}
         input[readonly]{background:#f1f3f5}
         .small{font-size:12px;color:#666}
         .radio-group-buttons{display:flex;flex-wrap:wrap;gap:8px}
-        .radio-button{padding:8px 10px;border:1px solid var(--borda);border-radius:6px;cursor:pointer;font-weight:600;font-size:13px}
+        .radio-button{padding:8px 10px;border:1px solid var(--borda);border-radius:6px;cursor:pointer;font-weight:600;font-size:var(--font-size-sm)}
         .radio-button[aria-checked="true"]{background:var(--azul-marinho);color:var(--dourado);border-color:var(--azul-marinho)}
-        .error{color:var(--erro);font-size:13px;margin-top:6px}
+        .error{color:var(--erro);font-size:var(--font-size-sm);margin-top:6px}
         .info-message{display:none;padding:12px;border-left:4px solid;border-radius:6px;margin-bottom:12px}
         .info-message.success{background:#e8f5e9;color:var(--sucesso);border-left-color:var(--sucesso)}
         .info-message.error{background:#fff0f2;color:var(--erro);border-left-color:var(--erro)}
+        .info-message.warning{background:#fff8e1;color:var(--alerta-prazo);border-left-color:var(--alerta-prazo)}
         .actions{display:flex;gap:10px}
-        .button{flex:1;padding:12px 14px;border-radius:8px;border:none;background:var(--azul-hover);color:#fff;font-weight:700;cursor:pointer;text-transform:uppercase}
+        .button{flex:1;padding:12px 14px;border-radius:8px;border:none;background:var(--azul-hover);color:#fff;font-weight:700;cursor:pointer;text-transform:uppercase;transition:background .2s}
         .button.secondary{background:#fff;border:1px solid var(--borda);color:var(--cinza-texto);text-transform:none}
+        .button:hover:not(:disabled){background:var(--azul-marinho)}
+        .button:disabled{opacity:.6;cursor:not-allowed}
+        /* Spinner padrão */
+        .spinner-base{width:30px;height:30px;border-radius:50%;border:4px solid rgba(0,0,0,.08);border-top:4px solid var(--azul-hover);animation:spin 1s linear infinite}
         #loadingOverlay{position:fixed;top:0;left:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.85);z-index:9999}
-        .spinner{width:30px;height:30px;border-radius:50%;border:4px solid rgba(0,0,0,.08);border-top:4px solid var(--azul-hover);animation:spin 1s linear infinite}
+        .spinner-lg{width:36px;height:36px;border-width:5px}
         @keyframes spin{to{transform:rotate(360deg)}}
         .field-with-spinner{position:relative}
-        .field-with-spinner .mini-spinner{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;border:3px solid rgba(0,0,0,.08);border-top:3px solid var(--azul-hover);animation:spin .8s linear infinite;display:none}
+        .mini-spinner{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;border:3px solid rgba(0,0,0,.08);border-top:3px solid var(--azul-hover);animation:spin .8s linear infinite;display:none}
         .is-loading .mini-spinner{display:block}
         .footer{font-size:12px;color:#666;text-align:center;margin-top:8px}
+        
+        /* Estilos do Modal */
+        .modal-base{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center;z-index:9998}
+        .modal-content{background:#fff;padding:18px;border-radius:10px;max-width:520px;width:92%;box-shadow:0 5px 15px rgba(0,0,0,.3)}
+        .modal-title{margin:0 0 8px 0;color:var(--azul-marinho)}
+        .modal-body{font-size:14px;color:#333;margin-bottom:12px}
+        .history-list{list-style:none;padding:0;margin-top:10px}
+        .history-list li{margin-bottom:5px;padding:5px;border-bottom:1px dashed #eee;font-size:var(--font-size-sm)}
+
         @media(max-width:640px){.grid{grid-template-columns:1fr}.logos img{height:44px}.container{padding:18px}}
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay" role="status" aria-live="polite"><div style="text-align:center"><div class="spinner"></div><div style="margin-top:10px;color:var(--azul-marinho)">Enviando...</div></div></div>
+<div id="loadingOverlay" role="status" aria-live="polite">
+    <div style="text-align:center">
+        <div class="spinner-base"></div>
+        <div style="margin-top:10px;color:var(--azul-marinho)">Enviando...</div>
+    </div>
+</div>
 
 <div class="container" id="app">
     <div id="progressBarContainer"><div id="progressBar" aria-hidden="true"></div></div>
@@ -77,7 +99,7 @@
     <div id="prazoMessage" class="info-message" role="status" aria-live="polite"></div>
 
     <div id="initialLoading" style="text-align:center;padding:26px;color:var(--azul-marinho)">
-        <div class="spinner" style="width:36px;height:36px;border-width:5px"></div>
+        <div class="spinner-base spinner-lg"></div>
         <div style="margin-top:10px">Carregando dados do sistema...</div>
     </div>
 
@@ -105,8 +127,9 @@
                 </div>
                 <div>
                     <label for="data">Data</label>
-                    <input type="date" id="data" name="data" required aria-describedby="dateHelp">
+                    <input type="date" id="data" name="data" required aria-describedby="dateHelp dateError">
                     <div id="dateHelp" class="small"></div>
+                    <div id="dateError" class="small error" aria-live="polite"></div>
                 </div>
             </div>
         </fieldset>
@@ -114,13 +137,12 @@
         <fieldset role="radiogroup" aria-label="Tipo de Folga">
             <legend>Tipo de Folga</legend>
             <div class="radio-group-buttons" id="folgaGroup">
-                <!-- Buttons will be generated by JS for accessibility -->
-            </div>
+                </div>
             <div id="duplicateError" class="error" aria-live="polite"></div>
         </fieldset>
 
         <div style="display:flex;gap:10px;align-items:center;margin-top:8px;margin-bottom:6px">
-            <button type="button" class="button secondary" id="btnPreview">Visualizar resumo</button>
+            <button type="button" class="button secondary" id="btnHistory">Ver Histórico</button>
             <button type="submit" class="button" id="btnSubmit">Enviar Solicitação</button>
         </div>
 
@@ -131,11 +153,10 @@
     <div class="footer" id="footerText"></div>
 </div>
 
-<!-- Modal de confirmação simples -->
-<div id="confirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center;z-index:9998">
-    <div style="background:#fff;padding:18px;border-radius:10px;max-width:520px;width:92%">
-        <h3 style="margin:0 0 8px 0;color:var(--azul-marinho)">Confirme sua Solicitação</h3>
-        <div id="summaryBox" style="font-size:14px;color:#333;margin-bottom:12px"></div>
+<div id="confirmModal" class="modal-base" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal-content">
+        <h3 id="confirmTitle" class="modal-title">Confirme sua Solicitação</h3>
+        <div id="summaryBox" class="modal-body"></div>
         <div style="display:flex;gap:8px">
             <button id="confirmSend" class="button">Confirmar e Enviar</button>
             <button id="cancelSend" class="button secondary">Voltar</button>
@@ -143,21 +164,45 @@
     </div>
 </div>
 
+<div id="historyModal" class="modal-base" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+    <div class="modal-content">
+        <h3 id="historyTitle" class="modal-title">Histórico de Solicitações</h3>
+        <div id="historyBox" class="modal-body"></div>
+        <div style="display:flex;justify-content:flex-end">
+            <button id="closeHistory" class="button secondary">Fechar</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwe2vseE23YEgIwPxOHiXlv3COUfJYVRsMSTYov0v78zSgDZtOeTCYx1J8GOzlzKhwDFg/exec";
-    const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"]; // incluiu domínio institucional
+    // URL DE EXEMPLO - SUBSTITUA PELA SUA URL REAL DO Google Apps Script
+    // É essencial que seu script suporte as actions 'lista', 'lookup', 'check_duplicidade', 'datas', 'historico' e o envio POST.
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwe2vseE23YEgIwPxOHiXlv3COUfJYVRsMSTYov0v78zSgDZtOeTCYx1J8GOzlzKhwDFg/exec"; 
+    const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"];
 
-    // estado global simples
+    // estado global
     window.employeeList = {};
+    const DERSO = {
+        minDate: null,
+        maxDate: null,
+        emailInput: document.getElementById('email'),
+        matriculaInput: document.getElementById('matricula'),
+        nomeInput: document.getElementById('nome'),
+        dataInput: document.getElementById('data'),
+        dateErrorEl: document.getElementById('dateError'),
+        folgaGroup: document.getElementById('folgaGroup'),
+        duplicateErrorEl: document.getElementById('duplicateError'),
+        statusMessageEl: document.getElementById('statusMessage'),
+        prazoMessageEl: document.getElementById('prazoMessage'),
+        loadingOverlay: document.getElementById('loadingOverlay'),
+        matBlock: document.getElementById('matBlock'),
+        formEl: document.getElementById('dersoForm'),
+        matErrorEl: document.getElementById('matError'),
+        btnSubmit: document.getElementById('btnSubmit'),
+        progressBar: document.getElementById('progressBar')
+    };
 
-    const progressBar = document.getElementById('progressBar');
-    const initialLoading = document.getElementById('initialLoading');
-    const formEl = document.getElementById('dersoForm');
-    const statusMessage = document.getElementById('statusMessage');
-    const prazoMessage = document.getElementById('prazoMessage');
-    const matSpinner = document.getElementById('matSpinner');
-
-    function setProgress(p){ progressBar.style.width = p + '%'; }
+    function setProgress(p){ DERSO.progressBar.style.width = p + '%'; }
 
     // fetch com timeout e retries
     async function fetchWithTimeout(url, opts = {}, timeout = 8000){
@@ -173,30 +218,29 @@
     // debounce helper
     function debounce(fn, wait){ let t; return function(...a){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,a), wait); }; }
 
-    function setDateLimits(){
-        const dateInput = document.getElementById('data');
+    function setDateLimits(abertura, fechamento){
+        const dateInput = DERSO.dataInput;
         const dateHelp = document.getElementById('dateHelp');
-        const today = new Date();
-        const start = new Date(today.getFullYear(), today.getMonth()+1, 1);
-        const end = new Date(today.getFullYear(), today.getMonth()+2, 0);
-        dateInput.min = start.toISOString().split('T')[0];
-        dateInput.max = end.toISOString().split('T')[0];
-        dateHelp.textContent = `Período permitido: ${start.toLocaleDateString('pt-BR')} — ${end.toLocaleDateString('pt-BR')}`;
+        DERSO.minDate = abertura ? new Date(abertura) : new Date(new Date().getFullYear(), new Date().getMonth()+1, 1);
+        DERSO.maxDate = fechamento ? new Date(fechamento) : new Date(new Date().getFullYear(), new Date().getMonth()+2, 0);
+
+        dateInput.min = DERSO.minDate.toISOString().split('T')[0];
+        dateInput.max = DERSO.maxDate.toISOString().split('T')[0];
+        dateHelp.textContent = `Período permitido: ${DERSO.minDate.toLocaleDateString('pt-BR')} — ${DERSO.maxDate.toLocaleDateString('pt-BR')}`;
     }
 
     function standardizeMatricula(m){
         if(!m) return '';
-        let num = m.replace(/\D/g,'').slice(-9); // pega até 9 digitos finais
+        let num = m.replace(/\D/g,'').slice(-9);
         if(!num) return '';
-        return num.startsWith('1000') ? num : '1000' + num.slice(-5); // tenta formar 9 dígitos
+        return num.startsWith('1000') ? num : '1000' + num.slice(-5);
     }
 
-    // popula botões de folga dinamicamente (acessível)
     const folgas = ['24H','48H','72H','96H','FOLGA LE','1ª FOLGA','2ª FOLGA','EXPEDIENTE'];
     function renderFolgas(){
-        const g = document.getElementById('folgaGroup');
+        const g = DERSO.folgaGroup;
         g.innerHTML = '';
-        folgas.forEach((f, i)=>{
+        folgas.forEach((f)=>{
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'radio-button';
@@ -212,15 +256,14 @@
         });
     }
 
-    // atualizar datalist de e-mails
     function updateEmailDatalist(){
-        const input = document.getElementById('email');
+        const input = DERSO.emailInput;
         const dl = document.getElementById('emailProviders');
         const val = input.value || '';
         const idx = val.indexOf('@');
         dl.innerHTML = '';
-        let username = val;
-        if(idx >= 0) username = val.slice(0, idx+1);
+        let username = (idx >= 0) ? val.slice(0, idx+1) : val;
+        
         const fragment = document.createDocumentFragment();
         emailProviders.forEach(d => {
             if(!val || idx === -1 || d.startsWith(val.slice(idx+1).toLowerCase())){
@@ -232,55 +275,51 @@
         dl.appendChild(fragment);
     }
 
-    // Carrega lista de funcionários
     async function loadEmployeeList(){
         setProgress(10);
-        const mat = document.getElementById('matricula');
-        mat.disabled = true;
-        document.getElementById('matError').textContent = '';
+        DERSO.matriculaInput.disabled = true;
+        DERSO.matErrorEl.textContent = '';
         try{
             const res = await fetchWithTimeout(SCRIPT_URL+'?action=lista', {}, 9000);
             const data = await res.json();
             if(data.error) throw new Error(data.error);
             window.employeeList = data;
-            mat.disabled = false;
+            DERSO.matriculaInput.disabled = false;
             setProgress(30);
         }catch(e){
-            document.getElementById('matError').textContent = 'Erro ao carregar lista de funcionários.';
+            DERSO.matErrorEl.textContent = 'Erro ao carregar lista de funcionários.';
             showPersistentMessage('⚠️ Erro ao carregar dados. Recarregue a página ou contate o suporte.','error');
-            initialLoading.style.display = 'none';
-            formEl.style.display = 'none';
+            document.getElementById('initialLoading').style.display = 'none';
+            DERSO.formEl.style.display = 'none';
             console.error(e);
         }
     }
 
-    // verifica matrícula (não chama se vazio)
     async function checkMatricula(){
-        const m = document.getElementById('matricula');
-        const n = document.getElementById('nome');
-        const e = document.getElementById('matError');
+        const m = DERSO.matriculaInput;
+        const n = DERSO.nomeInput;
+        const e = DERSO.matErrorEl;
         e.textContent = '';
         n.value = '';
+        m.classList.remove('is-invalid', 'is-valid');
+
         const raw = m.value.trim();
-        if(!raw) { m.classList.remove('is-invalid','is-valid'); return; }
+        if(!raw) { return; }
         const standardized = standardizeMatricula(raw);
         if(!standardized){ e.textContent = 'Matrícula inválida.'; m.classList.add('is-invalid'); return; }
         m.value = standardized;
 
-        // show spinner
-        document.getElementById('matBlock').classList.add('is-loading');
-        matSpinner.style.display = 'block';
+        DERSO.matBlock.classList.add('is-loading');
 
-        // Simples lookup local primeiro
+        // Lookup local
         if(window.employeeList && window.employeeList[standardized]){
             n.value = window.employeeList[standardized];
-            m.classList.remove('is-invalid'); m.classList.add('is-valid');
-            matSpinner.style.display = 'none';
-            document.getElementById('matBlock').classList.remove('is-loading');
+            m.classList.add('is-valid');
+            DERSO.matBlock.classList.remove('is-loading');
             return;
         }
 
-        // fallback: requisitar ao endpoint (caso exista)
+        // Fallback remoto
         try{
             const res = await fetchWithTimeout(SCRIPT_URL+`?action=lookup&matricula=${standardized}`,{},7000);
             const d = await res.json();
@@ -296,14 +335,12 @@
             e.textContent = 'Erro ao validar matrícula. Tente novamente.';
             m.classList.add('is-invalid');
         }finally{
-            matSpinner.style.display = 'none';
-            document.getElementById('matBlock').classList.remove('is-loading');
+            DERSO.matBlock.classList.remove('is-loading');
         }
     }
 
     const debouncedCheckMatricula = debounce(checkMatricula, 350);
 
-    // verifica duplicidade
     async function checkDuplicity(matricula, dataBR, folga){
         setProgress(70);
         try{
@@ -314,46 +351,66 @@
         }catch(e){
             console.error('Falha duplicidade',e);
             showMessage('⚠️ Não foi possível verificar duplicidade. Tentando prosseguir...','error');
-            return false; // deixa o envio prosseguir — servidor fará validação final
+            return false;
         }
     }
 
-    // form submit
-    async function submitForm(e){
-        e.preventDefault();
-        const btn = document.getElementById('btnSubmit');
-        const matriculaInput = document.getElementById('matricula');
-        const nomeVal = document.getElementById('nome').value.trim();
-        const dataVal = document.getElementById('data').value;
+    function validateForm(){
+        DERSO.matErrorEl.textContent = '';
+        DERSO.dateErrorEl.textContent = '';
+        DERSO.duplicateErrorEl.textContent = '';
+
+        const nomeVal = DERSO.nomeInput.value.trim();
+        const dataVal = DERSO.dataInput.value;
         const folgaBtn = document.querySelector('#folgaGroup [aria-checked="true"]');
-        const duplicateError = document.getElementById('duplicateError');
-        duplicateError.textContent = '';
+        const matriculaInvalid = DERSO.matriculaInput.classList.contains('is-invalid') || !DERSO.matriculaInput.value.trim();
 
-        if(!folgaBtn){ duplicateError.textContent = 'Selecione um tipo de folga.'; return; }
-        if(!nomeVal || matriculaInput.classList.contains('is-invalid')){ document.getElementById('matError').textContent = 'Verifique a matrícula.'; return; }
-        if(!dataVal){ document.getElementById('dateHelp').textContent = 'Escolha uma data válida.'; return; }
+        let valid = true;
 
-        // resumo e confirmação modal
-        const summary = {
-            matricula: matriculaInput.value,
-            nome: nomeVal,
-            email: document.getElementById('email').value,
-            data: formatBR(dataVal),
-            folga: folgaBtn.dataset.value
-        };
-        showSummaryModal(summary);
+        if(!folgaBtn){
+            DERSO.duplicateErrorEl.textContent = 'Selecione um tipo de folga.';
+            valid = false;
+        }
+        if(!nomeVal || matriculaInvalid){
+            DERSO.matErrorEl.textContent = 'Verifique a matrícula.';
+            valid = false;
+        }
+        if(!dataVal || new Date(dataVal) < DERSO.minDate || new Date(dataVal) > DERSO.maxDate){
+             DERSO.dateErrorEl.textContent = 'Escolha uma data válida dentro do período permitido.';
+             valid = false;
+        }
+
+        return valid;
     }
 
-    // envia depois de confirmado
+    async function submitForm(e){
+        e.preventDefault();
+        
+        if(!validateForm()) { return; }
+
+        const folgaBtn = document.querySelector('#folgaGroup [aria-checked="true"]');
+        
+        const summary = {
+            matricula: DERSO.matriculaInput.value,
+            nome: DERSO.nomeInput.value.trim(),
+            email: DERSO.emailInput.value.trim(),
+            data: formatBR(DERSO.dataInput.value),
+            folga: folgaBtn.dataset.value
+        };
+        showConfirmationModal(summary);
+    }
+
     async function confirmAndSend(summary){
+        DERSO.btnSubmit.disabled = true; // Previne duplo clique
+
         try{
             document.getElementById('confirmModal').style.display = 'none';
-            document.getElementById('loadingOverlay').style.display = 'flex';
+            DERSO.loadingOverlay.style.display = 'flex';
             setProgress(80);
+
             const isDup = await checkDuplicity(summary.matricula, summary.data, summary.folga);
             if(isDup){ showMessage(`⚠️ Solicitação DUPLICADA para ${summary.data} — ${summary.folga}`,'error'); return; }
 
-            // prepara envio
             const payload = new URLSearchParams();
             payload.set('matricula', summary.matricula);
             payload.set('nome', summary.nome);
@@ -363,12 +420,18 @@
 
             const res = await fetchWithTimeout(SCRIPT_URL, {method:'POST', body: payload}, 10000);
             const j = await res.json();
+            
             if(j && j.success){
                 showMessage('✅ Solicitação enviada com sucesso. Verifique seu e-mail.','success');
-                formEl.reset();
-                document.getElementById('nome').value = '';
-                // salvar último uso
-                try{ localStorage.setItem('derso_lastEmail', summary.email || ''); localStorage.setItem('derso_lastMat', summary.matricula); }catch(e){}
+                // Limpar apenas em caso de sucesso
+                DERSO.formEl.reset();
+                DERSO.nomeInput.value = '';
+                DERSO.matriculaInput.classList.remove('is-valid');
+                document.querySelector('#folgaGroup [aria-checked="true"]').setAttribute('aria-checked','false');
+                
+                // Salvar último uso
+                try{ localStorage.setItem('derso_lastEmail', summary.email || ''); }catch(e){}
+
             } else {
                 showMessage('⚠️ Erro ao enviar: '+(j.error || 'Tente novamente.'),'error');
             }
@@ -376,119 +439,176 @@
             console.error(e);
             showMessage('⚠️ Falha na conexão. Tente novamente.','error');
         }finally{
-            document.getElementById('loadingOverlay').style.display = 'none';
+            DERSO.loadingOverlay.style.display = 'none';
+            DERSO.btnSubmit.disabled = false;
             setProgress(100);
             setTimeout(()=>setProgress(0),1200);
         }
     }
 
-    // auxiliares
+    // Auxiliares
     function formatBR(iso){ if(!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
 
     function showMessage(msg,type='success'){
-        const d = statusMessage; d.className = 'info-message '+(type==='success'?'success':'error'); d.innerHTML = msg; d.style.display = 'block';
+        const d = DERSO.statusMessageEl; 
+        d.className = 'info-message '+(type==='success'?'success':'error'); 
+        d.innerHTML = msg; 
+        d.style.display = 'block';
         setTimeout(()=>{ d.style.display = 'none'; },6000);
     }
-    function showPersistentMessage(msg,type='success'){ prazoMessage.className = 'info-message '+(type==='success'?'success':'error'); prazoMessage.innerHTML = msg; prazoMessage.style.display = 'block'; }
 
-    // modal
-    function showSummaryModal(summary){
-        const box = document.getElementById('summaryBox');
-        box.innerHTML = `<div><strong>Nome:</strong> ${summary.nome}</div><div><strong>Matrícula:</strong> ${summary.matricula}</div><div><strong>Folga:</strong> ${summary.folga}</div><div><strong>Data:</strong> ${summary.data}</div><div style=\"margin-top:8px;font-size:13px;color:#666\">E-mail: ${summary.email||'---'}</div>`;
-        const modal = document.getElementById('confirmModal'); modal.style.display = 'flex';
-        document.getElementById('confirmSend').onclick = ()=>confirmAndSend(summary);
-        document.getElementById('cancelSend').onclick = ()=>modal.style.display = 'none';
+    function showPersistentMessage(msg,type='success'){ 
+        DERSO.prazoMessageEl.className = 'info-message '+(type); 
+        DERSO.prazoMessageEl.innerHTML = msg; 
+        DERSO.prazoMessageEl.style.display = 'block'; 
     }
 
-    // checa duplicidade e datas iniciais
+    // Modal de Confirmação (Envio)
+    function showConfirmationModal(summary){
+        const box = document.getElementById('summaryBox');
+        box.innerHTML = `<div><strong>Nome:</strong> ${summary.nome}</div><div><strong>Matrícula:</strong> ${summary.matricula}</div><div><strong>Folga:</strong> ${summary.folga}</div><div><strong>Data:</strong> ${summary.data}</div><div style="margin-top:8px;font-size:13px;color:#666">E-mail: ${summary.email||'---'}</div>`;
+        const modal = document.getElementById('confirmModal'); 
+        modal.style.display = 'flex';
+        document.getElementById('confirmSend').onclick = ()=>confirmAndSend(summary);
+        document.getElementById('cancelSend').onclick = ()=>modal.style.display = 'none';
+        document.getElementById('confirmSend').focus(); // Foco para acessibilidade
+    }
+
+    // Modal de Histórico
+    async function showHistoryModal(){
+        const matricula = DERSO.matriculaInput.value.trim();
+        if(!matricula || DERSO.matriculaInput.classList.contains('is-invalid')){
+            showMessage("Digite e valide a matrícula para ver o histórico.", "error");
+            return;
+        }
+
+        const modal = document.getElementById('historyModal');
+        const box = document.getElementById('historyBox');
+        
+        box.innerHTML = '<div style="text-align:center"><div class="spinner-base" style="width:20px;height:20px;border-width:3px"></div></div>';
+        modal.style.display = 'flex';
+
+        try {
+            const resp = await fetchWithTimeout(`${SCRIPT_URL}?matricula=${encodeURIComponent(matricula)}&action=historico`, {}, 8000);
+            const dados = await resp.json();
+
+            if(!dados || dados.error){
+                 box.innerHTML = `<p style="color:var(--erro)">Erro ao buscar histórico: ${dados.error || 'Falha na comunicação.'}</p>`;
+                 return;
+            }
+
+            let html = `<div>Histórico de solicitações para <strong>Matrícula ${matricula}</strong>:</div>`;
+
+            if(dados.length === 0){
+                html += `<p style="color:#666;font-style:italic;margin-top:10px">Nenhuma solicitação encontrada.</p>`;
+            } else {
+                html += `<ul class="history-list">`;
+                dados.slice(0, 10).forEach(item => { // Limitar a 10 itens
+                    const statusColor = item.Status === 'APROVADA' ? 'var(--sucesso)' : item.Status === 'RECUSADA' ? 'var(--erro)' : 'var(--alerta-prazo)';
+                    const statusText = item.Status === 'APROVADA' ? '✅ Aprovada' : item.Status === 'RECUSADA' ? '❌ Recusada' : '⏳ Aguardando';
+                    html += `<li>
+                                <strong>${item.Data}</strong> — ${item.Folga}
+                                (<span style="color:${statusColor}">${statusText}</span>)
+                            </li>`;
+                });
+                html += `</ul>`;
+                html += `<div class="small" style="margin-top:10px">Exibindo as últimas ${dados.length > 10 ? 10 : dados.length} solicitações.</div>`;
+            }
+
+            box.innerHTML = html;
+
+        } catch(e){
+            console.error('Erro ao buscar histórico:', e);
+            box.innerHTML = `<p style="color:var(--erro)">Erro de conexão ao buscar histórico.</p>`;
+        }
+        document.getElementById('closeHistory').focus();
+    }
+
     async function initializeForm(){
         setProgress(5);
         renderFolgas();
         updateEmailDatalist();
-        setDateLimits();
+        setDateLimits(); // Define limites padrão iniciais
         await loadEmployeeList();
         setProgress(40);
 
-        // verifica período aberto (datas fornecidas pelo script)
+        // Verifica período aberto (datas fornecidas pelo script)
         try{
             const res = await fetchWithTimeout(SCRIPT_URL+'?action=datas',{},7000);
             const d = await res.json();
+            
             if(d.error){ throw new Error(d.error); }
+            
             const now = new Date();
+            // As datas devem vir no formato ISO (e.g., "YYYY-MM-DDTHH:MM:SS")
             const abertura = new Date(d.abertura);
             const fechamento = new Date(d.fechamento);
-            initialLoading.style.display = 'none';
-            if(now < abertura){ showPersistentMessage(`⏳ Abertura em ${abertura.toLocaleString('pt-BR')}`,'error'); formEl.style.display = 'none'; }
-            else if(now > fechamento){ showPersistentMessage(`⛔ Encerrado em ${fechamento.toLocaleString('pt-BR')}`,'error'); formEl.style.display = 'none'; }
-            else{ // aberto
-                formEl.style.display = 'block';
-                const diffDays = Math.ceil((fechamento - now)/(1000*60*60*24));
-                showPersistentMessage(`🚨 Restam ${diffDays} dia(s) — fechamento: ${fechamento.toLocaleString('pt-BR')}`,'success');
+
+            setDateLimits(abertura, fechamento);
+
+            document.getElementById('initialLoading').style.display = 'none';
+            
+            let message = '';
+            let type = 'success';
+            
+            if(now < abertura){
+                message = `⏳ Abertura para solicitações em ${abertura.toLocaleString('pt-BR')}`;
+                type = 'error';
+                DERSO.formEl.style.display = 'none';
             }
+            else if(now > fechamento){
+                message = `⛔ Período de solicitações encerrado em ${fechamento.toLocaleString('pt-BR')}`;
+                type = 'error';
+                DERSO.formEl.style.display = 'none';
+            }
+            else{ // aberto
+                DERSO.formEl.style.display = 'block';
+                const diffMs = fechamento - now;
+                const diffDays = Math.ceil(diffMs/(1000*60*60*24));
+                const diffHours = Math.ceil(diffMs/(1000*60*60));
+
+                if(diffDays <= 3) type = 'warning'; // Alerta se faltar 3 dias ou menos
+
+                message = `🚨 **PRAZO:** Restam ${diffDays} dia(s) (aprox. ${diffHours}h) — fechamento: ${fechamento.toLocaleString('pt-BR')}`;
+            }
+            showPersistentMessage(message, type);
+
         }catch(err){
             console.warn(err);
             showPersistentMessage('⚠️ Falha ao obter prazo. Verifique a conexão.','error');
-            initialLoading.style.display = 'none';
-            formEl.style.display = 'none';
+            document.getElementById('initialLoading').style.display = 'none';
+            DERSO.formEl.style.display = 'none';
         }
 
-        // try to restore last used values
-        try{ const lastEmail = localStorage.getItem('derso_lastEmail'); if(lastEmail) document.getElementById('email').value = lastEmail; }catch(e){}
+        // Tenta restaurar último e-mail usado
+        try{ 
+            const lastEmail = localStorage.getItem('derso_lastEmail'); 
+            if(lastEmail) DERSO.emailInput.value = lastEmail; 
+        }catch(e){}
 
-        const now = new Date(); const mes = String(now.getMonth()+1).padStart(2,'0'); const ano = now.getFullYear();
+        const now = new Date(); 
+        const mes = String(now.getMonth()+1).padStart(2,'0'); 
+        const ano = now.getFullYear();
         document.getElementById('footerText').textContent = `Desenvolvido na 1ª Cia do 1º BPM — PVSA Pedro Porto — ${mes}/${ano}`;
         setProgress(60);
     }
 
-    // impede submit por Enter em inputs (exceto quando botão)
-    document.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter' && e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')){
-            e.preventDefault();
-        }
-    });
-
-    // listeners
+    // Listeners
     document.addEventListener('DOMContentLoaded', ()=>{
         initializeForm();
-        document.getElementById('matricula').addEventListener('input', debouncedCheckMatricula);
-        document.getElementById('email').addEventListener('input', updateEmailDatalist);
-        document.getElementById('dersoForm').addEventListener('submit', submitForm);
-        document.getElementById('btnPreview').addEventListener('click', async ()=>{
-    const matricula = document.getElementById('matricula').value.trim();
-    if(!matricula){
-        showMessage("Digite a matrícula para visualizar o resumo.", "error");
-        return;
-    }
+        DERSO.matriculaInput.addEventListener('input', debouncedCheckMatricula);
+        DERSO.emailInput.addEventListener('input', updateEmailDatalist);
+        DERSO.formEl.addEventListener('submit', submitForm);
+        document.getElementById('btnHistory').addEventListener('click', showHistoryModal);
+        document.getElementById('closeHistory').addEventListener('click', ()=>document.getElementById('historyModal').style.display = 'none');
 
-    try {
-        const resp = await fetch(`https://script.google.com/macros/s/AKfycbxXXXXXXXXXXXXXXX/exec?matricula=${encodeURIComponent(matricula)}&action=historico`);
-        const dados = await resp.json();
-
-        if(!dados || dados.length === 0){
-            showMessage("Nenhuma solicitação encontrada para essa matrícula.", "info");
-            return;
-        }
-
-        showSummaryModal({
-            matricula,
-            historico: dados
-        });
-
-    } catch(e){
-        console.error(e);
-        showMessage("Erro ao buscar informações. Tente novamente.", "error");
-    }
-});
-            if(!m || !n || !data || !folga){ showMessage('Preencha matrícula, nome, data e tipo de folga para visualizar.','error'); return; }
-            showSummaryModal({matricula:m,nome:n,email, data:formatBR(data), folga:folga.dataset.value});
+        // Impede submit por Enter em inputs
+        document.addEventListener('keydown', (e)=>{
+            if(e.key === 'Enter' && e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')){
+                e.preventDefault();
+            }
         });
     });
-
-    // proteção extra: evita múltiplos envios rápidos
-    (function disableDoubleClickOnSubmit(){
-        const btn = document.getElementById('btnSubmit');
-        btn.addEventListener('click', ()=>{ btn.disabled = true; setTimeout(()=>btn.disabled=false,4000); });
-    })();
 
 </script>
 </body>
