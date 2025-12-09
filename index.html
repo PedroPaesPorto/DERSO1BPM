@@ -175,9 +175,10 @@
 </div>
 
 <script>
-    // URL DE EXEMPLO - SUBSTITUA PELA SUA URL REAL DO Google Apps Script
-    // É essencial que seu script suporte as actions 'lista', 'lookup', 'check_duplicidade', 'datas', 'historico' e o envio POST.
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwttjSrhuOSHVmIJw9SVgAxr6FfBeGHbqb7YdnzN0fCV8zTTqFto9lsfytGFCEzYYjEmg/exec"; 
+    // ***********************************************
+    // AQUI ESTÁ A NOVA URL ATUALIZADA:
+    // ***********************************************
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwttjSrhuOSHVmIJw9SVgAxr6FfBeGHbqb7YdnzN0fCV8zTTFto9lsfytGFCEzYYjEmg/exec"; 
     const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"];
 
     // estado global
@@ -221,12 +222,18 @@
     function setDateLimits(abertura, fechamento){
         const dateInput = DERSO.dataInput;
         const dateHelp = document.getElementById('dateHelp');
-        DERSO.minDate = abertura ? new Date(abertura) : new Date(new Date().getFullYear(), new Date().getMonth()+1, 1);
-        DERSO.maxDate = fechamento ? new Date(fechamento) : new Date(new Date().getFullYear(), new Date().getMonth()+2, 0);
+        // Fallback de datas: primeiro dia do próximo mês
+        const today = new Date();
+        const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        
+        DERSO.minDate = abertura ? new Date(abertura) : nextMonth;
+        DERSO.maxDate = fechamento ? new Date(fechamento) : new Date(nextMonth.getFullYear(), nextMonth.getMonth()+1, 0); // Último dia do próximo mês
 
         dateInput.min = DERSO.minDate.toISOString().split('T')[0];
         dateInput.max = DERSO.maxDate.toISOString().split('T')[0];
-        dateHelp.textContent = `Período permitido: ${DERSO.minDate.toLocaleDateString('pt-BR')} — ${DERSO.maxDate.toLocaleDateString('pt-BR')}`;
+        
+        const formatter = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        dateHelp.textContent = `Período permitido: ${formatter.format(DERSO.minDate)} — ${formatter.format(DERSO.maxDate)}`;
     }
 
     function standardizeMatricula(m){
@@ -288,7 +295,7 @@
             setProgress(30);
         }catch(e){
             DERSO.matErrorEl.textContent = 'Erro ao carregar lista de funcionários.';
-            showPersistentMessage('⚠️ Erro ao carregar dados. Recarregue a página ou contate o suporte.','error');
+            showPersistentMessage('⚠️ Erro ao carregar dados do Efetivo. Recarregue a página ou contate o suporte.','error');
             document.getElementById('initialLoading').style.display = 'none';
             DERSO.formEl.style.display = 'none';
             console.error(e);
@@ -321,6 +328,7 @@
 
         // Fallback remoto
         try{
+            // O Apps Script agora tem um action=lookup para isso.
             const res = await fetchWithTimeout(SCRIPT_URL+`?action=lookup&matricula=${standardized}`,{},7000);
             const d = await res.json();
             if(d && d.nome){
@@ -409,7 +417,10 @@
             setProgress(80);
 
             const isDup = await checkDuplicity(summary.matricula, summary.data, summary.folga);
-            if(isDup){ showMessage(`⚠️ Solicitação DUPLICADA para ${summary.data} — ${summary.folga}`,'error'); return; }
+            if(isDup){ 
+                showMessage(`⚠️ Solicitação DUPLICADA para ${summary.data} — ${summary.folga}. O envio foi cancelado. Você pode verificar no Histórico.`,'error'); 
+                return; 
+            }
 
             const payload = new URLSearchParams();
             payload.set('matricula', summary.matricula);
@@ -424,8 +435,10 @@
             if(j && j.success){
                 showMessage('✅ Solicitação enviada com sucesso. Verifique seu e-mail.','success');
                 // Limpar apenas em caso de sucesso
+                const currentEmail = DERSO.emailInput.value;
                 DERSO.formEl.reset();
                 DERSO.nomeInput.value = '';
+                DERSO.emailInput.value = currentEmail; // Mantém o email preenchido
                 DERSO.matriculaInput.classList.remove('is-valid');
                 document.querySelector('#folgaGroup [aria-checked="true"]').setAttribute('aria-checked','false');
                 
@@ -492,7 +505,10 @@
             const resp = await fetchWithTimeout(`${SCRIPT_URL}?matricula=${encodeURIComponent(matricula)}&action=historico`, {}, 8000);
             const dados = await resp.json();
 
-            if(!dados || dados.error){
+            // A requisição falhou antes de receber o JSON
+            if(!dados){ throw new Error('Resposta vazia do servidor.'); }
+
+            if(dados.error){
                  box.innerHTML = `<p style="color:var(--erro)">Erro ao buscar histórico: ${dados.error || 'Falha na comunicação.'}</p>`;
                  return;
             }
@@ -500,15 +516,29 @@
             let html = `<div>Histórico de solicitações para <strong>Matrícula ${matricula}</strong>:</div>`;
 
             if(dados.length === 0){
-                html += `<p style="color:#666;font-style:italic;margin-top:10px">Nenhuma solicitação encontrada.</p>`;
+                html += `<p style="color:#666;font-style:italic;margin-top:10px">Nenhuma solicitação encontrada no período aberto.</p>`;
             } else {
                 html += `<ul class="history-list">`;
+                // Os dados vêm do Apps Script como: {Data, Folga, Status}
                 dados.slice(0, 10).forEach(item => { // Limitar a 10 itens
-                    const statusColor = item.Status === 'APROVADA' ? 'var(--sucesso)' : item.Status === 'RECUSADA' ? 'var(--erro)' : 'var(--alerta-prazo)';
-                    const statusText = item.Status === 'APROVADA' ? '✅ Aprovada' : item.Status === 'RECUSADA' ? '❌ Recusada' : '⏳ Aguardando';
+                    const statusText = item.Status;
+                    let statusColor;
+                    let icon;
+
+                    if (statusText === 'APROVADA') {
+                        statusColor = 'var(--sucesso)';
+                        icon = '✅ Aprovada';
+                    } else if (statusText === 'RECUSADA') {
+                        statusColor = 'var(--erro)';
+                        icon = '❌ Recusada';
+                    } else {
+                         statusColor = 'var(--alerta-prazo)';
+                        icon = '⏳ Aguardando';
+                    }
+
                     html += `<li>
                                 <strong>${item.Data}</strong> — ${item.Folga}
-                                (<span style="color:${statusColor}">${statusText}</span>)
+                                (<span style="color:${statusColor}; font-weight: 500;">${icon}</span>)
                             </li>`;
                 });
                 html += `</ul>`;
@@ -519,7 +549,7 @@
 
         } catch(e){
             console.error('Erro ao buscar histórico:', e);
-            box.innerHTML = `<p style="color:var(--erro)">Erro de conexão ao buscar histórico.</p>`;
+            box.innerHTML = `<p style="color:var(--erro)">Erro de conexão ou timeout ao buscar histórico. Verifique a matrícula e tente novamente.</p>`;
         }
         document.getElementById('closeHistory').focus();
     }
@@ -528,11 +558,12 @@
         setProgress(5);
         renderFolgas();
         updateEmailDatalist();
-        setDateLimits(); // Define limites padrão iniciais
+        
+        // 1. Carrega a lista de efetivo
         await loadEmployeeList();
         setProgress(40);
 
-        // Verifica período aberto (datas fornecidas pelo script)
+        // 2. Verifica período aberto (datas fornecidas pelo script)
         try{
             const res = await fetchWithTimeout(SCRIPT_URL+'?action=datas',{},7000);
             const d = await res.json();
@@ -540,12 +571,11 @@
             if(d.error){ throw new Error(d.error); }
             
             const now = new Date();
-            // As datas devem vir no formato ISO (e.g., "YYYY-MM-DDTHH:MM:SS")
+            // As datas vêm no formato ISO
             const abertura = new Date(d.abertura);
             const fechamento = new Date(d.fechamento);
 
-            setDateLimits(abertura, fechamento);
-
+            setDateLimits(abertura, fechamento); // Define limites
             document.getElementById('initialLoading').style.display = 'none';
             
             let message = '';
@@ -564,20 +594,25 @@
             else{ // aberto
                 DERSO.formEl.style.display = 'block';
                 const diffMs = fechamento - now;
-                const diffDays = Math.ceil(diffMs/(1000*60*60*24));
-                const diffHours = Math.ceil(diffMs/(1000*60*60));
+                // Cálculo de dias exato (ajustado para horas)
+                const diffDays = Math.floor(diffMs/(1000*60*60*24));
+                const diffHours = Math.ceil((diffMs % (1000*60*60*24)) / (1000*60*60));
+                
+                const timeRemaining = `${diffDays} dia(s) e ${diffHours} hora(s)`;
 
                 if(diffDays <= 3) type = 'warning'; // Alerta se faltar 3 dias ou menos
 
-                message = `🚨 **PRAZO:** Restam ${diffDays} dia(s) (aprox. ${diffHours}h) — fechamento: ${fechamento.toLocaleString('pt-BR')}`;
+                message = `🚨 **PRAZO:** Restam ${timeRemaining} — fechamento: ${fechamento.toLocaleString('pt-BR')}`;
             }
             showPersistentMessage(message, type);
 
         }catch(err){
-            console.warn(err);
-            showPersistentMessage('⚠️ Falha ao obter prazo. Verifique a conexão.','error');
+            console.warn("Erro ao carregar datas do servidor:", err);
+            // Se falhar, usa o fallback de datas para o próximo mês
+            setDateLimits(); 
             document.getElementById('initialLoading').style.display = 'none';
-            DERSO.formEl.style.display = 'none';
+            DERSO.formEl.style.display = 'block';
+            showPersistentMessage('⚠️ Falha ao obter prazo. O formulário está aberto, mas verifique se o Apps Script está ativo e as datas configuradas.','error');
         }
 
         // Tenta restaurar último e-mail usado
