@@ -178,7 +178,7 @@
     // ***********************************************
     // AQUI ESTÁ A NOVA URL ATUALIZADA:
     // ***********************************************
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwik0vISwewN_lm8smHHBiwUas7_sh2l7qRdZzRIcg79pSRq-dplNwn_shqGL16jEb79w/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwU-yAzVrL3iTiPOGN5LdddLWRK_TltXI5qOdeBVK8pIDo_jYKcGBDNSfzX9XSuYE4i_w/exec"; 
     const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"];
 
     // estado global
@@ -512,75 +512,90 @@
     }
 
     // Modal de Histórico
-    async function showHistoryModal(){
-        const matricula = DERSO.matriculaInput.value.trim();
-        if(!matricula || DERSO.matriculaInput.classList.contains('is-invalid')){
-            showMessage("Digite e valide a matrícula para ver o histórico.", "error");
-            return;
-        }
-
-        const modal = document.getElementById('historyModal');
-        const box = document.getElementById('historyBox');
-        
-        box.innerHTML = '<div style="text-align:center"><div class="spinner-base" style="width:20px;height:20px;border-width:3px"></div></div>';
-        modal.style.display = 'flex';
-
-        try {
-            const resp = await fetchWithTimeout(`${SCRIPT_URL}?matricula=${encodeURIComponent(matricula)}&action=historico`, {}, 8000);
-            const dados = await resp.json();
-
-            // A requisição falhou antes de receber o JSON
-            if(!dados){ throw new Error('Resposta vazia do servidor.'); }
-
-            if(dados.error){
-                 box.innerHTML = `<p style="color:var(--erro)">Erro ao buscar histórico: ${dados.error || 'Falha na comunicação.'}</p>`;
-                 return;
-            }
-
-            let html = `<div>Histórico de solicitações para <strong>Matrícula ${matricula}</strong>:</div>`;
-
-            if(dados.length === 0){
-                html += `<p style="color:#666;font-style:italic;margin-top:10px">Nenhuma solicitação encontrada no período aberto.</p>`;
-            } else {
-                html += `<ul class="history-list">`;
-                // Os dados vêm do Apps Script como: {Data, Folga, Status}
-                dados.slice(0, 10).forEach(item => { // Limitar a 10 itens
-                    const statusText = item.Status;
-                    let statusColor;
-                    let icon;
-
-                    if (statusText === 'APROVADA') {
-                        statusColor = 'var(--sucesso)';
-                        icon = '✅ Aprovada';
-                    } else if (statusText === 'RECUSADA') {
-                        statusColor = 'var(--erro)';
-                        icon = '❌ Recusada';
-                    } else { 
-    // Se não for APROVADA nem RECUSADA, não exibe status.
-    // Isso é ideal para registros pendentes/em branco.
-    statusColor = ''; // Remove a cor
-    icon = '';        // Remove o ícone e o texto
-}
-
-                    // LINHA CORRIGIDA
-html += `<li>
-    <strong>${item.Data}</strong> — ${item.Folga}
-    ${icon ? '(<span style="color:' + statusColor + '; font-weight: 500;">' + icon + '</span>)' : ''}
-</li>`;
-                });
-                html += `</ul>`;
-                html += `<div class="small" style="margin-top:10px">Exibindo as últimas ${dados.length > 10 ? 10 : dados.length} solicitações.</div>`;
-            }
-
-            box.innerHTML = html;
-
-        } catch(e){
-            console.error('Erro ao buscar histórico:', e);
-            box.innerHTML = `<p style="color:var(--erro)">Erro de conexão ou timeout ao buscar histórico. Verifique a matrícula e tente novamente.</p>`;
-        }
-        document.getElementById('closeHistory').focus();
+async function showHistoryModal(){
+    const matricula = DERSO.matriculaInput.value.trim();
+    if(!matricula || DERSO.matriculaInput.classList.contains('is-invalid')){
+        showMessage("Digite e valide a matrícula para ver o histórico.", "error");
+        return;
     }
 
+    const modal = document.getElementById('historyModal');
+    const box = document.getElementById('historyBox');
+    
+    box.innerHTML = '<div style="text-align:center"><div class="spinner-base" style="width:20px;height:20px;border-width:3px"></div></div>';
+    modal.style.display = 'flex';
+
+    try {
+        const resp = await fetchWithTimeout(`${SCRIPT_URL}?matricula=${encodeURIComponent(matricula)}&action=historico`, {}, 8000);
+        
+        // CORREÇÃO 1: Renomeia 'dados' para 'dadosResposta' e espera o objeto {nome, historico}
+        const dadosResposta = await resp.json();
+
+        // A requisição falhou antes de receber o JSON
+        if(!dadosResposta){ throw new Error('Resposta vazia do servidor.'); }
+
+        if(dadosResposta.error){
+             box.innerHTML = `<p style="color:var(--erro)">Erro ao buscar histórico: ${dadosResposta.error || 'Falha na comunicação.'}</p>`;
+             return;
+        }
+
+        // CORREÇÃO 2: Extrai o nome e o array de histórico
+        const nomeFuncionario = dadosResposta.nome || `Matrícula ${matricula}`;
+        const historico = dadosResposta.historico || []; 
+        
+        // CORREÇÃO 3: Altera o cabeçalho para incluir o nome
+        let html = `<div>Histórico de solicitações para <strong>${nomeFuncionario} (Matrícula ${matricula})</strong>:</div>`;
+
+        if(historico.length === 0){
+            html += `<p style="color:#666;font-style:italic;margin-top:10px">Nenhuma solicitação encontrada.</p>`;
+        } else {
+            html += `<ul class="history-list">`;
+            
+            // CORREÇÃO 4: Remove o .slice(0, 10) para exibir TODOS os itens
+            historico.forEach(item => { 
+                const statusText = item.Status;
+                let statusColor;
+                let icon;
+
+                if (statusText === 'APROVADA') {
+                    statusColor = 'var(--sucesso)';
+                    icon = '✅ Aprovada';
+                } else if (statusText === 'RECUSADA') {
+                    statusColor = 'var(--erro)';
+                    icon = '❌ Recusada';
+                } else { 
+                    // Se não for APROVADA nem RECUSADA, não exibe status (resolve o "Aguardando")
+                    statusColor = ''; 
+                    icon = '';      
+                }
+
+                // Ajusta a exibição para só incluir o status se ele existir
+                const statusHtml = icon 
+                    ? '(<span style="color:' + statusColor + '; font-weight: 500;">' + icon + '</span>)'
+                    : '';
+                    
+                html += `<li>
+                    <strong>${item.Data}</strong> — ${item.Folga}
+                    ${statusHtml}
+                </li>`;
+            });
+            
+            html += `</ul>`;
+            
+            // CORREÇÃO 5: Ajusta a mensagem final para refletir o total de itens
+            html += `<div class="small" style="margin-top:10px">Total de ${historico.length} solicitações encontradas.</div>`;
+        }
+
+        box.innerHTML = html;
+
+    } catch(e){
+        console.error('Erro ao buscar histórico:', e);
+        box.innerHTML = `<p style="color:var(--erro)">Erro de conexão ou timeout ao buscar histórico. Verifique a matrícula e tente novamente.</p>`;
+    }
+    document.getElementById('closeHistory').focus();
+}
+
+    
     async function initializeForm(){
         setProgress(5);
         renderFolgas();
