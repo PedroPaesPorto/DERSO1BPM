@@ -511,7 +511,7 @@
         document.getElementById('confirmSend').focus(); // Foco para acessibilidade
     }
 
-    // Modal de Histórico
+// Modal de Histórico
 async function showHistoryModal(){
     const matricula = DERSO.matriculaInput.value.trim();
     if(!matricula || DERSO.matriculaInput.classList.contains('is-invalid')){
@@ -528,30 +528,29 @@ async function showHistoryModal(){
     try {
         const resp = await fetchWithTimeout(`${SCRIPT_URL}?matricula=${encodeURIComponent(matricula)}&action=historico`, {}, 8000);
         
-        // CORREÇÃO 1: Renomeia 'dados' para 'dadosResposta' e espera o objeto {nome, historico}
+        // CORREÇÃO ESSENCIAL: O Backend retorna um objeto {nome, historico}
         const dadosResposta = await resp.json();
 
-        // A requisição falhou antes de receber o JSON
+        // Verifica erro de comunicação ou servidor
         if(!dadosResposta){ throw new Error('Resposta vazia do servidor.'); }
-
         if(dadosResposta.error){
              box.innerHTML = `<p style="color:var(--erro)">Erro ao buscar histórico: ${dadosResposta.error || 'Falha na comunicação.'}</p>`;
              return;
         }
 
-        // CORREÇÃO 2: Extrai o nome e o array de histórico
+        // 1. Extrai o nome e o array de histórico
         const nomeFuncionario = dadosResposta.nome || `Matrícula ${matricula}`;
-        const historico = dadosResposta.historico || []; 
+        const historico = dadosResposta.historico || []; // Usa o array que está dentro do objeto
         
-        // CORREÇÃO 3: Altera o cabeçalho para incluir o nome
-        let html = `<div>Histórico de solicitações para <strong>${nomeFuncionario} (Matrícula ${matricula})</strong>:</div>`;
+        // 2. CORREÇÃO DO CABEÇALHO: Exibe o nome do funcionário
+        let html = `<div>Histórico de solicitações para <strong>${nomeFuncionario}</strong>:</div>`;
 
-        if(historico.length === 0){
+        if(historico.length === 0){ // Agora checa o array corretamente
             html += `<p style="color:#666;font-style:italic;margin-top:10px">Nenhuma solicitação encontrada.</p>`;
         } else {
             html += `<ul class="history-list">`;
             
-            // CORREÇÃO 4: Remove o .slice(0, 10) para exibir TODOS os itens
+            // 3. Itera por todos os itens (sem .slice(0, 10))
             historico.forEach(item => { 
                 const statusText = item.Status;
                 let statusColor;
@@ -564,12 +563,11 @@ async function showHistoryModal(){
                     statusColor = 'var(--erro)';
                     icon = '❌ Recusada';
                 } else { 
-                    // Se não for APROVADA nem RECUSADA, não exibe status (resolve o "Aguardando")
                     statusColor = ''; 
                     icon = '';      
                 }
 
-                // Ajusta a exibição para só incluir o status se ele existir
+                // Lógica para só incluir o status se ele existir
                 const statusHtml = icon 
                     ? '(<span style="color:' + statusColor + '; font-weight: 500;">' + icon + '</span>)'
                     : '';
@@ -582,7 +580,7 @@ async function showHistoryModal(){
             
             html += `</ul>`;
             
-            // CORREÇÃO 5: Ajusta a mensagem final para refletir o total de itens
+            // 4. Exibe o total de itens
             html += `<div class="small" style="margin-top:10px">Total de ${historico.length} solicitações encontradas.</div>`;
         }
 
