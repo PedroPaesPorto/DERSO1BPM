@@ -555,15 +555,18 @@
                     } else if (statusText === 'RECUSADA') {
                         statusColor = 'var(--erro)';
                         icon = '❌ Recusada';
-                    } else {
-                         statusColor = 'var(--alerta-prazo)';
-                        icon = '⏳ Aguardando';
-                    }
+                    } else { 
+    // Se não for APROVADA nem RECUSADA, não exibe status.
+    // Isso é ideal para registros pendentes/em branco.
+    statusColor = ''; // Remove a cor
+    icon = '';        // Remove o ícone e o texto
+}
 
-                    html += `<li>
-                                <strong>${item.Data}</strong> — ${item.Folga}
-                                (<span style="color:${statusColor}; font-weight: 500;">${icon}</span>)
-                            </li>`;
+                    // LINHA CORRIGIDA
+html += `<li>
+    <strong>${item.Data}</strong> — ${item.Folga}
+    ${icon ? '(<span style="color:' + statusColor + '; font-weight: 500;">' + icon + '</span>)' : ''}
+</li>`;
                 });
                 html += `</ul>`;
                 html += `<div class="small" style="margin-top:10px">Exibindo as últimas ${dados.length > 10 ? 10 : dados.length} solicitações.</div>`;
