@@ -222,18 +222,42 @@
     function setDateLimits(abertura, fechamento){
         const dateInput = DERSO.dataInput;
         const dateHelp = document.getElementById('dateHelp');
-        // Fallback de datas: primeiro dia do próximo mês
+        
         const today = new Date();
-        const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
         
-        DERSO.minDate = abertura ? new Date(abertura) : nextMonth;
-        DERSO.maxDate = fechamento ? new Date(fechamento) : new Date(nextMonth.getFullYear(), nextMonth.getMonth()+1, 0); // Último dia do próximo mês
+        // LÓGICA DE DEFINIR O MÊS DE FOLGA COMO O MÊS SEGUINTE (Requisito do Usuário)
+        
+        // 1. Calcula o primeiro dia do MÊS SEGUINTE
+        // O mês é baseado em 0 (Janeiro = 0). today.getMonth() + 1 define o próximo mês.
+        const minFolgaDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        
+        // 2. Calcula o último dia do MÊS SEGUINTE
+        // O dia '0' (zero) do mês N+2 retorna o último dia do mês N+1.
+        const maxFolgaDate = new Date(today.getFullYear(), today.getMonth() + 2, 0); 
 
-        dateInput.min = DERSO.minDate.toISOString().split('T')[0];
-        dateInput.max = DERSO.maxDate.toISOString().split('T')[0];
+        // Define os limites do campo de input e o estado global de validação
+        DERSO.minDate = minFolgaDate;
+        DERSO.maxDate = maxFolgaDate;
+
+        const minISO = DERSO.minDate.toISOString().split('T')[0];
+        const maxISO = DERSO.maxDate.toISOString().split('T')[0];
+
+        // Aplica os limites de data (restringe o calendário)
+        dateInput.min = minISO;
+        dateInput.max = maxISO;
         
+        // Define o valor padrão do campo para o primeiro dia do próximo mês
+        // (Isso garante que ele comece no mês obrigatório, conforme solicitado)
+        if (!dateInput.value) {
+            dateInput.value = minISO;
+        }
+        
+        // Atualiza o texto de ajuda
         const formatter = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        dateHelp.textContent = `Período permitido: ${formatter.format(DERSO.minDate)} — ${formatter.format(DERSO.maxDate)}`;
+        dateHelp.textContent = `Datas de folga permitidas: ${formatter.format(DERSO.minDate)} — ${formatter.format(DERSO.maxDate)}`;
+        
+        // Os argumentos 'abertura' e 'fechamento' (do servidor)
+        // continuam sendo usados no restante da função initializeForm para definir o prazo de envio.
     }
 
     function standardizeMatricula(m){
