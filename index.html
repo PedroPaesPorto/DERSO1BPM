@@ -3,688 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitação de Folga - DERSO </title>
-
+    <title>Solicitação de Diária - DERSO 1º BPM</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
     <style>
-        :root{
-            --azul-marinho:#0C3667;
-            --dourado:#C9A400; /* escurecido para contraste */
-            --azul-hover:#1a5ca7;
-            --erro:#b00020;
-            --alerta-prazo:#D36400; /* Laranja para prazo apertado */
-            --sucesso:#388e3c;
-            --cinza-fundo:#f4f7f9;
-            --cinza-texto:#222;
-            --borda:#bdbdbd;
-            --padding-md: 12px;
-            --font-size-sm: 13px;
+        :root {
+            --azul-marinho: #0C3667;
+            --dourado: #C9A400;
+            --azul-hover: #1a5ca7;
+            --erro: #b00020;
+            --alerta: #D36400;
+            --sucesso: #388e3c;
+            --cinza-fundo: #f4f7f9;
+            --borda: #bdbdbd;
         }
-        *{box-sizing:border-box}
-        body{margin:0;font-family:'Roboto',Arial,Helvetica,sans-serif;background:var(--cinza-fundo);color:var(--cinza-texto);display:flex;justify-content:center;align-items:flex-start;padding:24px}
-        .container{width:100%;max-width:720px;background:#fff;border-radius:10px;padding:22px 24px;box-shadow:0 10px 30px rgba(0,0,0,.12);position:relative}
-        #progressBarContainer{position:absolute;left:0;top:0;width:100%;height:6px;background:#e6e9ee;border-radius:10px;overflow:hidden}
-        #progressBar{height:100%;width:0;background:linear-gradient(90deg,var(--dourado),var(--azul-marinho));transition:width .35s ease}
-        header{display:flex;gap:14px;align-items:center;margin-bottom:12px}
-        .logos{display:flex;gap:12px;align-items:center}
-        .logos img{height:54px;object-fit:contain;display:block}
-        h1{font-family:'Merriweather',serif;color:var(--azul-marinho);font-size:20px;margin:0}
-        .subtitle{font-size:14px;color:#444;margin-top:6px}
-        form{margin-top:14px}
-        fieldset{border:1px solid var(--borda);padding:var(--padding-md);border-radius:8px;margin-bottom:16px}
-        legend{font-weight:600;padding:0 6px}
-        .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        label{display:block;font-size:var(--font-size-sm);margin-bottom:6px}
-        input[type=text],input[type=email],input[type=date],select{width:100%;padding:10px;border:1px solid var(--borda);border-radius:6px;font-size:14px}
-        input[readonly]{background:#f1f3f5}
-        .small{font-size:12px;color:#666}
-        .radio-group-buttons{display:flex;flex-wrap:wrap;gap:8px}
-        .radio-button{padding:8px 10px;border:1px solid var(--borda);border-radius:6px;cursor:pointer;font-weight:600;font-size:var(--font-size-sm)}
-        .radio-button[aria-checked="true"]{background:var(--azul-marinho);color:var(--dourado);border-color:var(--azul-marinho)}
-        .error{color:var(--erro);font-size:var(--font-size-sm);margin-top:6px}
-        .info-message{display:none;padding:12px;border-left:4px solid;border-radius:6px;margin-bottom:12px}
-        .info-message.success{background:#e8f5e9;color:var(--sucesso);border-left-color:var(--sucesso)}
-        .info-message.error{background:#fff0f2;color:var(--erro);border-left-color:var(--erro)}
-        .info-message.warning{background:#fff8e1;color:var(--alerta-prazo);border-left-color:var(--alerta-prazo)}
-        .actions{display:flex;gap:10px}
-        .button{flex:1;padding:12px 14px;border-radius:8px;border:none;background:var(--azul-hover);color:#fff;font-weight:700;cursor:pointer;text-transform:uppercase;transition:background .2s}
-        .button.secondary{background:#fff;border:1px solid var(--borda);color:var(--cinza-texto);text-transform:none}
-        .button:hover:not(:disabled){background:var(--azul-marinho)}
-        .button:disabled{opacity:.6;cursor:not-allowed}
-        /* Spinner padrão */
-        .spinner-base{width:30px;height:30px;border-radius:50%;border:4px solid rgba(0,0,0,.08);border-top:4px solid var(--azul-hover);animation:spin 1s linear infinite}
-        #loadingOverlay{position:fixed;top:0;left:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.85);z-index:9999}
-        .spinner-lg{width:36px;height:36px;border-width:5px}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        .field-with-spinner{position:relative}
-        .mini-spinner{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;border:3px solid rgba(0,0,0,.08);border-top:3px solid var(--azul-hover);animation:spin .8s linear infinite;display:none}
-        .is-loading .mini-spinner{display:block}
-        .footer{font-size:12px;color:#666;text-align:center;margin-top:8px}
-        
-        /* Estilos do Modal */
-        .modal-base{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center;z-index:9998}
-        .modal-content{background:#fff;padding:18px;border-radius:10px;max-width:520px;width:92%;box-shadow:0 5px 15px rgba(0,0,0,.3)}
-        .modal-title{margin:0 0 8px 0;color:var(--azul-marinho)}
-        .modal-body{font-size:14px;color:#333;margin-bottom:12px}
-        .history-list{list-style:none;padding:0;margin-top:10px}
-        .history-list li{margin-bottom:5px;padding:5px;border-bottom:1px dashed #eee;font-size:var(--font-size-sm)}
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+        body { 
+            margin: 0; font-family: 'Roboto', sans-serif; 
+            background: var(--cinza-fundo); color: #222; 
+            display: flex; justify-content: center; padding: 20px;
+        }
+        .container { 
+            width: 100%; max-width: 700px; background: #fff; 
+            border-radius: 12px; padding: 30px; 
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12); position: relative; 
+        }
+        /* Barra de Progresso Superior */
+        #progressBarContainer { position: absolute; left: 0; top: 0; width: 100%; height: 6px; background: #eee; border-radius: 12px 12px 0 0; overflow: hidden; }
+        #progressBar { height: 100%; width: 0; background: linear-gradient(90deg, var(--dourado), var(--azul-marinho)); }
 
-        @media(max-width:640px){.grid{grid-template-columns:1fr}.logos img{height:44px}.container{padding:18px}}
+        header { display: flex; gap: 15px; align-items: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 20px; }
+        .logos img { height: 60px; object-fit: contain; }
+        h1 { font-family: 'Merriweather', serif; color: var(--azul-marinho); font-size: 22px; margin: 0; }
+        
+        fieldset { border: 1px solid var(--borda); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        legend { font-weight: 700; color: var(--azul-marinho); padding: 0 10px; font-size: 14px; text-transform: uppercase; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid var(--borda); border-radius: 6px; outline: none; }
+        input:focus { border-color: var(--azul-marinho); box-shadow: 0 0 0 2px rgba(12,54,103,0.1); }
+        input[readonly] { background: #f9f9f9; cursor: not-allowed; }
+
+        /* Botões de Seleção de Folga */
+        .radio-group-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .radio-button { 
+            padding: 10px 14px; border: 1px solid var(--borda); border-radius: 6px; 
+            cursor: pointer; font-weight: 600; font-size: 12px; background: #fff;
+        }
+        .radio-button[aria-checked="true"] { background: var(--azul-marinho); color: #fff; border-color: var(--azul-marinho); transform: scale(1.05); }
+
+        .actions { display: flex; gap: 10px; margin-top: 10px; }
+        .btn { 
+            flex: 1; padding: 14px; border-radius: 8px; border: none; 
+            font-weight: 700; cursor: pointer; text-transform: uppercase; 
+        }
+        .btn-primary { background: var(--azul-marinho); color: #fff; }
+        .btn-primary:hover { background: var(--azul-hover); transform: translateY(-2px); }
+        .btn-secondary { background: #fff; border: 1px solid var(--borda); color: #555; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Modais e Overlays */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; padding: 15px; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 12px; max-width: 500px; width: 100%; }
+        .info-message { padding: 15px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; display: none; border-left: 5px solid; }
+        .warning { background: #fff8e1; color: var(--alerta); border-color: var(--alerta); }
+        .error { background: #ffebee; color: var(--erro); border-color: var(--erro); }
+        .success { background: #e8f5e9; color: var(--sucesso); border-color: var(--sucesso); }
+
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay" role="status" aria-live="polite">
-    <div style="text-align:center">
-        <div class="spinner-base"></div>
-        <div style="margin-top:10px;color:var(--azul-marinho)">Enviando...</div>
-    </div>
-</div>
-
-<div class="container" id="app">
-    <div id="progressBarContainer"><div id="progressBar" aria-hidden="true"></div></div>
-
+<div class="container">
+    <div id="progressBarContainer"><div id="progressBar"></div></div>
+    
     <header>
         <div class="logos">
-            <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="Brasão PMRO" loading="lazy">
-            <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1º BPM" loading="lazy">
+            <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
         </div>
-        <div style="flex:1">
+        <div>
             <h1>DERSO — 1º BPM</h1>
-            <div class="subtitle">Solicitação de Diária Especial de Reforço do Serviço Operacional</div>
+            <small>Sistema de Solicitação de Diária Especial</small>
         </div>
     </header>
 
-    <div id="prazoMessage" class="info-message" role="status" aria-live="polite"></div>
+    <div id="statusPrazo" class="info-message"></div>
 
-    <div id="initialLoading" style="text-align:center;padding:26px;color:var(--azul-marinho)">
-        <div class="spinner-base spinner-lg"></div>
-        <div style="margin-top:10px">Carregando dados do sistema...</div>
-    </div>
-
-    <form id="dersoForm" style="display:none" aria-labelledby="formTitle">
-        <fieldset aria-labelledby="idTitle">
-            <legend id="idTitle">Identificação</legend>
+    <form id="dersoForm">
+        <fieldset>
+            <legend>Dados do Militar</legend>
             <div class="grid">
                 <div>
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" name="email" list="emailProviders" autocomplete="email" aria-describedby="emailHelp">
-                    <datalist id="emailProviders"></datalist>
-                    <div id="emailHelp" class="small">Use seu e-mail institucional ou pessoal.</div>
+                    <label>Matrícula</label>
+                    <input type="text" id="matricula" placeholder="Ex: 1000xxxxx" required>
+                    <div id="matStatus" style="font-size: 11px; margin-top: 4px;"></div>
                 </div>
                 <div>
-                    <label for="matricula">Matrícula</label>
-                    <div class="field-with-spinner" id="matBlock">
-                        <input type="text" id="matricula" name="matricula" inputmode="numeric" pattern="\d*" required placeholder="Ex: 100012345" aria-describedby="matError">
-                        <div class="mini-spinner" id="matSpinner" aria-hidden="true"></div>
-                    </div>
-                    <div id="matError" class="small error" aria-live="polite"></div>
+                    <label>Nome Completo</label>
+                    <input type="text" id="nome" readonly placeholder="Aguardando matrícula...">
                 </div>
-                <div>
-                    <label for="nome">Nome</label>
-                    <input type="text" id="nome" name="nome" readonly aria-readonly="true">
-                </div>
-                <div>
-                    <label for="data">Data</label>
-                    <input type="date" id="data" name="data" required aria-describedby="dateHelp dateError">
-                    <div id="dateHelp" class="small"></div>
-                    <div id="dateError" class="small error" aria-live="polite"></div>
+                <div style="grid-column: span 2;">
+                    <label>E-mail institucional/pessoal</label>
+                    <input type="email" id="email" placeholder="email@exemplo.com" required>
                 </div>
             </div>
         </fieldset>
 
-        <fieldset role="radiogroup" aria-label="Tipo de Folga">
-            <legend>Tipo de Folga</legend>
-            <div class="radio-group-buttons" id="folgaGroup">
+        <fieldset>
+            <legend>Informações da Folga</legend>
+            <div class="grid">
+                <div>
+                    <label>Data da Folga</label>
+                    <input type="date" id="dataFolga" required>
                 </div>
-            <div id="duplicateError" class="error" aria-live="polite"></div>
+                <div>
+                    <label>Tipo de Escala</label>
+                    <div class="radio-group-buttons" id="folgaGroup">
+                        </div>
+                </div>
+            </div>
         </fieldset>
 
-        <div style="display:flex;gap:10px;align-items:center;margin-top:8px;margin-bottom:6px">
-            <button type="button" class="button secondary" id="btnHistory">Ver Histórico</button>
-            <button type="submit" class="button" id="btnSubmit">Enviar Solicitação</button>
+        <div class="actions">
+            <button type="button" class="btn btn-secondary" id="btnHistory">Histórico</button>
+            <button type="submit" class="btn btn-primary" id="btnSubmit">Enviar Solicitação</button>
         </div>
-
     </form>
 
-    <div id="statusMessage" class="info-message" role="status" aria-live="polite"></div>
-
-    <div class="footer" id="footerText"></div>
+    <footer style="margin-top: 20px; text-align: center; font-size: 11px; color: #888;">
+        Desenvolvido pela 1ª Cia / 1º BPM — Porto Velho/RO
+    </footer>
 </div>
 
-<div id="confirmModal" class="modal-base" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+<div id="confirmModal" class="modal">
     <div class="modal-content">
-        <h3 id="confirmTitle" class="modal-title">Confirme sua Solicitação</h3>
-        <div id="summaryBox" class="modal-body"></div>
-        <div style="display:flex;gap:8px">
-            <button id="confirmSend" class="button">Confirmar e Enviar</button>
-            <button id="cancelSend" class="button secondary">Voltar</button>
-        </div>
-    </div>
-</div>
-
-<div id="historyModal" class="modal-base" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
-    <div class="modal-content">
-        <h3 id="historyTitle" class="modal-title">Histórico de Solicitações</h3>
-        <div id="historyBox" class="modal-body"></div>
-        <div style="display:flex;justify-content:flex-end">
-            <button id="closeHistory" class="button secondary">Fechar</button>
+        <h3 style="margin-top:0; color:var(--azul-marinho)">Confirmar Dados?</h3>
+        <div id="resumo" style="font-size: 14px; line-height: 1.6; margin-bottom: 20px;"></div>
+        <div class="actions">
+            <button class="btn btn-primary" id="finalConfirm">Confirmar</button>
+            <button class="btn btn-secondary" onclick="closeModal('confirmModal')">Corrigir</button>
         </div>
     </div>
 </div>
 
 <script>
-    // ***********************************************
-    // AQUI ESTÁ A NOVA URL ATUALIZADA:
-    // ***********************************************
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7-pdQ3f8UMXZylF-4M4Qai6UWGsXPdqfYhoyuPuEVBL_nbBrCn2DfyfpHVmgAFEhh/exec"; 
-    const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"];
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7-pdQ3f8UMXZylF-4M4Qai6UWGsXPdqfYhoyuPuEVBL_nbBrCn2DfyfpHVmgAFEhh/exec";
+    const TIPOS_FOLGA = ['24H','48H','72H','96H','FOLGA LE','1ª FOLGA','2ª FOLGA','EXPEDIENTE'];
+    
+    // Elementos
+    const form = document.getElementById('dersoForm');
+    const inputMat = document.getElementById('matricula');
+    const inputNome = document.getElementById('nome');
+    const groupFolga = document.getElementById('folgaGroup');
 
-    // estado global
-    window.employeeList = {};
-    const DERSO = {
-        minDate: null,
-        maxDate: null,
-        emailInput: document.getElementById('email'),
-        matriculaInput: document.getElementById('matricula'),
-        nomeInput: document.getElementById('nome'),
-        dataInput: document.getElementById('data'),
-        dateErrorEl: document.getElementById('dateError'),
-        folgaGroup: document.getElementById('folgaGroup'),
-        duplicateErrorEl: document.getElementById('duplicateError'),
-        statusMessageEl: document.getElementById('statusMessage'),
-        prazoMessageEl: document.getElementById('prazoMessage'),
-        loadingOverlay: document.getElementById('loadingOverlay'),
-        matBlock: document.getElementById('matBlock'),
-        formEl: document.getElementById('dersoForm'),
-        matErrorEl: document.getElementById('matError'),
-        btnSubmit: document.getElementById('btnSubmit'),
-        progressBar: document.getElementById('progressBar')
+    // Inicialização
+    window.onload = () => {
+        renderFolgas();
+        configurarDatas();
+        verificarPrazoServidor();
     };
 
-    function setProgress(p){ DERSO.progressBar.style.width = p + '%'; }
-
-    // fetch com timeout e retries
-    async function fetchWithTimeout(url, opts = {}, timeout = 8000){
-        const controller = new AbortController();
-        const id = setTimeout(()=>controller.abort(), timeout);
-        try{
-            const res = await fetch(url, {...opts, signal: controller.signal});
-            clearTimeout(id);
-            return res;
-        }catch(e){ clearTimeout(id); throw e; }
-    }
-
-    // debounce helper
-    function debounce(fn, wait){ let t; return function(...a){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,a), wait); }; }
-
-    function setDateLimits(abertura, fechamento){
-        const dateInput = DERSO.dataInput;
-        const dateHelp = document.getElementById('dateHelp');
-        
-        const today = new Date();
-        
-        // LÓGICA DE DEFINIR O MÊS DE FOLGA COMO O MÊS SEGUINTE (Requisito do Usuário)
-        
-        // 1. Calcula o primeiro dia do MÊS SEGUINTE
-        // O mês é baseado em 0 (Janeiro = 0). today.getMonth() + 1 define o próximo mês.
-        const minFolgaDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-        
-        // 2. Calcula o último dia do MÊS SEGUINTE
-        // O dia '0' (zero) do mês N+2 retorna o último dia do mês N+1.
-        const maxFolgaDate = new Date(today.getFullYear(), today.getMonth() + 2, 0); 
-
-        // Define os limites do campo de input e o estado global de validação
-        DERSO.minDate = minFolgaDate;
-        DERSO.maxDate = maxFolgaDate;
-
-        const minISO = DERSO.minDate.toISOString().split('T')[0];
-        const maxISO = DERSO.maxDate.toISOString().split('T')[0];
-
-        // Aplica os limites de data (restringe o calendário)
-        dateInput.min = minISO;
-        dateInput.max = maxISO;
-        
-        // Define o valor padrão do campo para o primeiro dia do próximo mês
-        // (Isso garante que ele comece no mês obrigatório, conforme solicitado)
-        if (!dateInput.value) {
-            dateInput.value = minISO;
-        }
-        
-        // Atualiza o texto de ajuda
-        const formatter = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        dateHelp.textContent = `Datas de folga permitidas: ${formatter.format(DERSO.minDate)} — ${formatter.format(DERSO.maxDate)}`;
-        
-        // Os argumentos 'abertura' e 'fechamento' (do servidor)
-        // continuam sendo usados no restante da função initializeForm para definir o prazo de envio.
-    }
-
-    function standardizeMatricula(m){
-        if(!m) return '';
-        let num = m.replace(/\D/g,'').slice(-9);
-        if(!num) return '';
-        return num.startsWith('1000') ? num : '1000' + num.slice(-5);
-    }
-
-    const folgas = ['24H','48H','72H','96H','FOLGA LE','1ª FOLGA','2ª FOLGA','EXPEDIENTE'];
-    function renderFolgas(){
-        const g = DERSO.folgaGroup;
-        g.innerHTML = '';
-        folgas.forEach((f)=>{
-            const btn = document.createElement('button');
-            btn.type = 'button';
+    function renderFolgas() {
+        TIPOS_FOLGA.forEach(tipo => {
+            const btn = document.createElement('div');
             btn.className = 'radio-button';
-            btn.setAttribute('role','radio');
-            btn.setAttribute('aria-checked','false');
-            btn.textContent = f;
-            btn.dataset.value = f;
-            btn.addEventListener('click', ()=>{
-                [...g.querySelectorAll('[role="radio"]')].forEach(b=>b.setAttribute('aria-checked','false'));
-                btn.setAttribute('aria-checked','true');
-            });
-            g.appendChild(btn);
+            btn.innerText = tipo;
+            btn.onclick = () => {
+                document.querySelectorAll('.radio-button').forEach(b => b.setAttribute('aria-checked', 'false'));
+                btn.setAttribute('aria-checked', 'true');
+            };
+            groupFolga.appendChild(btn);
         });
     }
 
-    function updateEmailDatalist(){
-        const input = DERSO.emailInput;
-        const dl = document.getElementById('emailProviders');
-        const val = input.value || '';
-        const idx = val.indexOf('@');
-        dl.innerHTML = '';
-        let username = (idx >= 0) ? val.slice(0, idx+1) : val;
+    function configurarDatas() {
+        const d = new Date();
+        const proximoMes = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+        const ultimoDiaMes = new Date(d.getFullYear(), d.getMonth() + 2, 0);
         
-        const fragment = document.createDocumentFragment();
-        emailProviders.forEach(d => {
-            if(!val || idx === -1 || d.startsWith(val.slice(idx+1).toLowerCase())){
-                const option = document.createElement('option');
-                option.value = username + d;
-                fragment.appendChild(option);
-            }
-        });
-        dl.appendChild(fragment);
+        const inputData = document.getElementById('dataFolga');
+        inputData.min = proximoMes.toISOString().split('T')[0];
+        inputData.max = ultimoDiaMes.toISOString().split('T')[0];
+        inputData.value = inputData.min;
     }
 
-    async function loadEmployeeList(){
-        setProgress(10);
-        DERSO.matriculaInput.disabled = true;
-        DERSO.matErrorEl.textContent = '';
-        try{
-            const res = await fetchWithTimeout(SCRIPT_URL+'?action=lista', {}, 9000);
-            const data = await res.json();
-            if(data.error) throw new Error(data.error);
-            window.employeeList = data;
-            DERSO.matriculaInput.disabled = false;
-            setProgress(30);
-        }catch(e){
-            DERSO.matErrorEl.textContent = 'Erro ao carregar lista de funcionários.';
-            showPersistentMessage('⚠️ Erro ao carregar dados do Efetivo. Recarregue a página ou contate o suporte.','error');
-            document.getElementById('initialLoading').style.display = 'none';
-            DERSO.formEl.style.display = 'none';
-            console.error(e);
-        }
-    }
-
-    async function checkMatricula(){
-        const m = DERSO.matriculaInput;
-        const n = DERSO.nomeInput;
-        const e = DERSO.matErrorEl;
-        e.textContent = '';
-        n.value = '';
-        m.classList.remove('is-invalid', 'is-valid');
-
-        const raw = m.value.trim();
-        if(!raw) { return; }
-        const standardized = standardizeMatricula(raw);
-        if(!standardized){ e.textContent = 'Matrícula inválida.'; m.classList.add('is-invalid'); return; }
-        m.value = standardized;
-
-        DERSO.matBlock.classList.add('is-loading');
-
-        // Lookup local
-        if(window.employeeList && window.employeeList[standardized]){
-            n.value = window.employeeList[standardized];
-            m.classList.add('is-valid');
-            DERSO.matBlock.classList.remove('is-loading');
-            return;
-        }
-
-        // Fallback remoto
-        try{
-            // O Apps Script agora tem um action=lookup para isso.
-            const res = await fetchWithTimeout(SCRIPT_URL+`?action=lookup&matricula=${standardized}`,{},7000);
-            const d = await res.json();
-            if(d && d.nome){
-                n.value = d.nome;
-                m.classList.add('is-valid');
-            } else {
-                e.textContent = 'Matrícula não encontrada.';
-                m.classList.add('is-invalid');
-            }
-        }catch(err){
-            console.warn('lookup falhou',err);
-            e.textContent = 'Erro ao validar matrícula. Tente novamente.';
-            m.classList.add('is-invalid');
-        }finally{
-            DERSO.matBlock.classList.remove('is-loading');
-        }
-    }
-
-    const debouncedCheckMatricula = debounce(checkMatricula, 350);
-
-    async function checkDuplicity(matricula, dataBR, folga){
-        setProgress(70);
-        try{
-            const url = `${SCRIPT_URL}?action=check_duplicidade&matricula=${encodeURIComponent(matricula)}&data=${encodeURIComponent(dataBR)}&folga=${encodeURIComponent(folga)}`;
-            const res = await fetchWithTimeout(url,{},7000);
-            const j = await res.json();
-            return j.duplicado === true;
-        }catch(e){
-            console.error('Falha duplicidade',e);
-            showMessage('⚠️ Não foi possível verificar duplicidade. Tentando prosseguir...','error');
-            return false;
-        }
-    }
-
-    function validateForm(){
-        DERSO.matErrorEl.textContent = '';
-        DERSO.dateErrorEl.textContent = '';
-        DERSO.duplicateErrorEl.textContent = '';
-
-        const nomeVal = DERSO.nomeInput.value.trim();
-        const dataVal = DERSO.dataInput.value;
-        const folgaBtn = document.querySelector('#folgaGroup [aria-checked="true"]');
-        const matriculaInvalid = DERSO.matriculaInput.classList.contains('is-invalid') || !DERSO.matriculaInput.value.trim();
-
-        let valid = true;
-
-        if(!folgaBtn){
-            DERSO.duplicateErrorEl.textContent = 'Selecione um tipo de folga.';
-            valid = false;
-        }
-        if(!nomeVal || matriculaInvalid){
-            DERSO.matErrorEl.textContent = 'Verifique a matrícula.';
-            valid = false;
-        }
-        if(!dataVal || new Date(dataVal) < DERSO.minDate || new Date(dataVal) > DERSO.maxDate){
-             DERSO.dateErrorEl.textContent = 'Escolha uma data válida dentro do período permitido.';
-             valid = false;
-        }
-
-        return valid;
-    }
-
-    async function submitForm(e){
-        e.preventDefault();
+    // Busca de Nome por Matrícula (Debounce)
+    let timeoutMat = null;
+    inputMat.oninput = () => {
+        clearTimeout(timeoutMat);
+        const mat = inputMat.value.trim();
+        if(mat.length < 5) return;
         
-        if(!validateForm()) { return; }
-
-        const folgaBtn = document.querySelector('#folgaGroup [aria-checked="true"]');
-        
-        const summary = {
-            matricula: DERSO.matriculaInput.value,
-            nome: DERSO.nomeInput.value.trim(),
-            email: DERSO.emailInput.value.trim(),
-            data: formatBR(DERSO.dataInput.value),
-            folga: folgaBtn.dataset.value
-        };
-        showConfirmationModal(summary);
-    }
-
-    async function confirmAndSend(summary){
-        DERSO.btnSubmit.disabled = true; // Previne duplo clique
-
-        try{
-            document.getElementById('confirmModal').style.display = 'none';
-            DERSO.loadingOverlay.style.display = 'flex';
-            setProgress(80);
-
-            const isDup = await checkDuplicity(summary.matricula, summary.data, summary.folga);
-            if(isDup){ 
-                showMessage(`⚠️ Solicitação DUPLICADA para ${summary.data} — ${summary.folga}. O envio foi cancelado. Você pode verificar no Histórico.`,'error'); 
-                return; 
-            }
-
-            const payload = new URLSearchParams();
-            payload.set('matricula', summary.matricula);
-            payload.set('nome', summary.nome);
-            payload.set('email', summary.email);
-            payload.set('data', summary.data);
-            payload.set('folga', summary.folga);
-
-            const res = await fetchWithTimeout(SCRIPT_URL, {method:'POST', body: payload}, 10000);
-            const j = await res.json();
-            
-            if(j && j.success){
-                showMessage('✅ Solicitação enviada com sucesso. Verifique seu e-mail.','success');
-                // Limpar apenas em caso de sucesso
-                const currentEmail = DERSO.emailInput.value;
-                DERSO.formEl.reset();
-                DERSO.nomeInput.value = '';
-                DERSO.emailInput.value = currentEmail; // Mantém o email preenchido
-                DERSO.matriculaInput.classList.remove('is-valid');
-                document.querySelector('#folgaGroup [aria-checked="true"]').setAttribute('aria-checked','false');
-                
-                // Salvar último uso
-                try{ localStorage.setItem('derso_lastEmail', summary.email || ''); }catch(e){}
-
-            } else {
-                showMessage('⚠️ Erro ao enviar: '+(j.error || 'Tente novamente.'),'error');
-            }
-        }catch(e){
-            console.error(e);
-            showMessage('⚠️ Falha na conexão. Tente novamente.','error');
-        }finally{
-            DERSO.loadingOverlay.style.display = 'none';
-            DERSO.btnSubmit.disabled = false;
-            setProgress(100);
-            setTimeout(()=>setProgress(0),1200);
-        }
-    }
-
-    // Auxiliares
-    function formatBR(iso){ if(!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
-
-    function showMessage(msg,type='success'){
-        const d = DERSO.statusMessageEl; 
-        d.className = 'info-message '+(type==='success'?'success':'error'); 
-        d.innerHTML = msg; 
-        d.style.display = 'block';
-        setTimeout(()=>{ d.style.display = 'none'; },6000);
-    }
-
-    function showPersistentMessage(msg,type='success'){ 
-        DERSO.prazoMessageEl.className = 'info-message '+(type); 
-        DERSO.prazoMessageEl.innerHTML = msg; 
-        DERSO.prazoMessageEl.style.display = 'block'; 
-    }
-
-    // Modal de Confirmação (Envio)
-    function showConfirmationModal(summary){
-        const box = document.getElementById('summaryBox');
-        box.innerHTML = `<div><strong>Nome:</strong> ${summary.nome}</div><div><strong>Matrícula:</strong> ${summary.matricula}</div><div><strong>Folga:</strong> ${summary.folga}</div><div><strong>Data:</strong> ${summary.data}</div><div style="margin-top:8px;font-size:13px;color:#666">E-mail: ${summary.email||'---'}</div>`;
-        const modal = document.getElementById('confirmModal'); 
-        modal.style.display = 'flex';
-        document.getElementById('confirmSend').onclick = ()=>confirmAndSend(summary);
-        document.getElementById('cancelSend').onclick = ()=>modal.style.display = 'none';
-        document.getElementById('confirmSend').focus(); // Foco para acessibilidade
-    }
-
-// Modal de Histórico
-async function showHistoryModal(){
-    const matricula = DERSO.matriculaInput.value.trim();
-    if(!matricula || DERSO.matriculaInput.classList.contains('is-invalid')){
-        showMessage("Digite e valide a matrícula para ver o histórico.", "error");
-        return;
-    }
-
-    const modal = document.getElementById('historyModal');
-    const box = document.getElementById('historyBox');
-    
-    box.innerHTML = '<div style="text-align:center"><div class="spinner-base" style="width:20px;height:20px;border-width:3px"></div></div>';
-    modal.style.display = 'flex';
-
-    try {
-        const resp = await fetchWithTimeout(`${SCRIPT_URL}?matricula=${encodeURIComponent(matricula)}&action=historico`, {}, 8000);
-        
-        // CORREÇÃO ESSENCIAL: O Backend retorna um objeto {nome, historico}
-        const dadosResposta = await resp.json();
-
-        // Verifica erro de comunicação ou servidor
-        if(!dadosResposta){ throw new Error('Resposta vazia do servidor.'); }
-        if(dadosResposta.error){
-             box.innerHTML = `<p style="color:var(--erro)">Erro ao buscar histórico: ${dadosResposta.error || 'Falha na comunicação.'}</p>`;
-             return;
-        }
-
-        // 1. Extrai o nome e o array de histórico
-        const nomeFuncionario = dadosResposta.nome || `Matrícula ${matricula}`;
-        const historico = dadosResposta.historico || []; // Usa o array que está dentro do objeto
-        
-        // 2. CORREÇÃO DO CABEÇALHO: Exibe o nome do funcionário
-        let html = `<div>Histórico de solicitações para <strong>${nomeFuncionario}</strong>:</div>`;
-
-        if(historico.length === 0){ // Agora checa o array corretamente
-            html += `<p style="color:#666;font-style:italic;margin-top:10px">Nenhuma solicitação encontrada.</p>`;
-        } else {
-            html += `<ul class="history-list">`;
-            
-            // 3. Itera por todos os itens (sem .slice(0, 10))
-            historico.forEach(item => { 
-                const statusText = item.Status;
-                let statusColor;
-                let icon;
-
-                if (statusText === 'APROVADA') {
-                    statusColor = 'var(--sucesso)';
-                    icon = '✅ Aprovada';
-                } else if (statusText === 'RECUSADA') {
-                    statusColor = 'var(--erro)';
-                    icon = '❌ Recusada';
-                } else { 
-                    statusColor = ''; 
-                    icon = '';      
+        timeoutMat = setTimeout(async () => {
+            document.getElementById('matStatus').innerText = "🔍 Buscando...";
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=lookup&matricula=${mat}`);
+                const data = await res.json();
+                if(data.nome) {
+                    inputNome.value = data.nome;
+                    document.getElementById('matStatus').innerText = "✅ Localizado";
+                } else {
+                    inputNome.value = "";
+                    document.getElementById('matStatus').innerText = "❌ Não encontrado";
                 }
+            } catch (e) { console.error("Erro na busca"); }
+        }, 600);
+    };
 
-                // Lógica para só incluir o status se ele existir
-                const statusHtml = icon 
-                    ? '(<span style="color:' + statusColor + '; font-weight: 500;">' + icon + '</span>)'
-                    : '';
-                    
-                html += `<li>
-                    <strong>${item.Data}</strong> — ${item.Folga}
-                    ${statusHtml}
-                </li>`;
-            });
-            
-            html += `</ul>`;
-            
-            // 4. Exibe o total de itens
-            html += `<div class="small" style="margin-top:10px">Total de ${historico.length} solicitações encontradas.</div>`;
-        }
-
-        box.innerHTML = html;
-
-    } catch(e){
-        console.error('Erro ao buscar histórico:', e);
-        box.innerHTML = `<p style="color:var(--erro)">Erro de conexão ou timeout ao buscar histórico. Verifique a matrícula e tente novamente.</p>`;
-    }
-    document.getElementById('closeHistory').focus();
-}
-
-    
-    async function initializeForm(){
-        setProgress(5);
-        renderFolgas();
-        updateEmailDatalist();
+    form.onsubmit = (e) => {
+        e.preventDefault();
+        const folgaSel = document.querySelector('.radio-button[aria-checked="true"]');
+        if(!folgaSel) return alert("Selecione o tipo de folga!");
         
-        // 1. Carrega a lista de efetivo
-        await loadEmployeeList();
-        setProgress(40);
+        const resumo = `
+            <b>Militar:</b> ${inputNome.value}<br>
+            <b>Matrícula:</b> ${inputMat.value}<br>
+            <b>Data:</b> ${document.getElementById('dataFolga').value}<br>
+            <b>Tipo:</b> ${folgaSel.innerText}
+        `;
+        document.getElementById('resumo').innerHTML = resumo;
+        document.getElementById('confirmModal').style.display = 'flex';
+    };
 
-        // 2. Verifica período aberto (datas fornecidas pelo script)
-        try{
-            const res = await fetchWithTimeout(SCRIPT_URL+'?action=datas',{},7000);
+    document.getElementById('finalConfirm').onclick = async () => {
+        const btn = document.getElementById('finalConfirm');
+        btn.disabled = true;
+        btn.innerText = "Enviando...";
+        
+        // Simulação/Lógica de envio via POST
+        // Aqui você insere o fetch(SCRIPT_URL, {method: 'POST', body: ...})
+        
+        alert("Solicitação enviada! Verifique seu e-mail.");
+        location.reload();
+    };
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    async function verificarPrazoServidor() {
+        const statusDiv = document.getElementById('statusPrazo');
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=datas`);
             const d = await res.json();
-            
-            if(d.error){ throw new Error(d.error); }
-            
-            const now = new Date();
-            // As datas vêm no formato ISO
-            const abertura = new Date(d.abertura);
+            const agora = new Date();
             const fechamento = new Date(d.fechamento);
-
-            setDateLimits(abertura, fechamento); // Define limites
-            document.getElementById('initialLoading').style.display = 'none';
             
-            let message = '';
-            let type = 'success';
-            
-            if(now < abertura){
-                message = `⏳ Abertura para solicitações em ${abertura.toLocaleString('pt-BR')}`;
-                type = 'error';
-                DERSO.formEl.style.display = 'none';
+            if(agora > fechamento) {
+                statusDiv.innerHTML = "<b>⛔ PRAZO ENCERRADO:</b> O formulário está fechado para este mês.";
+                statusDiv.className = "info-message error";
+                statusDiv.style.display = "block";
+                form.style.pointerEvents = "none";
+                form.style.opacity = "0.5";
+            } else {
+                statusDiv.innerHTML = `<b>🚨 PRAZO:</b> Aberto até ${fechamento.toLocaleDateString('pt-BR')}`;
+                statusDiv.className = "info-message warning";
+                statusDiv.style.display = "block";
             }
-            else if(now > fechamento){
-                message = `⛔ Período de solicitações encerrado em ${fechamento.toLocaleString('pt-BR')}`;
-                type = 'error';
-                DERSO.formEl.style.display = 'none';
-            }
-            else{ // aberto
-                DERSO.formEl.style.display = 'block';
-                const diffMs = fechamento - now;
-                // Cálculo de dias exato (ajustado para horas)
-                const diffDays = Math.floor(diffMs/(1000*60*60*24));
-                const diffHours = Math.ceil((diffMs % (1000*60*60*24)) / (1000*60*60));
-                
-                const timeRemaining = `${diffDays} dia(s) e ${diffHours} hora(s)`;
-
-                if(diffDays <= 3) type = 'warning'; // Alerta se faltar 3 dias ou menos
-
-                message = `🚨 **PRAZO:** Restam ${timeRemaining} — fechamento: ${fechamento.toLocaleString('pt-BR')}`;
-            }
-            showPersistentMessage(message, type);
-
-        }catch(err){
-            console.warn("Erro ao carregar datas do servidor:", err);
-            // Se falhar, usa o fallback de datas para o próximo mês
-            setDateLimits(); 
-            document.getElementById('initialLoading').style.display = 'none';
-            DERSO.formEl.style.display = 'block';
-            showPersistentMessage('⚠️ Falha ao obter prazo. O formulário está aberto, mas verifique se o Apps Script está ativo e as datas configuradas.','error');
+        } catch (e) { 
+            console.log("Servidor offline ou URL não configurada."); 
         }
-
-        // Tenta restaurar último e-mail usado
-        try{ 
-            const lastEmail = localStorage.getItem('derso_lastEmail'); 
-            if(lastEmail) DERSO.emailInput.value = lastEmail; 
-        }catch(e){}
-
-        const now = new Date(); 
-        const mes = String(now.getMonth()+1).padStart(2,'0'); 
-        const ano = now.getFullYear();
-        document.getElementById('footerText').textContent = `Desenvolvido na 1ª Cia do 1º BPM — PVSA Pedro Porto — ${mes}/${ano}`;
-        setProgress(60);
     }
-
-    // Listeners
-    document.addEventListener('DOMContentLoaded', ()=>{
-        initializeForm();
-        DERSO.matriculaInput.addEventListener('input', debouncedCheckMatricula);
-        DERSO.emailInput.addEventListener('input', updateEmailDatalist);
-        DERSO.formEl.addEventListener('submit', submitForm);
-        document.getElementById('btnHistory').addEventListener('click', showHistoryModal);
-        document.getElementById('closeHistory').addEventListener('click', ()=>document.getElementById('historyModal').style.display = 'none');
-
-        // Impede submit por Enter em inputs
-        document.addEventListener('keydown', (e)=>{
-            if(e.key === 'Enter' && e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')){
-                e.preventDefault();
-            }
-        });
-    });
-
 </script>
+
 </body>
 </html>
