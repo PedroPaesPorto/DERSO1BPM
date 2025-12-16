@@ -4,344 +4,364 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitação de Folga - DERSO</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
     <style>
+        /* 1. PALETA DE CORES INSTITUCIONAL (Mantida do HTML 1) */
         :root {
             --azul-marinho: #0C3667;
-            --dourado: #C9A400;
-            --azul-hover: #1a5ca7;
+            --dourado-amarelo: #FFD700;
+            --azul-claro-hover: #1a5ca7;
             --erro: #b00020;
-            --alerta-prazo: #D36400;
             --sucesso: #388e3c;
             --cinza-fundo: #f4f7f9;
-            --borda: #bdbdbd;
+            --cinza-texto: #333333;
+            --borda-campo: #aaa;
         }
 
-        * { box-sizing: border-box; }
-        body { 
-            margin: 0; 
-            font-family: 'Roboto', sans-serif; 
-            background: var(--cinza-fundo); 
-            display: flex; 
-            justify-content: center; 
-            padding: 20px;
+        body {
+            background-color: var(--cinza-fundo);
+            font-family: 'Roboto', Arial, sans-serif;
+            color: var(--cinza-texto);
+            margin: 0; padding: 0;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
         }
 
-        /* Estilo Visual do HTML 1 */
-        .container { 
-            width: 100%; 
-            max-width: 700px; 
-            background: #fff; 
-            border-radius: 12px; 
-            padding: 30px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+        .container {
+            width: 95%; max-width: 500px;
+            background-color: #ffffff;
+            border-radius: 8px; padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            display: flex; flex-direction: column;
             position: relative;
         }
 
-        #progressBarContainer { 
-            position: absolute; left: 0; top: 0; width: 100%; height: 6px; 
-            background: #e6e9ee; border-radius: 12px 12px 0 0; overflow: hidden; 
+        /* Barra de progresso DOURADA */
+        #progressBarContainer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background-color: #e0e0e0; border-radius: 8px 8px 0 0; overflow: hidden;
         }
-        #progressBar { height: 100%; width: 0; background: linear-gradient(90deg, var(--dourado), var(--azul-marinho)); transition: width 0.4s; }
+        #progressBar {
+            width: 0%; height: 100%;
+            background-color: var(--dourado-amarelo);
+            transition: width 0.4s ease;
+        }
 
-        header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        .logos { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; }
-        .logos img { height: 65px; }
+        .logos { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .logos img { height: 70px; object-fit: contain; }
 
-        h1 { font-family: 'Merriweather', serif; color: var(--azul-marinho); font-size: 22px; margin: 5px 0; }
-        .subtitle { font-size: 14px; color: #555; font-weight: 500; }
+        h2 {
+            font-family: 'Merriweather', serif; text-align: center;
+            color: var(--azul-marinho); font-size: 28px; font-weight: 700;
+            margin-bottom: 10px; line-height: 1.2; letter-spacing: -0.5px;
+            border-bottom: 2px solid var(--dourado-amarelo); padding-bottom: 5px;
+        }
 
-        fieldset { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        legend { font-weight: 700; color: var(--azul-marinho); padding: 0 10px; font-size: 14px; text-transform: uppercase; }
+        .subtitle { text-align: center; color: var(--cinza-texto); font-size: 16px; margin-bottom: 25px; }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #333; }
+        .form-group, fieldset { margin-bottom: 20px; width: 100%; border: none; padding: 0; }
+        label, legend { display: block; margin-bottom: 8px; color: var(--cinza-texto); font-weight: 500; font-size: 15px; }
+
+        .form-group input:not([type="radio"]), .form-group select {
+            width: 100%; padding: 12px 15px; font-size: 15px;
+            border: 1px solid var(--borda-campo); border-radius: 4px;
+            box-sizing: border-box; transition: all 0.3s ease;
+        }
+
+        .form-group input:focus { border-color: var(--azul-claro-hover); outline: none; box-shadow: 0 0 0 2px rgba(12, 54, 103, 0.2); }
+        input[readonly] { background-color: #e9ecef; cursor: not-allowed; }
+
+        /* Toggle Buttons HTML 1 */
+        .radio-group-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .radio-group-buttons input[type="radio"] { display: none; }
+        .radio-group-buttons label {
+            padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px;
+            cursor: pointer; font-size: 13px; text-transform: uppercase; font-weight: 500;
+            transition: all 0.2s;
+        }
+        .radio-group-buttons input[type="radio"]:checked + label {
+            background-color: var(--azul-marinho); color: var(--dourado-amarelo);
+            border-color: var(--azul-marinho); font-weight: 700;
+        }
+
+        /* Botões */
+        .button-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .button {
+            background-color: var(--azul-claro-hover); color: #fff; border: none;
+            cursor: pointer; padding: 14px 20px; font-size: 16px; font-weight: 700;
+            border-radius: 4px; text-transform: uppercase; width: 100%; transition: all 0.3s;
+        }
+        .button:hover { background-color: var(--azul-marinho); transform: translateY(-1px); }
         
-        input, select { 
-            width: 100%; padding: 12px; border: 1px solid var(--borda); 
-            border-radius: 6px; font-size: 14px; transition: border 0.3s;
+        /* Botão Histórico adaptado ao visual 1 */
+        .button-secondary {
+            background-color: transparent; color: var(--azul-marinho);
+            border: 1px solid var(--azul-marinho); font-size: 13px; padding: 8px;
         }
-        input:focus { border-color: var(--azul-marinho); outline: none; box-shadow: 0 0 5px rgba(12,54,103,0.1); }
-        input[readonly] { background: #f8f9fa; cursor: not-allowed; }
-
-        /* Botões de Folga Estilo HTML 1 */
-        .radio-group-buttons { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-        .radio-button { 
-            padding: 10px; border: 1px solid var(--borda); border-radius: 6px; 
-            background: #fff; cursor: pointer; font-weight: 600; font-size: 12px; text-align: center;
-        }
-        .radio-button[aria-checked="true"] { 
-            background: var(--azul-marinho); color: #fff; border-color: var(--azul-marinho); 
-        }
-
-        .actions { display: flex; gap: 10px; margin-top: 20px; }
-        .button { 
-            flex: 1; padding: 14px; border-radius: 8px; border: none; 
-            background: var(--azul-marinho); color: #fff; font-weight: 700; 
-            cursor: pointer; text-transform: uppercase; transition: transform 0.1s, background 0.2s;
-        }
-        .button:active { transform: scale(0.98); }
-        .button.secondary { background: #6c757d; }
-        .button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .button-secondary:hover { background-color: #f0f4f8; }
 
         /* Mensagens */
-        .info-message { padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; display: none; border-left: 5px solid; }
-        .info-message.success { background: #e8f5e9; color: var(--sucesso); border-left-color: var(--sucesso); }
-        .info-message.error { background: #ffebee; color: var(--erro); border-left-color: var(--erro); }
-        .info-message.warning { background: #fff3e0; color: var(--alerta-prazo); border-left-color: var(--alerta-prazo); }
-
-        /* Spinners de Carregamento (Iguais ao 1) */
-        #loadingOverlay { 
-            position: fixed; inset: 0; background: rgba(255,255,255,0.9); 
-            display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; 
+        .info-message {
+            text-align: center; border-radius: 4px; font-size: 15px; font-weight: 600;
+            display: none; margin-bottom: 25px; padding: 12px 15px; border-left: 5px solid;
         }
-        .spinner { 
-            width: 40px; height: 40px; border: 4px solid #f3f3f3; 
-            border-top: 4px solid var(--azul-marinho); border-radius: 50%; animation: spin 1s linear infinite; 
+        .info-message.success { background-color: #e8f5e9; color: var(--sucesso); border-left-color: var(--sucesso); }
+        .info-message.error { background-color: #fce4ec; color: var(--erro); border-left-color: var(--erro); }
+
+        /* Loading Overlay e Spinner HTML 1 */
+        #loadingOverlay {
+            position: fixed; inset: 0; background-color: rgba(255, 255, 255, 0.9);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000; flex-direction: column;
+        }
+        .spinner {
+            border: 4px solid rgba(12, 54, 103, 0.2); border-top: 4px solid var(--azul-claro-hover);
+            border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-top: 15px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Modais */
-        .modal-base { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000; }
-        .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; }
-        .history-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
-        .history-list li { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+        /* Modal de Histórico */
+        .modal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 2000; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .history-item { padding: 8px; border-bottom: 1px solid #eee; font-size: 13px; }
 
-        @media(max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 576px) { .logos img { height: 50px; } h2 { font-size: 24px; } }
     </style>
 </head>
 <body>
+    <div id="loadingOverlay">
+        <p id="loadingText">Enviando solicitação. Aguarde...</p>
+        <div class="spinner"></div>
+    </div>
 
-<div id="loadingOverlay">
-    <div class="spinner"></div>
-    <p id="loadingText" style="margin-top:15px; font-weight:bold; color:var(--azul-marinho)">Processando...</p>
-</div>
-
-<div class="container">
-    <div id="progressBarContainer"><div id="progressBar"></div></div>
-
-    <header>
+    <div class="container">
+        <div id="progressBarContainer"><div id="progressBar"></div></div>
+        
         <div class="logos">
             <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
             <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1º BPM">
         </div>
-        <h1>DERSO — 1º BPM</h1>
-        <div class="subtitle">Solicitação de Diária Especial</div>
-    </header>
 
-    <div id="prazoMessage" class="info-message"></div>
+        <h2>DERSO 1º BPM</h2>
+        <p class="subtitle">Formulário de Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO</p>
 
-    <form id="dersoForm">
-        <fieldset>
-            <legend>Identificação</legend>
-            <div class="grid">
-                <div>
-                    <label>E-mail</label>
-                    <input type="email" id="email" list="emailProviders" placeholder="exemplo@pm.ro.gov.br">
-                    <datalist id="emailProviders"></datalist>
-                </div>
-                <div>
-                    <label>Matrícula (9 dígitos)</label>
-                    <input type="text" id="matricula" inputmode="numeric" placeholder="1000XXXXX" required>
-                    <div id="matError" style="color:red; font-size:11px; margin-top:4px"></div>
-                </div>
-                <div style="grid-column: span 2">
-                    <label>Nome Completo</label>
-                    <input type="text" id="nome" readonly placeholder="Aguardando matrícula...">
-                </div>
-                <div style="grid-column: span 2">
-                    <label>Data da Folga</label>
-                    <input type="date" id="data" required>
-                    <div id="dateHelp" style="font-size:11px; color:#666; mt:4px"></div>
-                </div>
-            </div>
-        </fieldset>
+        <div id="prazoMessage" class="info-message"></div>
 
-        <fieldset>
-            <legend>Tipo de Folga</legend>
-            <div class="radio-group-buttons" id="folgaGroup"></div>
-        </fieldset>
-
-        <div class="actions">
-            <button type="button" class="button secondary" id="btnHistory">Histórico</button>
-            <button type="submit" class="button" id="btnSubmit">Enviar Solicitação</button>
+        <div id="initialLoading" style="text-align: center; padding: 30px;">
+            <p>Carregando sistema...</p>
+            <div class="spinner"></div>
         </div>
-    </form>
 
-    <div id="statusMessage" class="info-message"></div>
-</div>
+        <form id="dersoForm" style="display: none;">
+            <div class="form-group">
+                <label for="email">E-mail:</label>
+                <input type="email" id="email" name="email" list="emailProviders" required>
+                <datalist id="emailProviders"></datalist>
+            </div>
 
-<div id="historyModal" class="modal-base">
-    <div class="modal-content">
-        <h3 style="margin-top:0; color:var(--azul-marinho)">Meu Histórico</h3>
-        <div id="historyBox"></div>
-        <button type="button" class="button" style="margin-top:15px" onclick="closeModal('historyModal')">Fechar</button>
-    </div>
-</div>
+            <div class="form-group">
+                <label for="matricula">Matrícula:</label>
+                <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345">
+                <div id="matriculaError" style="color:var(--erro); font-size:12px; font-weight:600; margin-top:5px"></div>
+            </div>
 
-<script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7-pdQ3f8UMXZylF-4M4Qai6UWGsXPdqfYhoyuPuEVBL_nbBrCn2DfyfpHVmgAFEhh/exec";
-    
-    // Configuração de UI e Delays (Simulando o tempo de resposta do HTML 1)
-    const UI = {
-        overlay: document.getElementById('loadingOverlay'),
-        loadText: document.getElementById('loadingText'),
-        progress: document.getElementById('progressBar'),
-        form: document.getElementById('dersoForm')
-    };
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="nome" readonly required>
+            </div>
 
-    function showOverlay(text) {
-        UI.loadText.textContent = text;
-        UI.overlay.style.display = 'flex';
-    }
+            <fieldset>
+                <legend>Tipo de Folga*:</legend>
+                <div class="radio-group-buttons">
+                    <input type="radio" id="folga24H" name="folga" value="24H" required><label for="folga24H">24H</label>
+                    <input type="radio" id="folga48H" name="folga" value="48H"><label for="folga48H">48H</label>
+                    <input type="radio" id="folga72H" name="folga" value="72H"><label for="folga72H">72H</label>
+                    <input type="radio" id="folga96H" name="folga" value="96H"><label for="folga96H">96H</label>
+                    <input type="radio" id="folgaLE" name="folga" value="FOLGA LE"><label for="folgaLE">FOLGA LE</label>
+                    <input type="radio" id="folga1" name="folga" value="1ª Folga"><label for="folga1">1ª FOLGA</label>
+                    <input type="radio" id="folga2" name="folga" value="2ª Folga"><label for="folga2">2ª FOLGA</label>
+                    <input type="radio" id="folgaExp" name="folga" value="Expediente"><label for="folgaExp">EXPEDIENTE</label>
+                </div>
+            </fieldset>
 
-    function hideOverlay() { UI.overlay.style.display = 'none'; }
+            <div class="form-group">
+                <label for="data">Data:</label>
+                <input type="date" id="data" name="data" required>
+                <div id="dateLimitMessage" style="font-size: 12px; color: #666; margin-top: 5px;"></div>
+            </div>
 
-    // Inicialização
-    async function init() {
-        showOverlay("Carregando Sistema...");
-        renderFolgas();
+            <div class="button-container">
+                <button type="submit" class="button">Enviar Solicitação</button>
+                <button type="button" id="btnHistory" class="button button-secondary">Consultar Meu Histórico</button>
+            </div>
+        </form>
         
-        try {
-            // Busca dados iniciais
+        <div id="statusMessage" class="info-message"></div>
+        <div class="footer" id="footerText" style="text-align: center; margin-top: 20px; font-size: 11px; color: #888;"></div>
+    </div>
+
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin: 0 0 15px 0; color: var(--azul-marinho);">Minhas Solicitações</h3>
+            <div id="historyContent" style="max-height: 300px; overflow-y: auto;"></div>
+            <button onclick="closeModal()" class="button" style="margin-top: 15px; padding: 10px;">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7-pdQ3f8UMXZylF-4M4Qai6UWGsXPdqfYhoyuPuEVBL_nbBrCn2DfyfpHVmgAFEhh/exec";
+        window.employeeList = {};
+
+        // Inicia o sistema
+        async function init() {
+            setDateLimits();
+            await loadEmployees();
+            checkSystemStatus();
+        }
+
+        async function loadEmployees() {
+            try {
+                const r = await fetch(SCRIPT_URL + "?action=lista");
+                window.employeeList = await r.json();
+                document.getElementById("initialLoading").style.display = "none";
+                document.getElementById("dersoForm").style.display = "block";
+            } catch (e) {
+                alert("Erro ao carregar dados. Recarregue a página.");
+            }
+        }
+
+        // Pesquisa de Matrícula (Simulando o tempo de busca do HTML 1)
+        document.getElementById("matricula").addEventListener("blur", function() {
+            const m = this.value.trim();
+            const errorDiv = document.getElementById("matriculaError");
+            const nomeInput = document.getElementById("nome");
+
+            if (!m) return;
+            
+            // Padronização 1000...
+            let matFinal = m.replace(/\D/g, '');
+            if (!matFinal.startsWith("1000")) matFinal = "1000" + matFinal;
+            this.value = matFinal;
+
+            if (window.employeeList[matFinal]) {
+                nomeInput.value = window.employeeList[matFinal];
+                errorDiv.textContent = "";
+                this.style.borderColor = "var(--sucesso)";
+            } else {
+                nomeInput.value = "";
+                errorDiv.textContent = "Matrícula não cadastrada!";
+                this.style.borderColor = "var(--erro)";
+            }
+        });
+
+        // Função de Histórico (Mantida do HTML 2 com estilo do 1)
+        document.getElementById("btnHistory").onclick = async function() {
+            const mat = document.getElementById("matricula").value;
+            if (!mat) return alert("Digite sua matrícula primeiro.");
+
+            document.getElementById("loadingOverlay").style.display = "flex";
+            document.getElementById("loadingText").textContent = "Buscando histórico...";
+
+            try {
+                const r = await fetch(`${SCRIPT_URL}?action=historico&matricula=${mat}`);
+                const data = await r.json();
+                
+                let html = "";
+                if (data.historico && data.historico.length > 0) {
+                    data.historico.forEach(item => {
+                        html += `<div class="history-item">
+                            <strong>${item.Data}</strong> - ${item.Folga}<br>
+                            <small style="color: ${item.Status === 'APROVADA' ? 'green' : 'orange'}">${item.Status}</small>
+                        </div>`;
+                    });
+                } else {
+                    html = "<p>Nenhum registro encontrado.</p>";
+                }
+                
+                document.getElementById("historyContent").innerHTML = html;
+                document.getElementById("historyModal").style.display = "flex";
+            } catch (e) {
+                alert("Erro ao consultar histórico.");
+            } finally {
+                document.getElementById("loadingOverlay").style.display = "none";
+            }
+        };
+
+        function setDateLimits() {
+            const input = document.getElementById("data");
+            const today = new Date();
+            const start = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+            const end = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+            
+            input.min = start.toISOString().split("T")[0];
+            input.max = end.toISOString().split("T")[0];
+            document.getElementById("dateLimitMessage").textContent = 
+                `Permitido: ${start.toLocaleDateString('pt-BR')} a ${end.toLocaleDateString('pt-BR')}`;
+        }
+
+        async function checkSystemStatus() {
             const res = await fetch(SCRIPT_URL + "?action=datas");
             const d = await res.json();
-            setupDates(d);
+            const agora = new Date();
+            const fechamento = new Date(d.fechamento);
             
-            // Simula o delay de carregamento do HTML 1 para manter a identidade visual
-            setTimeout(() => {
-                hideOverlay();
-                UI.progress.style.width = "100%";
-                setTimeout(() => UI.progress.style.width = "0", 1000);
-            }, 800);
-        } catch (e) {
-            hideOverlay();
-            alert("Erro ao conectar com o servidor.");
-        }
-    }
-
-    function setupDates(d) {
-        const input = document.getElementById('data');
-        const help = document.getElementById('dateHelp');
-        const now = new Date();
-        const minDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        const maxDate = new Date(now.getFullYear(), now.getMonth() + 2, 0);
-
-        input.min = minDate.toISOString().split('T')[0];
-        input.max = maxDate.toISOString().split('T')[0];
-        input.value = input.min;
-        help.textContent = `Válido para o próximo mês.`;
-    }
-
-    function renderFolgas() {
-        const tipos = ['24H','48H','72H','96H','FOLGA LE','1ª FOLGA','2ª FOLGA','EXPEDIENTE'];
-        const container = document.getElementById('folgaGroup');
-        tipos.forEach(t => {
-            const btn = document.createElement('div');
-            btn.className = 'radio-button';
-            btn.textContent = t;
-            btn.onclick = () => {
-                document.querySelectorAll('.radio-button').forEach(b => b.setAttribute('aria-checked', 'false'));
-                btn.setAttribute('aria-checked', 'true');
-            };
-            container.appendChild(btn);
-        });
-    }
-
-    // Lógica de Matrícula com Delay de Pesquisa
-    document.getElementById('matricula').addEventListener('input', debounce(async (e) => {
-        const mat = e.target.value.trim();
-        if (mat.length < 5) return;
-
-        document.getElementById('nome').value = "Pesquisando...";
-        
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=lookup&matricula=${mat}`);
-            const data = await res.json();
-            if (data.nome) {
-                document.getElementById('nome').value = data.nome;
-                document.getElementById('matError').textContent = "";
+            if (agora > fechamento) {
+                document.getElementById("prazoMessage").innerHTML = "⛔ Inscrições Encerradas";
+                document.getElementById("prazoMessage").className = "info-message error";
+                document.getElementById("prazoMessage").style.display = "block";
+                document.getElementById("dersoForm").style.display = "none";
             } else {
-                document.getElementById('nome').value = "";
-                document.getElementById('matError').textContent = "Matrícula não encontrada.";
+                const diff = Math.ceil((fechamento - agora) / (1000 * 60 * 60 * 24));
+                document.getElementById("prazoMessage").innerHTML = `🚨 Restam ${diff} dia(s) para o fechamento.`;
+                document.getElementById("prazoMessage").className = "info-message success";
+                document.getElementById("prazoMessage").style.display = "block";
             }
-        } catch (err) {
-            document.getElementById('nome').value = "Erro na busca.";
         }
-    }, 600));
 
-    // FUNÇÃO DE HISTÓRICO (Mantida do HTML 2)
-    document.getElementById('btnHistory').onclick = async () => {
-        const mat = document.getElementById('matricula').value;
-        if (!mat) return alert("Digite sua matrícula primeiro.");
+        function closeModal() { document.getElementById("historyModal").style.display = "none"; }
 
-        const box = document.getElementById('historyBox');
-        box.innerHTML = "Carregando histórico...";
-        document.getElementById('historyModal').style.display = 'flex';
-
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=historico&matricula=${mat}`);
-            const data = await res.json();
+        // Envio do formulário
+        document.getElementById("dersoForm").onsubmit = async function(e) {
+            e.preventDefault();
+            document.getElementById("loadingOverlay").style.display = "flex";
+            document.getElementById("loadingText").textContent = "Enviando dados...";
             
-            if (data.historico && data.historico.length > 0) {
-                let html = `<ul class="history-list">`;
-                data.historico.forEach(item => {
-                    const statusCor = item.Status === 'APROVADA' ? 'green' : (item.Status === 'RECUSADA' ? 'red' : 'orange');
-                    html += `<li><strong>${item.Data}</strong> - ${item.Folga} <br> 
-                             <span style="color:${statusCor}; font-size:11px">● ${item.Status || 'PENDENTE'}</span></li>`;
-                });
-                html += `</ul>`;
-                box.innerHTML = html;
-            } else {
-                box.innerHTML = "Nenhuma solicitação encontrada.";
+            const fd = new FormData(this);
+            // Formatar data para PT-BR antes de enviar
+            const dataOriginal = document.getElementById("data").value;
+            const dataBr = dataOriginal.split("-").reverse().join("/");
+            fd.set("data", dataBr);
+
+            try {
+                const res = await fetch(SCRIPT_URL, { method: "POST", body: new URLSearchParams(fd) });
+                const result = await res.json();
+                if(result.success) {
+                    alert("Sucesso! Verifique seu e-mail.");
+                    location.reload();
+                } else {
+                    alert("Erro: " + result.error);
+                }
+            } catch (e) {
+                alert("Erro de conexão.");
+            } finally {
+                document.getElementById("loadingOverlay").style.display = "none";
             }
-        } catch (e) {
-            box.innerHTML = "Erro ao carregar.";
-        }
-    };
-
-    // Envio do Formulário
-    UI.form.onsubmit = async (e) => {
-        e.preventDefault();
-        const folgaBtn = document.querySelector('.radio-button[aria-checked="true"]');
-        if (!folgaBtn) return alert("Selecione o tipo de folga!");
-
-        showOverlay("Enviando Dados...");
-        
-        const payload = new URLSearchParams({
-            matricula: document.getElementById('matricula').value,
-            nome: document.getElementById('nome').value,
-            email: document.getElementById('email').value,
-            data: document.getElementById('data').value.split('-').reverse().join('/'),
-            folga: folgaBtn.textContent
-        });
-
-        try {
-            const res = await fetch(SCRIPT_URL, { method: 'POST', body: payload });
-            const result = await res.json();
-            hideOverlay();
-            if (result.success) {
-                alert("✅ Solicitação enviada com sucesso!");
-                location.reload();
-            } else {
-                alert("❌ Erro: " + result.error);
-            }
-        } catch (err) {
-            hideOverlay();
-            alert("Erro de conexão.");
-        }
-    };
-
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function debounce(fn, delay) {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => fn(...args), delay);
         };
-    }
 
-    window.onload = init;
-</script>
+        const now = new Date();
+        document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM - ${now.toLocaleDateString()}`;
+
+        window.onload = init;
+    </script>
 </body>
 </html>
