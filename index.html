@@ -247,24 +247,27 @@
         }
     });
 
-    // Histórico (HTML 2 integrado)
-    document.getElementById('btnHist').onclick = async () => {
-        const mat = document.getElementById('matricula').value;
-        if (!mat) return alert("Insira a matrícula para consultar.");
-        
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=historico&matricula=${mat}`);
-            const data = await res.json();
-            let h = "";
-            if (data.historico?.length) {
-                data.historico.forEach(i => h += `<div style="border-bottom:1px solid #eee; padding:5px"><b>${i.Data}</b>: ${i.Folga} (${i.Status})</div>`);
-            } else { h = "Sem registros."; }
-            document.getElementById('histLista').innerHTML = h;
-            document.getElementById('modalHist').style.display = 'flex';
-        } catch(e) { alert("Erro ao buscar histórico."); }
-        document.getElementById('loadingOverlay').style.display = 'none';
-    };
+    // Histórico Corrigido (Sem o Status Pendente)
+document.getElementById('btnHist').onclick = async () => {
+    const mat = document.getElementById('matricula').value;
+    if (!mat) return alert("Insira a matrícula para consultar.");
+    
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    try {
+        const res = await fetch(`${SCRIPT_URL}?action=historico&matricula=${mat}`);
+        const data = await res.json();
+        let h = "";
+        if (data.historico?.length) {
+            data.historico.forEach(i => {
+                // Removemos o (${i.Status}) daqui para não aparecer "PENDENTE"
+                h += `<div style="border-bottom:1px solid #eee; padding:10px 5px"><b>📅 ${i.Data}</b> - ${i.Folga}</div>`;
+            });
+        } else { h = "<p style='text-align:center'>Nenhuma solicitação encontrada.</p>"; }
+        document.getElementById('histLista').innerHTML = h;
+        document.getElementById('modalHist').style.display = 'flex';
+    } catch(e) { alert("Erro ao buscar histórico."); }
+    document.getElementById('loadingOverlay').style.display = 'none';
+};
 
     document.getElementById('dersoForm').onsubmit = async (e) => {
         e.preventDefault();
