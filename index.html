@@ -388,12 +388,12 @@
     </div>
 
     <script>
-           // ***********************************************
+    // ***********************************************
     // AQUI ESTÁ A NOVA URL ATUALIZADA:
     // ***********************************************
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7-pdQ3f8UMXZylF-4M4Qai6UWGsXPdqfYhoyuPuEVBL_nbBrCn2DfyfpHVmgAFEhh/exec"; 
+    const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"];
 
-        const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br"];
         window.employeeList = {};
 
         // FUNÇÃO PARA BUSCAR HISTÓRICO
@@ -554,7 +554,7 @@
             }).catch(() => { initialLoadingDiv.style.display = "none"; formDiv.style.display = "block"; });
             
             const now = new Date();
-            document.getElementById("footerText").textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${mes.toString().padStart(2,'0')}/${ano}``;
+            document.getElementById("footerText").textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${now.getFullYear()}`;
         }
 
         document.addEventListener("DOMContentLoaded",()=>{
