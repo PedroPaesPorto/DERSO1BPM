@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitação de Folga - DERSO</title>
+    <title>Solicitação de Folga - DERSO </title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root{
@@ -20,7 +20,7 @@
             --font-size-sm: 13px;
         }
         *{box-sizing:border-box}
-        body{margin:0;font-family:'Roboto',Arial,sans-serif;background:var(--cinza-fundo);color:var(--cinza-texto);display:flex;justify-content:center;align-items:flex-start;padding:24px}
+        body{margin:0;font-family:'Roboto',Arial,Helvetica,sans-serif;background:var(--cinza-fundo);color:var(--cinza-texto);display:flex;justify-content:center;align-items:flex-start;padding:24px}
         .container{width:100%;max-width:720px;background:#fff;border-radius:10px;padding:22px 24px;box-shadow:0 10px 30px rgba(0,0,0,.12);position:relative}
         #progressBarContainer{position:absolute;left:0;top:0;width:100%;height:6px;background:#e6e9ee;border-radius:10px;overflow:hidden}
         #progressBar{height:100%;width:0;background:linear-gradient(90deg,var(--dourado),var(--azul-marinho));transition:width .35s ease}
@@ -34,126 +34,116 @@
         legend{font-weight:600;padding:0 6px}
         .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
         label{display:block;font-size:var(--font-size-sm);margin-bottom:6px}
-        input, select{width:100%;padding:10px;border:1px solid var(--borda);border-radius:6px;font-size:14px}
+        input[type=text],input[type=email],input[type=date],select{width:100%;padding:10px;border:1px solid var(--borda);border-radius:6px;font-size:14px}
         input[readonly]{background:#f1f3f5}
         .small{font-size:12px;color:#666}
         .radio-group-buttons{display:flex;flex-wrap:wrap;gap:8px}
-        .radio-button{padding:8px 10px;border:1px solid var(--borda);border-radius:6px;cursor:pointer;font-weight:600;font-size:var(--font-size-sm);background:#fff}
+        .radio-button{padding:8px 10px;border:1px solid var(--borda);border-radius:6px;cursor:pointer;font-weight:600;font-size:var(--font-size-sm)}
         .radio-button[aria-checked="true"]{background:var(--azul-marinho);color:var(--dourado);border-color:var(--azul-marinho)}
         .error{color:var(--erro);font-size:var(--font-size-sm);margin-top:6px}
         .info-message{display:none;padding:12px;border-left:4px solid;border-radius:6px;margin-bottom:12px}
         .info-message.success{background:#e8f5e9;color:var(--sucesso);border-left-color:var(--sucesso)}
         .info-message.error{background:#fff0f2;color:var(--erro);border-left-color:var(--erro)}
         .info-message.warning{background:#fff8e1;color:var(--alerta-prazo);border-left-color:var(--alerta-prazo)}
-        .actions{display:flex;gap:10px;margin-top:10px}
+        .actions{display:flex;gap:10px}
         .button{flex:1;padding:12px 14px;border-radius:8px;border:none;background:var(--azul-hover);color:#fff;font-weight:700;cursor:pointer;text-transform:uppercase;transition:background .2s}
         .button.secondary{background:#fff;border:1px solid var(--borda);color:var(--cinza-texto);text-transform:none}
         .button:hover:not(:disabled){background:var(--azul-marinho)}
         .button:disabled{opacity:.6;cursor:not-allowed}
         
-        /* Modais e Spinners */
-        .spinner-base{width:30px;height:30px;border-radius:50%;border:4px solid rgba(0,0,0,.08);border-top:4px solid var(--azul-hover);animation:spin 1s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        #loadingOverlay{position:fixed;top:0;left:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.85);z-index:9999}
+        /* CSS ADICIONAL DO HISTÓRICO (HTML 2) */
         .modal-base{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center;z-index:9998}
         .modal-content{background:#fff;padding:18px;border-radius:10px;max-width:520px;width:92%;box-shadow:0 5px 15px rgba(0,0,0,.3)}
+        .modal-title{margin:0 0 8px 0;color:var(--azul-marinho)}
+        .modal-body{font-size:14px;color:#333;margin-bottom:12px}
         .history-list{list-style:none;padding:0;margin-top:10px}
-        .history-list li{margin-bottom:5px;padding:8px;border-bottom:1px dashed #eee;font-size:var(--font-size-sm);display:flex;justify-content:space-between}
-        
+        .history-list li{margin-bottom:5px;padding:5px;border-bottom:1px dashed #eee;font-size:var(--font-size-sm)}
+        #loadingOverlay{position:fixed;top:0;left:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.85);z-index:9999}
+        .spinner-base{width:30px;height:30px;border-radius:50%;border:4px solid rgba(0,0,0,.08);border-top:4px solid var(--azul-hover);animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
         .field-with-spinner{position:relative}
         .mini-spinner{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;border:3px solid rgba(0,0,0,.08);border-top:3px solid var(--azul-hover);animation:spin .8s linear infinite;display:none}
         .is-loading .mini-spinner{display:block}
 
-        @media(max-width:640px){.grid{grid-template-columns:1fr}}
+        @media(max-width:640px){.grid{grid-template-columns:1fr}.logos img{height:44px}.container{padding:18px}}
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay">
+<div id="loadingOverlay" role="status" aria-live="polite">
     <div style="text-align:center">
         <div class="spinner-base"></div>
         <div style="margin-top:10px;color:var(--azul-marinho)">Enviando...</div>
     </div>
 </div>
 
-<div class="container">
-    <div id="progressBarContainer"><div id="progressBar"></div></div>
+<div class="container" id="app">
+    <div id="progressBarContainer"><div id="progressBar" aria-hidden="true"></div></div>
 
     <header>
         <div class="logos">
             <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="Brasão PMRO">
             <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1º BPM">
         </div>
-        <div>
+        <div style="flex:1">
             <h1>DERSO — 1º BPM</h1>
             <div class="subtitle">Solicitação de Diária Especial de Reforço</div>
         </div>
     </header>
 
-    <div id="prazoMessage" class="info-message"></div>
+    <div id="prazoMessage" class="info-message" role="status" aria-live="polite"></div>
 
-    <form id="dersoForm">
-        <fieldset>
-            <legend>Identificação</legend>
+    <form id="dersoForm" aria-labelledby="formTitle">
+        <fieldset aria-labelledby="idTitle">
+            <legend id="idTitle">Identificação</legend>
             <div class="grid">
                 <div>
-                    <label>E-mail</label>
-                    <input type="email" id="email" list="emailProviders">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" list="emailProviders" autocomplete="email">
                     <datalist id="emailProviders"></datalist>
                 </div>
                 <div>
-                    <label>Matrícula</label>
+                    <label for="matricula">Matrícula</label>
                     <div class="field-with-spinner" id="matBlock">
-                        <input type="text" id="matricula" required placeholder="Ex: 100012345">
-                        <div class="mini-spinner"></div>
+                        <input type="text" id="matricula" name="matricula" inputmode="numeric" pattern="\d*" required placeholder="Ex: 100012345">
+                        <div class="mini-spinner" id="matSpinner" aria-hidden="true"></div>
                     </div>
-                    <div id="matError" class="error"></div>
+                    <div id="matError" class="small error" aria-live="polite"></div>
                 </div>
                 <div>
-                    <label>Nome</label>
-                    <input type="text" id="nome" readonly>
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" readonly aria-readonly="true">
                 </div>
                 <div>
-                    <label>Data da Folga</label>
-                    <input type="date" id="data" required>
+                    <label for="data">Data</label>
+                    <input type="date" id="data" name="data" required>
                     <div id="dateHelp" class="small"></div>
-                    <div id="dateError" class="error"></div>
+                    <div id="dateError" class="small error" aria-live="polite"></div>
                 </div>
             </div>
         </fieldset>
 
-        <fieldset>
+        <fieldset role="radiogroup" aria-label="Tipo de Folga">
             <legend>Tipo de Folga</legend>
             <div class="radio-group-buttons" id="folgaGroup"></div>
-            <div id="duplicateError" class="error"></div>
+            <div id="duplicateError" class="error" aria-live="polite"></div>
         </fieldset>
 
-        <div class="actions">
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px;margin-bottom:6px">
             <button type="button" class="button secondary" id="btnHistory">Ver Histórico</button>
             <button type="submit" class="button" id="btnSubmit">Enviar Solicitação</button>
         </div>
     </form>
 
-    <div id="statusMessage" class="info-message"></div>
-    <div id="footerText" class="small" style="text-align:center;margin-top:15px"></div>
+    <div id="statusMessage" class="info-message" role="status" aria-live="polite"></div>
+    <div class="footer" id="footerText" style="text-align:center;font-size:12px;color:#666;margin-top:10px"></div>
 </div>
 
-<div id="confirmModal" class="modal-base">
+<div id="historyModal" class="modal-base" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
     <div class="modal-content">
-        <h3 style="margin-top:0;color:var(--azul-marinho)">Confirme sua Solicitação</h3>
-        <div id="summaryBox" style="font-size:14px;margin-bottom:15px"></div>
-        <div class="actions">
-            <button id="confirmSend" class="button">Confirmar</button>
-            <button id="cancelSend" class="button secondary">Voltar</button>
-        </div>
-    </div>
-</div>
-
-<div id="historyModal" class="modal-base">
-    <div class="modal-content">
-        <h3 style="margin-top:0;color:var(--azul-marinho)">Histórico de Solicitações</h3>
-        <div id="historyBox" style="max-height:300px;overflow-y:auto"></div>
-        <div style="text-align:right;margin-top:15px">
+        <h3 id="historyTitle" class="modal-title">Histórico de Solicitações</h3>
+        <div id="historyBox" class="modal-body"></div>
+        <div style="display:flex;justify-content:flex-end">
             <button id="closeHistory" class="button secondary">Fechar</button>
         </div>
     </div>
@@ -162,138 +152,107 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7-pdQ3f8UMXZylF-4M4Qai6UWGsXPdqfYhoyuPuEVBL_nbBrCn2DfyfpHVmgAFEhh/exec";
     
+    // ESTADO E ELEMENTOS
     const DERSO = {
-        form: document.getElementById('dersoForm'),
         matricula: document.getElementById('matricula'),
         nome: document.getElementById('nome'),
         data: document.getElementById('data'),
-        email: document.getElementById('email'),
         folgaGroup: document.getElementById('folgaGroup'),
         progressBar: document.getElementById('progressBar')
     };
 
-    // Inicialização
+    // INICIALIZAÇÃO DOS BOTÕES DE FOLGA
     const folgas = ['24H','48H','72H','96H','FOLGA LE','1ª FOLGA','2ª FOLGA','EXPEDIENTE'];
-    
-    function init() {
-        // Renderizar botões de folga
-        folgas.forEach(f => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'radio-button';
-            btn.textContent = f;
-            btn.dataset.value = f;
-            btn.onclick = () => {
-                document.querySelectorAll('.radio-button').forEach(b => b.setAttribute('aria-checked', 'false'));
-                btn.setAttribute('aria-checked', 'true');
-            };
-            DERSO.folgaGroup.appendChild(btn);
-        });
+    folgas.forEach(f => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'radio-button';
+        btn.textContent = f;
+        btn.dataset.value = f;
+        btn.onclick = () => {
+            document.querySelectorAll('.radio-button').forEach(b => b.setAttribute('aria-checked', 'false'));
+            btn.setAttribute('aria-checked', 'true');
+        };
+        DERSO.folgaGroup.appendChild(btn);
+    });
 
-        // Configurar limites de data (Próximo Mês)
-        const today = new Date();
-        const min = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-        const max = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-        DERSO.data.min = min.toISOString().split('T')[0];
-        DERSO.data.max = max.toISOString().split('T')[0];
-        document.getElementById('dateHelp').textContent = `Período permitido: ${min.toLocaleDateString()} a ${max.toLocaleDateString()}`;
-    }
-
-    // Lógica do Histórico (Copiada do HTML 2)
-    async function showHistory() {
+    // FUNÇÃO DE HISTÓRICO (TRANSPLANTADA DO HTML 2)
+    async function showHistoryModal() {
         const mat = DERSO.matricula.value.trim();
         if(!mat) { alert("Digite a matrícula primeiro."); return; }
 
         const modal = document.getElementById('historyModal');
         const box = document.getElementById('historyBox');
-        
-        box.innerHTML = "Carregando...";
+        box.innerHTML = "Carregando histórico...";
         modal.style.display = 'flex';
 
         try {
-            const res = await fetch(`${SCRIPT_URL}?matricula=${mat}&action=historico`);
-            const data = await res.json();
+            const resp = await fetch(`${SCRIPT_URL}?matricula=${encodeURIComponent(mat)}&action=historico`);
+            const dados = await resp.json();
             
-            if(data.error) {
-                box.innerHTML = `<p style="color:red">${data.error}</p>`;
+            if(dados.error) {
+                box.innerHTML = `<p style="color:red">${dados.error}</p>`;
                 return;
             }
 
-            let html = `<p>Solicitações de: <strong>${data.nome}</strong></p><ul class="history-list">`;
-            data.historico.forEach(item => {
-                const cor = item.Status === 'APROVADA' ? 'green' : (item.Status === 'RECUSADA' ? 'red' : 'gray');
-                html += `<li><span>${item.Data} - ${item.Folga}</span> <b style="color:${cor}">${item.Status || ''}</b></li>`;
+            let html = `<div>Solicitações para: <strong>${dados.nome}</strong></div><ul class="history-list">`;
+            dados.historico.forEach(item => {
+                const cor = item.Status === 'APROVADA' ? 'var(--sucesso)' : (item.Status === 'RECUSADA' ? 'var(--erro)' : '#666');
+                html += `<li><strong>${item.Data}</strong> — ${item.Folga} <span style="color:${cor};font-weight:bold">(${item.Status || 'PENDENTE'})</span></li>`;
             });
             html += "</ul>";
             box.innerHTML = html;
-        } catch (e) {
-            box.innerHTML = "Erro ao carregar histórico.";
+        } catch(e) {
+            box.innerHTML = "Erro ao conectar com o servidor.";
         }
     }
 
-    // Validação de Matrícula
-    DERSO.matricula.onblur = async () => {
+    // LÓGICA DE BUSCA DE NOME POR MATRÍCULA
+    DERSO.matricula.addEventListener('blur', async () => {
         const mat = DERSO.matricula.value.trim();
-        if(mat.length < 4) return;
-        
+        if(mat.length < 5) return;
         document.getElementById('matBlock').classList.add('is-loading');
         try {
             const res = await fetch(`${SCRIPT_URL}?action=lookup&matricula=${mat}`);
             const data = await res.json();
             DERSO.nome.value = data.nome || "Não encontrado";
-        } finally {
-            document.getElementById('matBlock').classList.remove('is-loading');
-        }
-    };
+        } catch(e) { console.error(e); }
+        document.getElementById('matBlock').classList.remove('is-loading');
+    });
 
-    // Envio do Formulário
-    DERSO.form.onsubmit = (e) => {
+    // EVENTOS DOS BOTÕES
+    document.getElementById('btnHistory').onclick = showHistoryModal;
+    document.getElementById('closeHistory').onclick = () => document.getElementById('historyModal').style.display = 'none';
+
+    // LIMITE DE DATA (PRÓXIMO MÊS)
+    const today = new Date();
+    const minD = new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString().split('T')[0];
+    const maxD = new Date(today.getFullYear(), today.getMonth() + 2, 0).toISOString().split('T')[0];
+    DERSO.data.min = minD; DERSO.data.max = maxD;
+    document.getElementById('dateHelp').textContent = `Datas permitidas: ${minD.split('-').reverse().join('/')} a ${maxD.split('-').reverse().join('/')}`;
+
+    // ENVIO DO FORMULÁRIO
+    document.getElementById('dersoForm').onsubmit = async (e) => {
         e.preventDefault();
         const folgaBtn = document.querySelector('.radio-button[aria-checked="true"]');
-        if(!folgaBtn) { alert("Selecione o tipo de folga"); return; }
+        if(!folgaBtn) { alert("Selecione uma folga!"); return; }
 
-        const summary = `
-            <b>Nome:</b> ${DERSO.nome.value}<br>
-            <b>Data:</b> ${DERSO.data.value}<br>
-            <b>Folga:</b> ${folgaBtn.dataset.value}
-        `;
-        document.getElementById('summaryBox').innerHTML = summary;
-        document.getElementById('confirmModal').style.display = 'flex';
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        const p = new URLSearchParams();
+        p.append('matricula', DERSO.matricula.value);
+        p.append('nome', DERSO.nome.value);
+        p.append('data', DERSO.data.value.split('-').reverse().join('/'));
+        p.append('folga', folgaBtn.dataset.value);
+        p.append('email', document.getElementById('email').value);
 
-        document.getElementById('confirmSend').onclick = async () => {
-            document.getElementById('confirmModal').style.display = 'none';
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            
-            const params = new URLSearchParams();
-            params.append('matricula', DERSO.matricula.value);
-            params.append('nome', DERSO.nome.value);
-            params.append('data', DERSO.data.value);
-            params.append('folga', folgaBtn.dataset.value);
-            params.append('email', DERSO.email.value);
-
-            try {
-                const res = await fetch(SCRIPT_URL, { method: 'POST', body: params });
-                const result = await res.json();
-                if(result.success) {
-                    alert("Enviado com sucesso!");
-                    location.reload();
-                } else {
-                    alert("Erro: " + result.error);
-                }
-            } catch (e) {
-                alert("Falha na conexão.");
-            } finally {
-                document.getElementById('loadingOverlay').style.display = 'none';
-            }
-        };
+        try {
+            const r = await fetch(SCRIPT_URL, { method: 'POST', body: p });
+            const j = await r.json();
+            if(j.success) { alert("Solicitação enviada!"); location.reload(); }
+            else { alert("Erro: " + j.error); }
+        } catch(e) { alert("Erro na rede."); }
+        document.getElementById('loadingOverlay').style.display = 'none';
     };
-
-    // Botões dos Modais
-    document.getElementById('btnHistory').onclick = showHistory;
-    document.getElementById('closeHistory').onclick = () => document.getElementById('historyModal').style.display = 'none';
-    document.getElementById('cancelSend').onclick = () => document.getElementById('confirmModal').style.display = 'none';
-
-    init();
 </script>
 </body>
 </html>
