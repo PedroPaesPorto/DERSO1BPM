@@ -544,17 +544,30 @@
             prazoMessageDiv.innerHTML = msg; prazoMessageDiv.style.display = "block";
         } 
 
-      function initializeForm(){
+     function initializeForm(){
     loadEmployeeList();
     setDateLimits();
-    fetch(SCRIPT_URL+"?action=datas")
-    .then(r=>r.json())
-    .then(data=>{
+    
+    fetch(SCRIPT_URL + "?action=datas")
+    .then(r => r.json())
+    .then(data => {
         initialLoadingDiv.style.display = "none";
-        formDiv.style.display = "block";
+        
+        const agora = new Date();
         const fechamento = new Date(data.fechamento);
-        showPersistentMessage(`🚨 Prazo final: ${fechamento.toLocaleString("pt-BR")}`, "success");
-    }).catch(() => { initialLoadingDiv.style.display = "none"; formDiv.style.display = "block"; });
+
+        // SE A DATA ATUAL FOR MAIOR QUE O FECHAMENTO, BLOQUEIA O FORMULÁRIO
+        if (agora > fechamento) {
+            formDiv.style.display = "none"; // Esconde o formulário
+            showPersistentMessage(`⚠️ PRAZO ENCERRADO: As solicitações foram encerradas em ${fechamento.toLocaleString("pt-BR")}`, "error");
+        } else {
+            formDiv.style.display = "block";
+            showPersistentMessage(`🚨 Prazo final: ${fechamento.toLocaleString("pt-BR")}`, "success");
+        }
+    }).catch(() => { 
+        initialLoadingDiv.style.display = "none"; 
+        formDiv.style.display = "block"; 
+    });
     
     // AJUSTE DO RODAPÉ CONFORME SOLICITADO
     const agora = new Date();
