@@ -396,7 +396,6 @@
 
         window.employeeList = {};
 
-        // FUNÇÃO PARA BUSCAR HISTÓRICO
         async function fetchHistory() {
             const mat = document.getElementById("matricula").value.trim();
             if(!mat) { alert("Digite sua matrícula primeiro."); return; }
@@ -415,9 +414,10 @@
                 let html = `<p><strong>${data.nome}</strong></p><ul style="padding:0">`;
                 data.historico.forEach(h => {
                     const statusCor = h.Status === 'APROVADA' ? 'var(--sucesso)' : (h.Status === 'RECUSADA' ? 'var(--erro)' : '#666');
+                    const statusTexto = h.Status ? h.Status : '';
                     html += `<li style="border-bottom:1px solid #eee;padding:8px 0">
                         ${h.Data} - ${h.Folga} <br>
-                        <span style="color:${statusCor};font-weight:bold;font-size:12px">${h.Status || 'PENDENTE'}</span>
+                        <span style="color:${statusCor};font-weight:bold;font-size:12px">${statusTexto}</span>
                     </li>`;
                 });
                 box.innerHTML = html + "</ul>";
@@ -554,7 +554,7 @@
             }).catch(() => { initialLoadingDiv.style.display = "none"; formDiv.style.display = "block"; });
             
             const now = new Date();
-            document.getElementById("footerText").textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${now.getFullYear()}`;
+            document.getElementById("footerText").textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${mes.toString().padStart(2,'0')}/${ano}`;
         }
 
         document.addEventListener("DOMContentLoaded",()=>{
