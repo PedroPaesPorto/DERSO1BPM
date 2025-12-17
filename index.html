@@ -550,7 +550,7 @@
             }).catch(() => { initialLoadingDiv.style.display = "none"; formDiv.style.display = "block"; });
             
             const now = new Date();
-            document.getElementById("footerText").textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${now.getFullYear()}`;
+            document.getElementById("footerText").textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${mes.toString().padStart(2,'0')}/${ano}`;
         }
 
         document.addEventListener("DOMContentLoaded",()=>{
