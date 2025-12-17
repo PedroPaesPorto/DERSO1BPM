@@ -3,256 +3,568 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitação de Folga - DERSO </title>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root{
-            --azul-marinho:#0C3667;
-            --dourado:#C9A400;
-            --azul-hover:#1a5ca7;
-            --erro:#b00020;
-            --alerta-prazo:#D36400;
-            --sucesso:#388e3c;
-            --cinza-fundo:#f4f7f9;
-            --cinza-texto:#222;
-            --borda:#bdbdbd;
-            --padding-md: 12px;
-            --font-size-sm: 13px;
-        }
-        *{box-sizing:border-box}
-        body{margin:0;font-family:'Roboto',Arial,Helvetica,sans-serif;background:var(--cinza-fundo);color:var(--cinza-texto);display:flex;justify-content:center;align-items:flex-start;padding:24px}
-        .container{width:100%;max-width:720px;background:#fff;border-radius:10px;padding:22px 24px;box-shadow:0 10px 30px rgba(0,0,0,.12);position:relative}
-        #progressBarContainer{position:absolute;left:0;top:0;width:100%;height:6px;background:#e6e9ee;border-radius:10px;overflow:hidden}
-        #progressBar{height:100%;width:0;background:linear-gradient(90deg,var(--dourado),var(--azul-marinho));transition:width .35s ease}
-        header{display:flex;gap:14px;align-items:center;margin-bottom:12px}
-        .logos{display:flex;gap:12px;align-items:center}
-        .logos img{height:54px;object-fit:contain;display:block}
-        h1{font-family:'Merriweather',serif;color:var(--azul-marinho);font-size:20px;margin:0}
-        .subtitle{font-size:14px;color:#444;margin-top:6px}
-        form{margin-top:14px}
-        fieldset{border:1px solid var(--borda);padding:var(--padding-md);border-radius:8px;margin-bottom:16px}
-        legend{font-weight:600;padding:0 6px}
-        .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        label{display:block;font-size:var(--font-size-sm);margin-bottom:6px}
-        input[type=text],input[type=email],input[type=date],select{width:100%;padding:10px;border:1px solid var(--borda);border-radius:6px;font-size:14px}
-        input[readonly]{background:#f1f3f5}
-        .small{font-size:12px;color:#666}
-        .radio-group-buttons{display:flex;flex-wrap:wrap;gap:8px}
-        .radio-button{padding:8px 10px;border:1px solid var(--borda);border-radius:6px;cursor:pointer;font-weight:600;font-size:var(--font-size-sm)}
-        .radio-button[aria-checked="true"]{background:var(--azul-marinho);color:var(--dourado);border-color:var(--azul-marinho)}
-        .error{color:var(--erro);font-size:var(--font-size-sm);margin-top:6px}
-        .info-message{display:none;padding:12px;border-left:4px solid;border-radius:6px;margin-bottom:12px}
-        .info-message.success{background:#e8f5e9;color:var(--sucesso);border-left-color:var(--sucesso)}
-        .info-message.error{background:#fff0f2;color:var(--erro);border-left-color:var(--erro)}
-        .info-message.warning{background:#fff8e1;color:var(--alerta-prazo);border-left-color:var(--alerta-prazo)}
-        .actions{display:flex;gap:10px}
-        .button{flex:1;padding:12px 14px;border-radius:8px;border:none;background:var(--azul-hover);color:#fff;font-weight:700;cursor:pointer;text-transform:uppercase;transition:background .2s}
-        .button.secondary{background:#fff;border:1px solid var(--borda);color:var(--cinza-texto);text-transform:none}
-        .button:hover:not(:disabled){background:var(--azul-marinho)}
-        .button:disabled{opacity:.6;cursor:not-allowed}
-        
-        /* CSS ADICIONAL DO HISTÓRICO (HTML 2) */
-        .modal-base{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center;z-index:9998}
-        .modal-content{background:#fff;padding:18px;border-radius:10px;max-width:520px;width:92%;box-shadow:0 5px 15px rgba(0,0,0,.3)}
-        .modal-title{margin:0 0 8px 0;color:var(--azul-marinho)}
-        .modal-body{font-size:14px;color:#333;margin-bottom:12px}
-        .history-list{list-style:none;padding:0;margin-top:10px}
-        .history-list li{margin-bottom:5px;padding:5px;border-bottom:1px dashed #eee;font-size:var(--font-size-sm)}
-        #loadingOverlay{position:fixed;top:0;left:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.85);z-index:9999}
-        .spinner-base{width:30px;height:30px;border-radius:50%;border:4px solid rgba(0,0,0,.08);border-top:4px solid var(--azul-hover);animation:spin 1s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        .field-with-spinner{position:relative}
-        .mini-spinner{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;border:3px solid rgba(0,0,0,.08);border-top:3px solid var(--azul-hover);animation:spin .8s linear infinite;display:none}
-        .is-loading .mini-spinner{display:block}
+    <title>Solicitação de Folga - DERSO</title>
 
-        @media(max-width:640px){.grid{grid-template-columns:1fr}.logos img{height:44px}.container{padding:18px}}
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* 1. PALETA DE CORES INSTITUCIONAL */
+        :root {
+            --azul-marinho: #0C3667; 
+            --dourado-amarelo: #FFD700; 
+            --azul-claro-hover: #1a5ca7; 
+            --erro: #b00020; 
+            --sucesso: #388e3c; 
+            --cinza-fundo: #f4f7f9; 
+            --cinza-texto: #333333; 
+            --borda-campo: #aaa;
+        }
+
+        /* 2. TIPOGRAFIA E FUNDO */
+        body {
+            background-color: var(--cinza-fundo);
+            font-family: 'Roboto', Arial, sans-serif;
+            color: var(--cinza-texto);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 500px;
+            background-color: #ffffff; 
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #progressBarContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: #e0e0e0;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        #progressBar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--dourado-amarelo); 
+            transition: width 0.4s ease;
+        }
+
+        .logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logos img {
+            height: 70px;
+            object-fit: contain;
+        }
+
+        h2 {
+            font-family: 'Merriweather', serif;
+            text-align: center;
+            color: var(--azul-marinho);
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            border-bottom: 2px solid var(--dourado-amarelo);
+            padding-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--cinza-texto);
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        .form-group, fieldset {
+            margin-bottom: 20px;
+            width: 100%;
+            border: none;
+            padding: 0;
+        }
+
+        label, legend {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--cinza-texto);
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .form-group input:not([type="radio"]),
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 15px;
+            border: 1px solid var(--borda-campo);
+            border-radius: 4px; 
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:not([type="radio"]):focus,
+        .form-group select:focus {
+            border-color: var(--azul-claro-hover);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(12, 54, 103, 0.2);
+        }
+
+        input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .radio-group-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px; 
+            margin-top: 10px;
+        }
+
+        .radio-group-buttons input[type="radio"] {
+            display: none;
+        }
+
+        .radio-group-buttons label {
+            padding: 8px 10px; 
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px; 
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+            user-select: none;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .radio-group-buttons input[type="radio"]:checked + label {
+            background-color: var(--azul-marinho);
+            color: var(--dourado-amarelo);
+            border-color: var(--azul-marinho);
+            font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .radio-group-buttons label:hover {
+            background-color: #e0e0e0;
+            border-color: var(--azul-claro-hover);
+        }
+
+        .button {
+            background-color: var(--azul-claro-hover);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            text-transform: uppercase;
+        }
+
+        .button.secondary {
+            background-color: #fff;
+            color: var(--azul-marinho);
+            border: 1px solid var(--azul-marinho);
+            margin-bottom: 10px;
+        }
+
+        .button:hover {
+            background-color: var(--azul-marinho); 
+            transform: translateY(-1px);
+        }
+        
+        .button.secondary:hover {
+            background-color: #f0f0f0;
+            color: var(--azul-marinho);
+        }
+
+        .error {
+            color: var(--erro);
+            margin-top: 5px;
+            font-size: 13px;
+            font-weight: 600; 
+            padding-left: 5px;
+        }
+
+        .info-message {
+            text-align: center;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.4;
+            display: none;
+            margin-bottom: 25px;
+            padding: 12px 15px;
+            border-left: 5px solid; 
+        }
+
+        .info-message.success {
+            background-color: #e8f5e9; 
+            color: var(--sucesso);
+            border-left-color: var(--sucesso);
+        }
+
+        .info-message.error {
+            background-color: #fce4ec; 
+            color: var(--erro);
+            border-left-color: var(--erro);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 12px;
+            color: #777;
+        }
+
+        /* ESTILOS DO MODAL DE HISTÓRICO */
+        .modal-base {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .history-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9); 
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-size: 18px;
+            color: var(--azul-marinho);
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid rgba(12, 54, 103, 0.2);
+            border-top: 4px solid var(--azul-claro-hover); 
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-top: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
     </style>
 </head>
 <body>
-
-<div id="loadingOverlay" role="status" aria-live="polite">
-    <div style="text-align:center">
-        <div class="spinner-base"></div>
-        <div style="margin-top:10px;color:var(--azul-marinho)">Enviando...</div>
+    <div id="loadingOverlay">
+        <p>Aguarde...</p>
+        <div class="spinner"></div>
     </div>
-</div>
 
-<div class="container" id="app">
-    <div id="progressBarContainer"><div id="progressBar" aria-hidden="true"></div></div>
-
-    <header>
+    <div class="container" id="formulario">
+        <div id="progressBarContainer"><div id="progressBar"></div></div>
+        
         <div class="logos">
-            <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="Brasão PMRO">
+            <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
             <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1º BPM">
         </div>
-        <div style="flex:1">
-            <h1>DERSO — 1º BPM</h1>
-            <div class="subtitle">Solicitação de Diária Especial de Reforço</div>
+
+        <h2>DERSO 1º BPM</h2>
+        <p class="subtitle">Formulário de Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO </p>
+
+        <div id="prazoMessage" class="info-message success" style="margin-bottom: 25px;"></div>
+
+        <div id="initialLoading" style="text-align: center; padding: 50px; color: var(--azul-marinho);">
+            <p>Carregando dados do sistema...</p>
+            <div class="spinner"></div>
         </div>
-    </header>
 
-    <div id="prazoMessage" class="info-message" role="status" aria-live="polite"></div>
-
-    <form id="dersoForm" aria-labelledby="formTitle">
-        <fieldset aria-labelledby="idTitle">
-            <legend id="idTitle">Identificação</legend>
-            <div class="grid">
-                <div>
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" name="email" list="emailProviders" autocomplete="email">
-                    <datalist id="emailProviders"></datalist>
-                </div>
-                <div>
-                    <label for="matricula">Matrícula</label>
-                    <div class="field-with-spinner" id="matBlock">
-                        <input type="text" id="matricula" name="matricula" inputmode="numeric" pattern="\d*" required placeholder="Ex: 100012345">
-                        <div class="mini-spinner" id="matSpinner" aria-hidden="true"></div>
-                    </div>
-                    <div id="matError" class="small error" aria-live="polite"></div>
-                </div>
-                <div>
-                    <label for="nome">Nome</label>
-                    <input type="text" id="nome" name="nome" readonly aria-readonly="true">
-                </div>
-                <div>
-                    <label for="data">Data</label>
-                    <input type="date" id="data" name="data" required>
-                    <div id="dateHelp" class="small"></div>
-                    <div id="dateError" class="small error" aria-live="polite"></div>
-                </div>
+        <form id="dersoForm" style="display: none;">
+            <div class="form-group">
+                <label for="email">E-mail:</label>
+                <input type="email" id="email" name="email" list="emailProviders" required>
+                <datalist id="emailProviders"></datalist>
             </div>
-        </fieldset>
 
-        <fieldset role="radiogroup" aria-label="Tipo de Folga">
-            <legend>Tipo de Folga</legend>
-            <div class="radio-group-buttons" id="folgaGroup"></div>
-            <div id="duplicateError" class="error" aria-live="polite"></div>
-        </fieldset>
+            <div class="form-group">
+                <label for="matricula">Matrícula:</label>
+                <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
+                <div id="matriculaError" class="error"></div>
+            </div>
 
-        <div style="display:flex;gap:10px;align-items:center;margin-top:8px;margin-bottom:6px">
-            <button type="button" class="button secondary" id="btnHistory">Ver Histórico</button>
-            <button type="submit" class="button" id="btnSubmit">Enviar Solicitação</button>
-        </div>
-    </form>
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="nome" readonly required>
+            </div>
 
-    <div id="statusMessage" class="info-message" role="status" aria-live="polite"></div>
-    <div class="footer" id="footerText" style="text-align:center;font-size:12px;color:#666;margin-top:10px"></div>
-</div>
+            <fieldset>
+                <legend>Tipo de Folga:</legend>
+                <div class="radio-group-buttons">
+                    <input type="radio" id="folga24H" name="folga" value="24H" required><label for="folga24H">24H</label>
+                    <input type="radio" id="folga48H" name="folga" value="48H"><label for="folga48H">48H</label>
+                    <input type="radio" id="folga72H" name="folga" value="72H"><label for="folga72H">72H</label>
+                    <input type="radio" id="folga96H" name="folga" value="96H"><label for="folga96H">96H</label>
+                    <input type="radio" id="folgaLE" name="folga" value="FOLGA LE"><label for="folgaLE">FOLGA LE</label>
+                    <input type="radio" id="folga1" name="folga" value="1ª Folga"><label for="folga1">1ª FOLGA</label>
+                    <input type="radio" id="folga2" name="folga" value="2ª Folga"><label for="folga2">2ª FOLGA</label>
+                    <input type="radio" id="folgaExp" name="folga" value="Expediente"><label for="folgaExp">EXPEDIENTE</label>
+                </div>
+                <div id="duplicateError" class="error"></div>
+            </fieldset>
 
-<div id="historyModal" class="modal-base" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
-    <div class="modal-content">
-        <h3 id="historyTitle" class="modal-title">Histórico de Solicitações</h3>
-        <div id="historyBox" class="modal-body"></div>
-        <div style="display:flex;justify-content:flex-end">
-            <button id="closeHistory" class="button secondary">Fechar</button>
+            <div class="form-group">
+                <label for="data">Data:</label>
+                <input type="date" id="data" name="data" required>
+                <div id="dateLimitMessage" class="subtitle" style="margin-top: 5px; margin-bottom: 0; font-size: 13px; text-align: left;"></div>
+            </div>
+
+            <button type="button" class="button secondary" id="btnHistory">Ver Meu Histórico</button>
+            <button type="submit" class="button">Enviar Solicitação</button>
+        </form>
+        
+        <div id="statusMessage" class="info-message"></div>
+        <div class="footer" id="footerText"></div>
+    </div>
+
+    <div id="historyModal" class="modal-base">
+        <div class="modal-content">
+            <h3 style="color:var(--azul-marinho);margin-top:0">Meu Histórico</h3>
+            <div id="historyBox" class="history-list">Carregando...</div>
+            <button type="button" class="button" id="closeHistory">Fechar</button>
         </div>
     </div>
-</div>
 
-<script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7-pdQ3f8UMXZylF-4M4Qai6UWGsXPdqfYhoyuPuEVBL_nbBrCn2DfyfpHVmgAFEhh/exec";
-    
-    // ESTADO E ELEMENTOS
-    const DERSO = {
-        matricula: document.getElementById('matricula'),
-        nome: document.getElementById('nome'),
-        data: document.getElementById('data'),
-        folgaGroup: document.getElementById('folgaGroup'),
-        progressBar: document.getElementById('progressBar')
-    };
+    <script>
+           // ***********************************************
+    // AQUI ESTÁ A NOVA URL ATUALIZADA:
+    // ***********************************************
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7-pdQ3f8UMXZylF-4M4Qai6UWGsXPdqfYhoyuPuEVBL_nbBrCn2DfyfpHVmgAFEhh/exec"; 
 
-    // INICIALIZAÇÃO DOS BOTÕES DE FOLGA
-    const folgas = ['24H','48H','72H','96H','FOLGA LE','1ª FOLGA','2ª FOLGA','EXPEDIENTE'];
-    folgas.forEach(f => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'radio-button';
-        btn.textContent = f;
-        btn.dataset.value = f;
-        btn.onclick = () => {
-            document.querySelectorAll('.radio-button').forEach(b => b.setAttribute('aria-checked', 'false'));
-            btn.setAttribute('aria-checked', 'true');
-        };
-        DERSO.folgaGroup.appendChild(btn);
-    });
+        const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br"];
+        window.employeeList = {};
 
-    // FUNÇÃO DE HISTÓRICO (TRANSPLANTADA DO HTML 2)
-    async function showHistoryModal() {
-        const mat = DERSO.matricula.value.trim();
-        if(!mat) { alert("Digite a matrícula primeiro."); return; }
-
-        const modal = document.getElementById('historyModal');
-        const box = document.getElementById('historyBox');
-        box.innerHTML = "Carregando histórico...";
-        modal.style.display = 'flex';
-
-        try {
-            const resp = await fetch(`${SCRIPT_URL}?matricula=${encodeURIComponent(mat)}&action=historico`);
-            const dados = await resp.json();
+        // FUNÇÃO PARA BUSCAR HISTÓRICO
+        async function fetchHistory() {
+            const mat = document.getElementById("matricula").value.trim();
+            if(!mat) { alert("Digite sua matrícula primeiro."); return; }
             
-            if(dados.error) {
-                box.innerHTML = `<p style="color:red">${dados.error}</p>`;
-                return;
-            }
+            const modal = document.getElementById("historyModal");
+            const box = document.getElementById("historyBox");
+            modal.style.display = "flex";
+            box.innerHTML = "Buscando solicitações...";
 
-            let html = `<div>Solicitações para: <strong>${dados.nome}</strong></div><ul class="history-list">`;
-            dados.historico.forEach(item => {
-                const cor = item.Status === 'APROVADA' ? 'var(--sucesso)' : (item.Status === 'RECUSADA' ? 'var(--erro)' : '#666');
-                html += `<li><strong>${item.Data}</strong> — ${item.Folga} <span style="color:${cor};font-weight:bold">(${item.Status || 'PENDENTE'})</span></li>`;
-            });
-            html += "</ul>";
-            box.innerHTML = html;
-        } catch(e) {
-            box.innerHTML = "Erro ao conectar com o servidor.";
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=historico&matricula=${mat}`);
+                const data = await response.json();
+                
+                if(data.error) { box.innerHTML = `<p style="color:red">${data.error}</p>`; return; }
+                
+                let html = `<p><strong>${data.nome}</strong></p><ul style="padding:0">`;
+                data.historico.forEach(h => {
+                    const statusCor = h.Status === 'APROVADA' ? 'var(--sucesso)' : (h.Status === 'RECUSADA' ? 'var(--erro)' : '#666');
+                    html += `<li style="border-bottom:1px solid #eee;padding:8px 0">
+                        ${h.Data} - ${h.Folga} <br>
+                        <span style="color:${statusCor};font-weight:bold;font-size:12px">${h.Status || 'PENDENTE'}</span>
+                    </li>`;
+                });
+                box.innerHTML = html + "</ul>";
+            } catch(e) { box.innerHTML = "Erro ao conectar com o servidor."; }
         }
-    }
 
-    // LÓGICA DE BUSCA DE NOME POR MATRÍCULA
-    DERSO.matricula.addEventListener('blur', async () => {
-        const mat = DERSO.matricula.value.trim();
-        if(mat.length < 5) return;
-        document.getElementById('matBlock').classList.add('is-loading');
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=lookup&matricula=${mat}`);
-            const data = await res.json();
-            DERSO.nome.value = data.nome || "Não encontrado";
-        } catch(e) { console.error(e); }
-        document.getElementById('matBlock').classList.remove('is-loading');
-    });
+        const progressBar = document.getElementById("progressBar");
+        const formDiv = document.getElementById("dersoForm");
+        const initialLoadingDiv = document.getElementById("initialLoading");
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        const prazoMessageDiv = document.getElementById("prazoMessage");
 
-    // EVENTOS DOS BOTÕES
-    document.getElementById('btnHistory').onclick = showHistoryModal;
-    document.getElementById('closeHistory').onclick = () => document.getElementById('historyModal').style.display = 'none';
+        function setProgress(percent) {
+            progressBar.style.width = percent + "%";
+        }
 
-    // LIMITE DE DATA (PRÓXIMO MÊS)
-    const today = new Date();
-    const minD = new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString().split('T')[0];
-    const maxD = new Date(today.getFullYear(), today.getMonth() + 2, 0).toISOString().split('T')[0];
-    DERSO.data.min = minD; DERSO.data.max = maxD;
-    document.getElementById('dateHelp').textContent = `Datas permitidas: ${minD.split('-').reverse().join('/')} a ${maxD.split('-').reverse().join('/')}`;
+        function updateEmailDatalist() {
+            const emailInput = document.getElementById("email");
+            const datalist = document.getElementById("emailProviders");
+            const value = emailInput.value;
+            const atIndex = value.indexOf("@");
+            if (atIndex === -1) { datalist.innerHTML = ""; return; }
+            const domainPart = value.slice(atIndex + 1).toLowerCase();
+            const filtered = emailProviders.filter(p => p.startsWith(domainPart));
+            datalist.innerHTML = "";
+            filtered.forEach(p => { const option = document.createElement("option"); option.value = value.slice(0, atIndex+1)+p; datalist.appendChild(option); });
+        }
 
-    // ENVIO DO FORMULÁRIO
-    document.getElementById('dersoForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const folgaBtn = document.querySelector('.radio-button[aria-checked="true"]');
-        if(!folgaBtn) { alert("Selecione uma folga!"); return; }
+        function standardizeMatricula(m) {
+            let num = m.replace(/\D/g,'').slice(0,9);
+            return num.startsWith("1000") ? num : "1000"+num;
+        }
 
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        const p = new URLSearchParams();
-        p.append('matricula', DERSO.matricula.value);
-        p.append('nome', DERSO.nome.value);
-        p.append('data', DERSO.data.value.split('-').reverse().join('/'));
-        p.append('folga', folgaBtn.dataset.value);
-        p.append('email', document.getElementById('email').value);
+        async function checkDuplicity(matricula, data, folga) {
+            const url = `${SCRIPT_URL}?action=check_duplicidade&matricula=${matricula}&data=${data}&folga=${folga}`;
+            try {
+                const response = await fetch(url);
+                const dataJson = await response.json();
+                return dataJson.duplicado === true; 
+            } catch (e) { return false; }
+        }
 
-        try {
-            const r = await fetch(SCRIPT_URL, { method: 'POST', body: p });
-            const j = await r.json();
-            if(j.success) { alert("Solicitação enviada!"); location.reload(); }
-            else { alert("Erro: " + j.error); }
-        } catch(e) { alert("Erro na rede."); }
-        document.getElementById('loadingOverlay').style.display = 'none';
-    };
-</script>
+        function loadEmployeeList() {
+            setProgress(20);
+            fetch(SCRIPT_URL+"?action=lista")
+            .then(r => r.json())
+            .then(data => {
+                window.employeeList = data;
+                setProgress(40);
+                document.getElementById("matricula").disabled = false;
+            }).catch(()=>{
+                document.getElementById("matriculaError").textContent="Erro ao carregar lista.";
+            });
+        }
+
+        function checkMatricula() {
+            const m = document.getElementById("matricula");
+            const n = document.getElementById("nome");
+            const e = document.getElementById("matriculaError");
+            if (!m.value.trim()) { n.value = ""; e.textContent = ""; m.classList.remove("is-valid", "is-invalid"); return; }
+            const standardized = standardizeMatricula(m.value);
+            m.value = standardized;
+            m.classList.remove("is-valid", "is-invalid");
+            if(window.employeeList[standardized]) { n.value = window.employeeList[standardized]; e.textContent = ""; m.classList.add("is-valid"); }
+            else { n.value = ""; e.textContent = "Matrícula não encontrada!"; m.classList.add("is-invalid"); }
+        }
+
+        function setDateLimits() {
+            const dateInput = document.getElementById("data");
+            const messageDiv = document.getElementById("dateLimitMessage"); 
+            const today = new Date();
+            let nextMonthStart = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+            let nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+            dateInput.min = nextMonthStart.toISOString().split("T")[0];
+            dateInput.max = nextMonthEnd.toISOString().split("T")[0];
+            messageDiv.textContent = `Período permitido: ${nextMonthStart.toLocaleDateString("pt-BR")} a ${nextMonthEnd.toLocaleDateString("pt-BR")}.`;
+        }
+
+        function formatDateBR(d) {
+            if(!d) return "";
+            const [y,m,day] = d.split("-");
+            return `${day}/${m}/${y}`;
+        }
+
+        async function submitForm(e){
+            e.preventDefault();
+            const btn = document.querySelector('button[type="submit"]');
+            const matInput = document.getElementById("matricula");
+            const folgaRadio = document.querySelector('input[name="folga"]:checked');
+            const dataValue = document.getElementById("data").value;
+            const dataBR = formatDateBR(dataValue);
+
+            if(matInput.classList.contains("is-invalid") || !folgaRadio) return;
+
+            btn.disabled = true;
+            loadingOverlay.style.display = "flex";
+            
+            try {
+                const isDuplicate = await checkDuplicity(matInput.value, dataBR, folgaRadio.value);
+                if (isDuplicate) { showMessage(`⚠️ Já existe solicitação para esta data/folga.`, "error"); return; }
+                
+                const fd = new FormData(document.getElementById("dersoForm"));
+                fd.set("data", dataBR);
+                const resp = await fetch(SCRIPT_URL, {method: "POST", body: new URLSearchParams(fd)});
+                const result = await resp.json();
+                if(result.success){ showMessage("✅ Enviado com sucesso!","success"); document.getElementById("dersoForm").reset(); checkMatricula(); }
+                else { showMessage("⚠️ Erro ao enviar.", "error"); }
+            } catch(error) { showMessage("⚠️ Erro de conexão.", "error"); }
+            finally { btn.disabled = false; loadingOverlay.style.display = "none"; }
+        }
+
+        function showMessage(msg, type = "success") {
+            const div = document.getElementById("statusMessage");
+            div.className = "info-message " + type;
+            div.innerHTML = msg; div.style.display = "block";
+            setTimeout(() => { div.style.display = "none"; }, 5000);
+        }
+
+        function showPersistentMessage(msg, type = "success") {
+            prazoMessageDiv.className = "info-message " + type;
+            prazoMessageDiv.innerHTML = msg; prazoMessageDiv.style.display = "block";
+        } 
+
+        function initializeForm(){
+            loadEmployeeList();
+            setDateLimits();
+            fetch(SCRIPT_URL+"?action=datas")
+            .then(r=>r.json())
+            .then(data=>{
+                initialLoadingDiv.style.display = "none";
+                formDiv.style.display = "block";
+                const fechamento = new Date(data.fechamento);
+                showPersistentMessage(`🚨 Prazo final: ${fechamento.toLocaleString("pt-BR")}`, "success");
+            }).catch(() => { initialLoadingDiv.style.display = "none"; formDiv.style.display = "block"; });
+            
+            const now = new Date();
+            document.getElementById("footerText").textContent=`Desenvolvido na 1ª Cia do 1º BPM - ${now.getFullYear()}`;
+        }
+
+        document.addEventListener("DOMContentLoaded",()=>{
+            initializeForm();
+            document.getElementById("matricula").addEventListener("blur",checkMatricula);
+            document.getElementById("email").addEventListener("input",updateEmailDatalist);
+            document.getElementById("dersoForm").addEventListener("submit",submitForm);
+            document.getElementById("btnHistory").onclick = fetchHistory;
+            document.getElementById("closeHistory").onclick = () => { document.getElementById("historyModal").style.display = "none"; };
+        });
+    </script>
 </body>
 </html>
