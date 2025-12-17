@@ -597,12 +597,15 @@
             footer.textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${mes.toString().padStart(2,'0')}/${ano}`;
         }
 
-        document.addEventListener("DOMContentLoaded",()=>{
+            document.addEventListener("DOMContentLoaded",()=>{
             initializeForm();
             document.getElementById("matricula").addEventListener("blur",checkMatricula);
             document.getElementById("email").addEventListener("input",updateEmailDatalist);
             document.getElementById("dersoForm").addEventListener("submit",submitForm);
+            document.getElementById("btnHistory").onclick = fetchHistory;
+            document.getElementById("closeHistory").onclick = () => { document.getElementById("historyModal").style.display = "none"; };
         });
+
     </script>
 </body>
 </html>
