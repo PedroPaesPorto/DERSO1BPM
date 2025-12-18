@@ -552,38 +552,51 @@ function initializeForm(){
     // Adicionado o timestamp apenas aqui para garantir que o prazo seja sempre o real da planilha
     const timestamp = new Date().getTime();
 
-    fetch(`${SCRIPT_URL}?action=datas&t=${timestamp}`)
-    .then(r=>r.json())
-    .then(data=>{
-        if(data.error) {
-            showPersistentMessage(`⚠️ Erro ao verificar o prazo: ${data.error}`, "error");
-            initialLoadingDiv.style.display = "none";
-            formDiv.style.display = "none"; 
-            return;
-        }
+    fetch(`${SCRIPT_URL}?action=datas&t=${new Date().getTime()}`)
+            .then(r=>r.json())
+            .then(data=>{
+                if(data.error) {
+                    showPersistentMessage(`⚠️ Erro ao verificar o prazo: ${data.error}`, "error");
+                    initialLoadingDiv.style.display = "none";
+                    formDiv.style.display = "none"; 
+                    return;
+                }
 
-        const agora = new Date();
-       // Isso adiciona o fuso horário de Porto Velho caso a string não tenha
-const abertura = new Date(data.abertura.includes("-") && !data.abertura.includes("T") ? data.abertura.replace(" ", "T") + "-04:00" : data.abertura + "-04:00");
-const fechamento = new Date(data.fechamento.includes("-") && !data.fechamento.includes("T") ? data.fechamento.replace(" ", "T") + "-04:00" : data.fechamento + "-04:00");
+                const agora = new Date();
+                // Forçamos o fuso horário de Rondônia (-04:00) para evitar erros em celulares diferentes
+                const abertura = new Date(data.abertura + "-04:00");
+                const fechamento = new Date(data.fechamento + "-04:00");
 
-        initialLoadingDiv.style.display = "none"; 
+                initialLoadingDiv.style.display = "none";
 
-        if(agora < abertura || agora > fechamento){
-            const msg = agora < abertura
-                ? `⏳ **Abertura:** ${abertura.toLocaleString("pt-BR")}`
-                : `⛔ **Encerrado:** ${fechamento.toLocaleString("pt-BR")}`;
+                if(agora < abertura){
+                    // CASO 1: AINDA NÃO ABRIU
+                    const diffAbertura = abertura.getTime() - agora.getTime();
+                    const diasParaAbrir = Math.ceil(diffAbertura / (1000 * 60 * 60 * 24));
+                    
+                    const msg = `⏳ **SISTEMA FECHADO**<br>As solicitações iniciam em **${abertura.toLocaleDateString("pt-BR")}** às **${abertura.toLocaleTimeString("pt-BR", {hour: '2-digit', minute:'2-digit'})}**.<br>Faltam aproximadamente **${diasParaAbrir} dia(s)**.`;
 
-            showPersistentMessage(msg, "error");
-            formDiv.style.display = "none"; 
-        } else {
-            formDiv.style.display = "block";
-            const diffTime = fechamento.getTime() - agora.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const msg = `🚨 **Atenção!** Restam **${diffDays} dia(s)** para o fechamento em ${fechamento.toLocaleDateString("pt-BR")} às ${fechamento.toLocaleTimeString("pt-BR")}.`;
-            showPersistentMessage(msg, "success");
-        }
-    })
+                    showPersistentMessage(msg, "error"); // Cor de aviso (amarelo/rosa)
+                    formDiv.style.display = "none"; 
+
+                } else if(agora > fechamento){
+                    // CASO 2: JÁ FECHOU
+                    const msg = `⛔ **SISTEMA ENCERRADO**<br>O prazo encerrou em ${fechamento.toLocaleString("pt-BR")}.`;
+                    showPersistentMessage(msg, "error");
+                    formDiv.style.display = "none"; 
+
+                } else {
+                    // CASO 3: ESTÁ DENTRO DO PRAZO
+                    formDiv.style.display = "block";
+
+                    const diffTime = fechamento.getTime() - agora.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    const msg = `🚨 **SISTEMA ABERTO!**<br>Você tem até o dia ${fechamento.toLocaleDateString("pt-BR")} às ${fechamento.toLocaleTimeString("pt-BR", {hour: '2-digit', minute:'2-digit'})} para enviar sua solicitação.`;
+
+                    showPersistentMessage(msg, "success");
+                }
+            })
     .catch(error => {
         showPersistentMessage(`⚠️ Falha ao conectar com o servidor. Verifique o link do script.`, "error");
         initialLoadingDiv.style.display = "none";
