@@ -575,12 +575,12 @@ function initializeForm() {
                             const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                             const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-                            showPersistentMessage(`⏳ **SISTEMA FECHADO**<br>Abre em: ${d}d ${h}h ${m}m ${s}s`, "error");
+                            showPersistentMessage(`⏳ **FORMULÁRIO FECHADO**<br>Abre em: ${d}d ${h}h ${m}m ${s}s`, "error");
                             formDiv.style.display = "none";
                         } 
                         else if (agora > fechamento) {
                             // CASO 2: PRAZO ENCERRADO
-                            showPersistentMessage(`⛔ **SISTEMA ENCERRADO**<br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")}`, "error");
+                            showPersistentMessage(`⛔ **FORMULÁRIO ENCERRADO**<br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")}`, "error");
                             formDiv.style.display = "none";
                             clearInterval(intervalo);
                         } 
@@ -600,7 +600,7 @@ function initializeForm() {
                             if (diff < (2 * 60 * 60 * 1000)) {
                                 showPersistentMessage(`⚠️ **URGENTE! ENCERRAMENTO EM:**<br><span style="color: #ff0000; font-size: 1.2em; animation: blinker 1s linear infinite;">${tempoTexto}</span>`, "error");
                             } else {
-                                showPersistentMessage(`🚨 **SISTEMA ABERTO!**<br>Encerra em: **${tempoTexto}**`, "success");
+                                showPersistentMessage(`🚨 **FORMULÁRIO ABERTO!**<br>Encerra em: **${tempoTexto}**`, "success");
                             }
                         }
                     };
