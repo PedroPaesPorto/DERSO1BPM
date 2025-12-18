@@ -563,8 +563,9 @@ function initializeForm(){
         }
 
         const agora = new Date();
-        const abertura = new Date(data.abertura);
-        const fechamento = new Date(data.fechamento);
+       // Isso adiciona o fuso horário de Porto Velho caso a string não tenha
+const abertura = new Date(data.abertura.includes("-") && !data.abertura.includes("T") ? data.abertura.replace(" ", "T") + "-04:00" : data.abertura + "-04:00");
+const fechamento = new Date(data.fechamento.includes("-") && !data.fechamento.includes("T") ? data.fechamento.replace(" ", "T") + "-04:00" : data.fechamento + "-04:00");
 
         initialLoadingDiv.style.display = "none"; 
 
