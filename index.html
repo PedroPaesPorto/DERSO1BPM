@@ -387,209 +387,202 @@
         </div>
     </div>
 
-    <script>
-    // ***********************************************
-    // URL DO BACKEND (GOOGLE APPS SCRIPT)
-    // ***********************************************
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtotRW_K-3l2AYO28W477xpVVR1_xywCxW2QIBsEKs5eWCpRnDLE3uW1Fmr56tKV8i/exec"; 
-    const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"];
+<script>
+/* =====================================================
+   CONFIGURAÇÕES GERAIS
+===================================================== */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtotRW_K-3l2AYO28W477xpVVR1_xywCxW2QIBsEKs5eWCpRnDLE3uW1Fmr56tKV8i/exec";
+const emailProviders = ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"];
+window.employeeList = {};
 
-    window.employeeList = {};
+/* =====================================================
+   ELEMENTOS FIXOS
+===================================================== */
+const progressBar = document.getElementById("progressBar");
+const formDiv = document.getElementById("dersoForm");
+const initialLoadingDiv = document.getElementById("initialLoading");
+const loadingOverlay = document.getElementById("loadingOverlay");
+const prazoMessageDiv = document.getElementById("prazoMessage");
 
-    // =================================================
-    // 🎨 SISTEMA DE TEMA INSTITUCIONAL AUTOMÁTICO
-    // =================================================
-    function applyInstitutionalTheme() {
-        const hoje = new Date();
-        const dia = hoje.getDate();
-        const mes = hoje.getMonth(); // 0-11
-        const root = document.documentElement;
+/* =====================================================
+   UTILITÁRIOS
+===================================================== */
+function setProgress(percent){ progressBar.style.width = percent + "%"; }
 
-        const aplicar = (msg, tipo = "success", cores = {}) => {
-            if (cores.primaria) root.style.setProperty("--dourado-amarelo", cores.primaria);
-            showPersistentMessage(msg, tipo);
-        };
+function standardizeMatricula(m){
+    let num = m.replace(/\D/g,'').slice(0,9);
+    return num.startsWith("1000") ? num : "1000"+num;
+}
 
-        const datasEspeciais = {
-            "1-4": () => aplicar("Rondônia: história, serviço e compromisso com a sociedade."),
-            "5-1": () => aplicar("O trabalho sustenta o serviço público e a cidadania."),
-            "9-7": () => aplicar("Independência se constrói diariamente com responsabilidade institucional."),
-            "11-15": () => aplicar("A República se sustenta pelo respeito às instituições."),
-            "12-7": () => aplicar(
-                "1º BPM — tradição, serviço e compromisso com a segurança pública.",
-                "success",
-                { primaria: "#c9a227" }
-            )
-        };
+function formatDateBR(d){
+    if(!d) return "";
+    const [y,m,day] = d.split("-");
+    return `${day}/${m}/${y}`;
+}
 
-        const chaveData = `${mes + 1}-${dia}`;
-        if (datasEspeciais[chaveData]) {
-            datasEspeciais[chaveData]();
-            return;
-        }
+function showMessage(msg, type="success"){
+    const div = document.getElementById("statusMessage");
+    div.className = "info-message " + type;
+    div.innerHTML = msg;
+    div.style.display = "block";
+    setTimeout(()=> div.style.display="none",5000);
+}
 
-        const temasMensais = {
-            1: () => aplicar("Período de elevada demanda operacional. Planejamento é essencial.", "success", { primaria: "#d4af37" }),
-            2: () => aplicar("Reconhecemos, neste mês, a dedicação e a contribuição das mulheres na Corporação.", "success", { primaria: "#b39ddb" }),
-            3: () => aplicar("Tempo de renovação, reflexão e responsabilidade coletiva."),
-            4: () => aplicar("Mães exercem múltiplas missões, dentro e fora do serviço."),
-            5: () => aplicar("Cultura e tradição também fazem parte da identidade social."),
-            7: () => aplicar("A presença familiar também integra o equilíbrio profissional."),
-            10: () => aplicar("Reconhecer a história fortalece a instituição e a sociedade.", "success", { primaria: "#b08d57" }),
-            11: () => aplicar("Planejamento e compromisso garantem a continuidade do serviço público.", "success", { primaria: "#2e7d32" })
-        };
+function showPersistentMessage(msg, type="success"){
+    prazoMessageDiv.className = "info-message " + type;
+    prazoMessageDiv.innerHTML = msg;
+    prazoMessageDiv.style.display = "block";
+}
 
-        if (temasMensais[mes]) {
-            temasMensais[mes]();
-        }
-    }
+/* =====================================================
+   TEMA INSTITUCIONAL AUTOMÁTICO
+===================================================== */
+function applyInstitutionalTheme(){
+    const hoje = new Date();
+    const dia = hoje.getDate();
+    const mes = hoje.getMonth();
+    const root = document.documentElement;
 
-    // =================================================
-    // 📜 HISTÓRICO DE SOLICITAÇÕES
-    // =================================================
-    async function fetchHistory() {
-        let mat = document.getElementById("matricula").value.trim();
-        if (!mat) {
-            alert("Digite sua matrícula primeiro.");
-            return;
-        }
+    const aplicar = (msg, type="success", cor=null)=>{
+        if(cor) root.style.setProperty("--dourado-amarelo", cor);
+        showPersistentMessage(msg,type);
+    };
 
-        mat = standardizeMatricula(mat);
-        document.getElementById("matricula").value = mat;
+    const datas = {
+        "1-4": ()=> aplicar("Rondônia: história, serviço e compromisso."),
+        "5-1": ()=> aplicar("O trabalho sustenta o serviço público."),
+        "9-7": ()=> aplicar("Independência se constrói com responsabilidade."),
+        "11-15": ()=> aplicar("A República se sustenta pelas instituições."),
+        "12-7": ()=> aplicar("1º BPM — tradição e compromisso com a sociedade.", "success", "#c9a227")
+    };
 
-        const modal = document.getElementById("historyModal");
-        const box = document.getElementById("historyBox");
+    const chave = `${mes+1}-${dia}`;
+    if(datas[chave]){ datas[chave](); return; }
 
-        modal.style.display = "flex";
-        box.innerHTML = "Buscando solicitações...";
+    const meses = {
+        1: ()=> aplicar("Período de planejamento operacional."),
+        2: ()=> aplicar("Reconhecimento às mulheres da Corporação."),
+        3: ()=> aplicar("Tempo de renovação e reflexão institucional."),
+        4: ()=> aplicar("Mães exercem múltiplas missões."),
+        7: ()=> aplicar("Família também integra o equilíbrio profissional.")
+    };
 
-        try {
-            const response = await fetch(`${SCRIPT_URL}?action=historico&matricula=${encodeURIComponent(mat)}`);
-            const data = await response.json();
+    if(meses[mes]) meses[mes]();
+}
 
-            if (!Array.isArray(data.historico) || data.historico.length === 0) {
-                box.innerHTML = `<p><strong>${data.nome || "Usuário"}</strong></p><p>Nenhuma solicitação encontrada.</p>`;
-                return;
-            }
-
-            let html = `<p><strong>${data.nome}</strong></p><ul style="padding:0">`;
-            data.historico.forEach(h => {
-                const statusCor =
-                    h.Status === 'APROVADA' ? 'var(--sucesso)' :
-                    h.Status === 'RECUSADA' ? 'var(--erro)' : '#666';
-
-                const statusTexto =
-                    (h.Status && h.Status.toUpperCase() !== 'PENDENTE') ? h.Status : '';
-
-                html += `
-                    <li style="border-bottom:1px solid #eee;padding:8px 0">
-                        ${h.Data} - ${h.Folga}<br>
-                        <span style="color:${statusCor};font-weight:bold;font-size:12px">${statusTexto}</span>
-                    </li>
-                `;
-            });
-
-            html += "</ul>";
-            box.innerHTML = html;
-
-        } catch (e) {
-            box.innerHTML = "<p>Erro ao conectar com o servidor.</p>";
-        }
-    }
-
-    // =================================================
-    // FUNÇÕES AUXILIARES (inalteradas)
-    // =================================================
-    const progressBar = document.getElementById("progressBar");
-    const formDiv = document.getElementById("dersoForm");
-    const initialLoadingDiv = document.getElementById("initialLoading");
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    const prazoMessageDiv = document.getElementById("prazoMessage");
-
-    function setProgress(p) { progressBar.style.width = p + "%"; }
-
-    function updateEmailDatalist() {
-        const emailInput = document.getElementById("email");
-        const datalist = document.getElementById("emailProviders");
-        const value = emailInput.value;
-        const atIndex = value.indexOf("@");
-        if (atIndex === -1) { datalist.innerHTML = ""; return; }
-        const domainPart = value.slice(atIndex + 1).toLowerCase();
-        datalist.innerHTML = "";
-        emailProviders.filter(p => p.startsWith(domainPart))
-            .forEach(p => {
-                const option = document.createElement("option");
-                option.value = value.slice(0, atIndex + 1) + p;
-                datalist.appendChild(option);
-            });
-    }
-
-    function standardizeMatricula(m) {
-        let num = m.replace(/\D/g,'').slice(0,9);
-        return num.startsWith("1000") ? num : "1000"+num;
-    }
-
-    function showPersistentMessage(msg, type = "success") {
-        prazoMessageDiv.className = "info-message " + type;
-        prazoMessageDiv.innerHTML = msg;
-        prazoMessageDiv.style.display = "block";
-    }
-
-    // =================================================
-    // 🚀 INICIALIZAÇÃO
-    // =================================================
-    function initializeForm() {
-        applyInstitutionalTheme();
-        loadEmployeeList();
-        setDateLimits();
-        const footer = document.getElementById("footerText");
-
-        fetch(`${SCRIPT_URL}?action=datas&t=${Date.now()}`)
-            .then(r => r.json())
-            .then(data => {
-                initialLoadingDiv.style.display = "none";
-                if (data.error) {
-                    showPersistentMessage(`⚠️ Erro ao verificar o prazo: ${data.error}`, "error");
-                    return;
-                }
-
-                const atualizarCronometro = () => {
-                    const agora = new Date();
-                    const abertura = new Date(data.abertura + "-04:00");
-                    const fechamento = new Date(data.fechamento + "-04:00");
-
-                    if (agora < abertura) {
-                        const diff = abertura - agora;
-                        showPersistentMessage(`⏳ FORMULÁRIO FECHADO<br>Abre em ${Math.floor(diff/3600000)}h`, "error");
-                        formDiv.style.display = "none";
-                    } else if (agora > fechamento) {
-                        showPersistentMessage(`⛔ FORMULÁRIO ENCERRADO`, "error");
-                        formDiv.style.display = "none";
-                        clearInterval(intervalo);
-                    } else {
-                        formDiv.style.display = "block";
-                    }
-                };
-
-                atualizarCronometro();
-                const intervalo = setInterval(atualizarCronometro, 1000);
-            });
-
-        const now = new Date();
-        footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        initializeForm();
-        document.getElementById("matricula").addEventListener("blur", checkMatricula);
-        document.getElementById("email").addEventListener("input", updateEmailDatalist);
-        document.getElementById("dersoForm").addEventListener("submit", submitForm);
-        document.getElementById("btnHistory").onclick = fetchHistory;
-        document.getElementById("closeHistory").onclick = () => {
-            document.getElementById("historyModal").style.display = "none";
-        };
+/* =====================================================
+   BACKEND / DADOS
+===================================================== */
+function loadEmployeeList(){
+    setProgress(20);
+    fetch(SCRIPT_URL+"?action=lista")
+    .then(r=>r.json())
+    .then(data=>{
+        window.employeeList = data;
+        setProgress(40);
+        document.getElementById("matricula").disabled = false;
+    })
+    .catch(()=>{
+        document.getElementById("matriculaError").textContent="Erro ao carregar lista.";
     });
+}
+
+function checkMatricula(){
+    const m = document.getElementById("matricula");
+    const n = document.getElementById("nome");
+    const e = document.getElementById("matriculaError");
+
+    if(!m.value.trim()){
+        n.value=""; e.textContent="";
+        m.classList.remove("is-valid","is-invalid");
+        return;
+    }
+
+    const s = standardizeMatricula(m.value);
+    m.value = s;
+    m.classList.remove("is-valid","is-invalid");
+
+    if(window.employeeList[s]){
+        n.value = window.employeeList[s];
+        e.textContent="";
+        m.classList.add("is-valid");
+    } else {
+        n.value="";
+        e.textContent="Matrícula não encontrada!";
+        m.classList.add("is-invalid");
+    }
+}
+
+async function checkDuplicity(matricula,data,folga){
+    try{
+        const r = await fetch(`${SCRIPT_URL}?action=check_duplicidade&matricula=${matricula}&data=${data}&folga=${folga}`);
+        const j = await r.json();
+        return j.duplicado === true;
+    } catch { return false; }
+}
+
+/* =====================================================
+   FORMULÁRIO
+===================================================== */
+async function submitForm(e){
+    e.preventDefault();
+    const btn = document.querySelector('button[type="submit"]');
+    const mat = document.getElementById("matricula");
+    const folga = document.querySelector('input[name="folga"]:checked');
+    const dataValue = document.getElementById("data").value;
+    const dataBR = formatDateBR(dataValue);
+
+    if(mat.classList.contains("is-invalid") || !folga) return;
+
+    btn.disabled = true;
+    loadingOverlay.style.display="flex";
+
+    try{
+        if(await checkDuplicity(mat.value,dataBR,folga.value)){
+            showMessage("⚠️ Já existe solicitação para esta data.","error");
+            return;
+        }
+
+        const fd = new FormData(document.getElementById("dersoForm"));
+        fd.set("data",dataBR);
+
+        const resp = await fetch(SCRIPT_URL,{method:"POST",body:new URLSearchParams(fd)});
+        const r = await resp.json();
+
+        if(r.success){
+            showMessage("✅ Enviado com sucesso!");
+            document.getElementById("dersoForm").reset();
+            checkMatricula();
+        } else {
+            showMessage("⚠️ Erro ao enviar.","error");
+        }
+    } catch {
+        showMessage("⚠️ Erro de conexão.","error");
+    } finally {
+        btn.disabled=false;
+        loadingOverlay.style.display="none";
+    }
+}
+
+/* =====================================================
+   INICIALIZAÇÃO
+===================================================== */
+function initializeForm(){
+    applyInstitutionalTheme();
+    loadEmployeeList();
+    setDateLimits();
+}
+
+/* =====================================================
+   EVENTOS
+===================================================== */
+document.addEventListener("DOMContentLoaded",()=>{
+    initializeForm();
+    document.getElementById("matricula").addEventListener("blur",checkMatricula);
+    document.getElementById("dersoForm").addEventListener("submit",submitForm);
+});
 </script>
+
 
 </body>
 </html>
