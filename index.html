@@ -18,7 +18,6 @@
             --borda-campo: #aaa;
         }
 
-        /* 2. TIPOGRAFIA E FUNDO */
         body {
             background-color: var(--cinza-fundo);
             font-family: 'Roboto', Arial, sans-serif;
@@ -30,6 +29,9 @@
             align-items: center;
             min-height: 100vh;
         }
+
+        /* Classe para impedir scroll quando modal abrir */
+        body.modal-open { overflow: hidden; }
 
         .container {
             width: 95%;
@@ -71,10 +73,7 @@
             margin-bottom: 15px;
         }
 
-        .logos img {
-            height: 70px;
-            object-fit: contain;
-        }
+        .logos img { height: 70px; object-fit: contain; }
 
         h2 {
             font-family: 'Merriweather', serif;
@@ -83,190 +82,80 @@
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 10px;
-            line-height: 1.2;
-            letter-spacing: -0.5px;
             border-bottom: 2px solid var(--dourado-amarelo);
             padding-bottom: 5px;
         }
 
-        .subtitle {
-            text-align: center;
-            color: var(--cinza-texto);
-            font-size: 16px;
-            margin-bottom: 25px;
-        }
+        .subtitle { text-align: center; font-size: 16px; margin-bottom: 25px; }
 
-        /* ESTILO DA MENSAGEM INSTITUCIONAL (DESTAQUE) */
         .institutional-highlight {
             text-align: center;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--azul-marinho);
             font-weight: 500;
-            margin-top: 5px;
             margin-bottom: 20px;
             padding: 12px;
-            border-top: 1px solid #eee;
-            border-bottom: 1px solid #eee;
-            font-style: italic;
-            line-height: 1.4;
             background-color: #fcfcfc;
+            border: 1px solid #eee;
+            font-style: italic;
         }
 
-        .form-group, fieldset {
-            margin-bottom: 20px;
-            width: 100%;
-            border: none;
-            padding: 0;
+        .form-group, fieldset { margin-bottom: 20px; width: 100%; border: none; padding: 0; }
+        label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
+
+        .form-group input:not([type="radio"]), .form-group select {
+            width: 100%; padding: 12px; border: 1px solid var(--borda-campo); border-radius: 4px; box-sizing: border-box;
         }
 
-        label, legend {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--cinza-texto);
-            font-weight: 500;
-            font-size: 15px;
-        }
+        .is-valid { border-color: var(--sucesso) !important; box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.1); }
+        .is-invalid { border-color: var(--erro) !important; box-shadow: 0 0 0 2px rgba(176, 0, 32, 0.1); }
 
-        .form-group input:not([type="radio"]),
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            font-size: 15px;
-            border: 1px solid var(--borda-campo);
-            border-radius: 4px;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            border-color: var(--azul-claro-hover);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(12, 54, 103, 0.2);
-        }
-
-        /* FEEDBACK DE VALIDAÇÃO DA MATRÍCULA */
-        .is-valid { border-color: var(--sucesso) !important; box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.2) !important; }
-        .is-invalid { border-color: var(--erro) !important; box-shadow: 0 0 0 2px rgba(176, 0, 32, 0.2) !important; }
-
-        input[readonly] { background-color: #e9ecef; cursor: not-allowed; }
-
-        .radio-group-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .radio-group-buttons input[type="radio"] { display: none; }
-
+        .radio-group-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+        .radio-group-buttons input { display: none; }
         .radio-group-buttons label {
-            padding: 8px 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
-            user-select: none;
-            text-transform: uppercase;
-            font-weight: 500;
+            padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
         }
-
-        .radio-group-buttons input[type="radio"]:checked + label {
-            background-color: var(--azul-marinho);
-            color: var(--dourado-amarelo);
-            border-color: var(--azul-marinho);
-            font-weight: 700;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        .radio-group-buttons input:checked + label {
+            background-color: var(--azul-marinho); color: var(--dourado-amarelo); border-color: var(--azul-marinho);
         }
 
         .button {
-            background-color: var(--azul-claro-hover);
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            padding: 14px 20px;
-            font-size: 16px;
-            font-weight: 700;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            display: block;
-            width: 100%;
-            text-transform: uppercase;
-            margin-top: 10px;
+            background-color: var(--azul-claro-hover); color: #fff; border: none; cursor: pointer; padding: 14px;
+            font-size: 16px; font-weight: 700; border-radius: 4px; width: 100%; text-transform: uppercase; margin-top: 10px;
         }
-
-        .button.secondary {
-            background-color: #fff;
-            color: var(--azul-marinho);
-            border: 1px solid var(--azul-marinho);
-        }
-
-        .button:hover { background-color: var(--azul-marinho); transform: translateY(-1px); }
-        .button.secondary:hover { background-color: #f0f0f0; }
+        .button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .button.secondary { background-color: #fff; color: var(--azul-marinho); border: 1px solid var(--azul-marinho); }
 
         .info-message {
-            text-align: center;
-            border-radius: 4px;
-            font-size: 15px;
-            font-weight: 600;
-            line-height: 1.4;
-            display: none;
-            margin-bottom: 25px;
-            padding: 12px 15px;
-            border-left: 5px solid;
+            text-align: center; padding: 15px; border-radius: 4px; font-weight: 600; margin-bottom: 20px; display: none; border-left: 5px solid;
         }
-
         .info-message.success { background-color: #e8f5e9; color: var(--sucesso); border-left-color: var(--sucesso); }
         .info-message.error { background-color: #fce4ec; color: var(--erro); border-left-color: var(--erro); }
 
-        @keyframes blinker { 50% { opacity: 0; } }
+        /* Mensagem de sucesso gigante para não haver dúvida */
+        #successState { display: none; text-align: center; padding: 20px; }
+        .check-icon { font-size: 50px; color: var(--sucesso); margin-bottom: 15px; }
 
-        .footer { text-align: center; margin-top: 25px; font-size: 12px; color: #777; }
+        .footer { text-align: center; margin-top: 25px; font-size: 11px; color: #777; }
 
-        /* MODAL */
+        /* MODAIS */
         .modal-base {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 2000;
         }
-       .modal-content {
-    background: #fff;
-    padding: 25px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 450px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    display: flex;
-    flex-direction: column;
-    max-height: 85vh; /* Evita que o modal saia da tela em celulares */
-}
-       .history-list {
-    list-style: none;
-    padding: 0;
-    margin: 15px 0;
-    overflow-y: auto; /* A barra só aparece se o conteúdo exceder o max-height */
-    max-height: 480px; /* Altura confortável para ~12 linhas antes de rolar */
-}
+        .modal-content { background: #fff; padding: 25px; border-radius: 8px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
 
         .spinner {
-            border: 4px solid rgba(12, 54, 103, 0.2);
-            border-top: 4px solid var(--azul-claro-hover);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 15px auto;
+            border: 4px solid rgba(0,0,0,0.1); border-top-color: var(--azul-claro-hover); border-radius: 50%;
+            width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes blinker { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
-    <div id="loadingOverlay" class="modal-base" style="flex-direction: column; background: rgba(255,255,255,0.9); color: var(--azul-marinho);">
-        <p>Processando solicitação...</p>
+
+    <div id="loadingOverlay" class="modal-base" style="flex-direction: column; background: rgba(255,255,255,0.9);">
+        <p style="color: var(--azul-marinho); font-weight: bold;">Enviando sua solicitação...</p>
         <div class="spinner"></div>
     </div>
 
@@ -279,14 +168,20 @@
         </div>
 
         <h2>DERSO 1º BPM</h2>
-        <p class="subtitle">Formulário de Solicitação de Diária Especial</p>
-        
+        <p class="subtitle">Solicitação de Diária Especial</p>
+
         <div id="instMessage" class="institutional-highlight"></div>
-        
         <div id="prazoMessage" class="info-message"></div>
 
-        <div id="initialLoading" style="text-align: center; padding: 20px; color: var(--azul-marinho);">
-            <p>Carregando sistema...</p>
+        <div id="successState">
+            <div class="check-icon">✓</div>
+            <h3 style="color: var(--sucesso)">ENVIADO COM SUCESSO!</h3>
+            <p>Sua solicitação foi registrada no sistema.</p>
+            <button class="button" onclick="location.reload()">Fazer outra solicitação</button>
+        </div>
+
+        <div id="initialLoading">
+            <p style="text-align:center">Carregando sistema...</p>
             <div class="spinner"></div>
         </div>
 
@@ -305,7 +200,7 @@
 
             <div class="form-group">
                 <label for="nome">Nome:</label>
-                <input type="text" id="nome" name="nome" readonly required>
+                <input type="text" id="nome" name="nome" readonly required style="background:#f0f0f0">
             </div>
 
             <fieldset>
@@ -325,11 +220,11 @@
             <div class="form-group">
                 <label for="data">Data da Folga:</label>
                 <input type="date" id="data" name="data" required>
-                <div id="dateLimitMessage" style="font-size: 12px; color: #666; margin-top: 5px;"></div>
+                <div id="dateLimitMessage" style="font-size: 11px; color: #666; margin-top: 5px;"></div>
             </div>
 
             <button type="button" class="button secondary" id="btnHistory">Minhas Solicitações</button>
-            <button type="submit" class="button">Enviar Solicitação</button>
+            <button type="submit" class="button" id="btnSubmit">Enviar Solicitação</button>
         </form>
 
         <div id="statusMessage" class="info-message"></div>
@@ -339,7 +234,7 @@
     <div id="historyModal" class="modal-base">
         <div class="modal-content">
             <h3 style="color:var(--azul-marinho); margin-top:0;">Histórico Recente</h3>
-            <div id="historyBox" class="history-list"></div>
+            <div id="historyBox"></div>
             <button type="button" class="button" id="closeHistory">Fechar</button>
         </div>
     </div>
@@ -355,6 +250,7 @@
     const formDiv = document.getElementById("dersoForm");
     const statusMessageDiv = document.getElementById("statusMessage");
     const prazoMessageDiv = document.getElementById("prazoMessage");
+    const successState = document.getElementById("successState"); // Referência à nova div de sucesso
 
     function showPersistentMessage(msg, type="success") {
         prazoMessageDiv.className = `info-message ${type}`;
@@ -445,26 +341,42 @@
         document.getElementById("data").min = min.toISOString().split("T")[0];
         document.getElementById("data").max = max.toISOString().split("T")[0];
         document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
-        document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+        
+        // CORREÇÃO: Removido 'now' que não existia e trocado por 'hoje'
+        document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
     }
 
     async function submitForm(e) {
         e.preventDefault();
-        if (matInput.classList.contains("is-invalid")) return;
+        const btnSubmit = document.getElementById("btnSubmit");
+        
+        if (matInput.classList.contains("is-invalid") || btnSubmit.disabled) return;
+
+        // TRAVA DE SEGURANÇA: Desabilita o botão imediatamente
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "ENVIANDO...";
         document.getElementById("loadingOverlay").style.display = "flex";
+
         const fd = new FormData(formDiv);
         try {
             const resp = await fetch(SCRIPT_URL, { method: "POST", body: new URLSearchParams(fd) });
             const res = await resp.json();
+            
             if (res.success) {
-                showStatus("✅ Solicitação enviada com sucesso!", "success");
-                formDiv.reset();
-                matInput.classList.remove("is-valid");
+                // FEEDBACK DE SUCESSO: Esconde formulário e mostra tela de sucesso
+                formDiv.style.display = "none";
+                prazoMessageDiv.style.display = "none";
+                successState.style.display = "block";
+                window.scrollTo(0,0);
             } else {
                 showStatus("❌ Erro: " + (res.error || "Tente novamente."), "error");
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "Enviar Solicitação";
             }
         } catch (err) {
             showStatus("❌ Erro de conexão com o servidor.", "error");
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Enviar Solicitação";
         } finally {
             document.getElementById("loadingOverlay").style.display = "none";
         }
@@ -538,8 +450,10 @@
         
         document.getElementById("btnHistory").onclick = async () => {
             if (!matInput.value) return alert("Insira a matrícula.");
-            document.getElementById("historyModal").style.display = "flex";
-            document.getElementById("historyBox").innerHTML = "Buscando...";
+            const modal = document.getElementById("historyModal");
+            modal.style.display = "flex";
+            document.body.classList.add("modal-open"); // Trava o scroll
+            document.getElementById("historyBox").innerHTML = "<div class='spinner'></div> Buscando...";
             
             try {
                 const r = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matInput.value}`);
@@ -563,7 +477,18 @@
                 document.getElementById("historyBox").innerHTML = "Erro ao carregar histórico.";
             }
         };
-        document.getElementById("closeHistory").onclick = () => document.getElementById("historyModal").style.display="none";
+
+        const closeMod = () => {
+            document.getElementById("historyModal").style.display="none";
+            document.body.classList.remove("modal-open");
+        };
+
+        document.getElementById("closeHistory").onclick = closeMod;
+        
+        // ACESSIBILIDADE: Fechar no ESC
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") closeMod();
+        });
     });
 </script>
 </body>
