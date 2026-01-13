@@ -445,7 +445,7 @@
         document.getElementById("data").min = min.toISOString().split("T")[0];
         document.getElementById("data").max = max.toISOString().split("T")[0];
         document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
-        document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+        document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia/1º BPM - ${hoje.getMonth()+1}/${hoje.getFullYear()}`;
     }
 
     async function submitForm(e) {
@@ -476,7 +476,7 @@
         const aplicar = (msg) => instDiv.innerHTML = msg;
 
         const temas = {
-            "1-13": () => {
+            "1-4": () => {
                 const anosRondonia = hoje.getFullYear() - 1982;
                 aplicar(`🌳 Rondônia: ${anosRondonia} anos de história, bravura e compromisso.`);
             },
@@ -514,7 +514,9 @@
                 },
                 11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. Boas Festas! ✨")
             };
-            if (mensais[mes]) mensais[mes]();
+            if (mensais[mes]) {
+                mensais[mes]();
+            }
         }
     }
 
