@@ -225,6 +225,19 @@
             border-left: 5px solid; 
         }
 
+        .institutional-message {
+    background-color: #fff8e1; /* amarelo claro */
+    color: var(--azul-marinho);
+    border-left: 5px solid var(--dourado-amarelo);
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+
         .info-message.success {
             background-color: #e8f5e9; 
             color: var(--sucesso);
@@ -549,80 +562,109 @@
             .catch(()=>{ matError.textContent="Erro ao carregar lista."; });
     }
 
-    function initializeForm() {
-        loadEmployeeList();
-        setDateLimits();
-        fetch(`${SCRIPT_URL}?action=datas&t=${new Date().getTime()}`)
-        .then(r=>r.json())
-        .then(data=>{
-            if(data.error){ showPersistentMessage(`⚠️ Erro ao verificar o prazo: ${data.error}`,"error"); initialLoadingDiv.style.display="none"; return; }
+  function initializeForm() {
+    loadEmployeeList();
+    setDateLimits();
+
+    // Busca datas de abertura/fechamento do formulário
+    fetch(`${SCRIPT_URL}?action=datas&t=${new Date().getTime()}`)
+    .then(r => r.json())
+    .then(data => {
+        if(data.error){
+            showPersistentMessage(`⚠️ Erro ao verificar o prazo: ${data.error}`, "error");
             initialLoadingDiv.style.display="none";
+            return;
+        }
 
-            const intervalo = setInterval(()=>{
-                const agora = new Date();
-                const abertura = new Date(data.abertura + "-04:00");
-                const fechamento = new Date(data.fechamento + "-04:00");
-                let diff, d, h, m, s, tempoTexto;
+        initialLoadingDiv.style.display="none";
 
-                if(agora<abertura){
-                    diff = abertura - agora;
-                    d = Math.floor(diff/(1000*60*60*24));
-                    h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-                    m = Math.floor((diff%(1000*60*60))/(1000*60));
-                    s = Math.floor((diff%(1000*60))/1000);
-                    showPersistentMessage(`⏳ **FORMULÁRIO FECHADO**<br>Abre em: ${d}d ${h}h ${m}m ${s}s`,"error");
-                    formDiv.style.display="none";
-                } else if(agora>fechamento){
-                    showPersistentMessage(`⛔ **FORMULÁRIO ENCERRADO**<br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")}`,"error");
-                    formDiv.style.display="none"; clearInterval(intervalo);
-                } else {
-                    formDiv.style.display="block";
-                    diff = fechamento - agora;
-                    d = Math.floor(diff/(1000*60*60*24));
-                    h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-                    m = Math.floor((diff%(1000*60*60))/(1000*60));
-                    s = Math.floor((diff%(1000*60))/1000);
-                    tempoTexto=`${d}d ${h}h ${m}m ${s}s`;
-                    if(diff<(2*60*60*1000)) showPersistentMessage(`⚠️ **URGENTE! ENCERRAMENTO EM:**<br><span style="color:#ff0000;font-size:1.2em;animation:blinker 1s linear infinite;">${tempoTexto}</span>`,"error");
-                    else showPersistentMessage(`🚨 **FORMULÁRIO ABERTO!**<br>Encerra em: **${tempoTexto}**`,"success");
+        // Função para pegar a mensagem institucional
+        function getInstitutionalMessage() {
+            const hoje = new Date(), dia = hoje.getDate(), mes = hoje.getMonth(); // 0-based
+
+            const datasEspeciais = {
+                "1-4": "Rondônia: história, serviço e compromisso com a sociedade.",
+                "5-1": "O trabalho sustenta o serviço público e a cidadania.",
+                "9-7": "Independência se constrói diariamente com responsabilidade institucional.",
+                "11-15": "A República se sustenta pelo respeito às instituições.",
+                "12-7": "1º BPM — tradição, serviço e compromisso com a segurança pública"
+            };
+            const chaveData = `${mes+1}-${dia}`;
+            if(datasEspeciais[chaveData]) return datasEspeciais[chaveData];
+
+            const temasMensais = {
+                1: "Período de elevada demanda operacional. Planejamento é essencial.",
+                3: "Reconhecemos, neste mês, a dedicação e a contribuição das mulheres na Corporação.",
+                4: "Tempo de renovação, reflexão e responsabilidade coletiva.",
+                5: "Mães exercem múltiplas missões, dentro e fora do serviço.",
+                6: "Cultura e tradição também fazem parte da identidade social.",
+                8: "A presença familiar também integra o equilíbrio profissional.",
+                11: "Reconhecer a história fortalece a instituição e a sociedade.",
+                12: "Planejamento e compromisso garantem a continuidade do serviço público."
+            };
+            return temasMensais[mes+1] || "";
+        }
+
+        // Atualiza status do formulário a cada segundo
+        const intervalo = setInterval(() => {
+            const agora = new Date();
+            const abertura = new Date(data.abertura + "-04:00");
+            const fechamento = new Date(data.fechamento + "-04:00");
+            let diff, d, h, m, s, tempoTexto;
+
+            const msgInstitucional = getInstitutionalMessage();
+
+            if(agora < abertura){
+                diff = abertura - agora;
+                d = Math.floor(diff/(1000*60*60*24));
+                h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+                m = Math.floor((diff%(1000*60*60))/(1000*60));
+                s = Math.floor((diff%(1000*60))/1000);
+
+                prazoMessageDiv.innerHTML = `
+                    ${msgInstitucional ? `<div class="institutional-message">📢 ${msgInstitucional}</div>` : ""}
+                    ⏳ <strong>FORMULÁRIO FECHADO</strong><br>Abre em: ${d}d ${h}h ${m}m ${s}s
+                `;
+                formDiv.style.display = "none";
+
+            } else if(agora > fechamento){
+                prazoMessageDiv.innerHTML = `
+                    ${msgInstitucional ? `<div class="institutional-message">📢 ${msgInstitucional}</div>` : ""}
+                    ⛔ <strong>FORMULÁRIO ENCERRADO</strong><br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")}
+                `;
+                formDiv.style.display = "none";
+                clearInterval(intervalo);
+
+            } else {
+                diff = fechamento - agora;
+                d = Math.floor(diff/(1000*60*60*24));
+                h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+                m = Math.floor((diff%(1000*60*60))/(1000*60));
+                s = Math.floor((diff%(1000*60))/1000);
+                tempoTexto = `${d}d ${h}h ${m}m ${s}s`;
+
+                prazoMessageDiv.innerHTML = `
+                    ${msgInstitucional ? `<div class="institutional-message">📢 ${msgInstitucional}</div>` : ""}
+                    🚨 <strong>FORMULÁRIO ABERTO!</strong><br>Encerra em: <strong>${tempoTexto}</strong>
+                `;
+
+                formDiv.style.display = "block";
+
+                if(diff < (2*60*60*1000)){ // menos de 2h
+                    prazoMessageDiv.innerHTML += `<br><span style="color:#ff0000;font-size:1.2em;animation:blinker 1s linear infinite;">⚠️ URGENTE! ENCERRAMENTO EM BREVE</span>`;
                 }
-            },1000);
-        })
-        .catch(()=>{ showPersistentMessage("⚠️ Falha ao conectar com o servidor.","error"); initialLoadingDiv.style.display="none"; });
+            }
+        }, 1000);
+    })
+    .catch(() => {
+        showPersistentMessage("⚠️ Falha ao conectar com o servidor.", "error");
+        initialLoadingDiv.style.display="none";
+    });
 
-        const now = new Date();
-        footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
-    }
-
-    // ***********************************************
-    // TEMA INSTITUCIONAL
-    // ***********************************************
-    function applyInstitutionalTheme() {
-        const hoje = new Date(), dia = hoje.getDate(), mes = hoje.getMonth(), root=document.documentElement;
-        const aplicar = (msg,tipo="success",cores={})=>{ if(cores.primaria) root.style.setProperty("--dourado-amarelo",cores.primaria); if(cores.secundaria) root.style.setProperty("--azul-marinho",cores.secundaria); showPersistentMessage(msg,tipo); };
-
-        const datasEspeciais = {
-            "1-4":()=>aplicar("Rondônia: história, serviço e compromisso com a sociedade."),
-            "5-1":()=>aplicar("O trabalho sustenta o serviço público e a cidadania."),
-            "9-7":()=>aplicar("Independência se constrói diariamente com responsabilidade institucional."),
-            "11-15":()=>aplicar("A República se sustenta pelo respeito às instituições."),
-            "12-7":()=>aplicar("1º BPM — tradição, serviço e compromisso com a segurança pública","success",{primaria:"#c9a227"})
-        };
-        const chaveData=`${mes+1}-${dia}`;
-        if(datasEspeciais[chaveData]){ datasEspeciais[chaveData](); return; }
-
-        const temasMensais = {
-            1:()=>aplicar("Período de elevada demanda operacional. Planejamento é essencial.","success",{primaria:"#d4af37"}),
-            2:()=>aplicar("Reconhecemos, neste mês, a dedicação e a contribuição das mulheres na Corporação.","success",{primaria:"#b39ddb"}),
-            3:()=>aplicar("Tempo de renovação, reflexão e responsabilidade coletiva."),
-            4:()=>aplicar("Mães exercem múltiplas missões, dentro e fora do serviço."),
-            5:()=>aplicar("Cultura e tradição também fazem parte da identidade social."),
-            7:()=>aplicar("A presença familiar também integra o equilíbrio profissional."),
-            10:()=>aplicar("Reconhecer a história fortalece a instituição e a sociedade.","success",{primaria:"#b08d57"}),
-            11:()=>aplicar("Planejamento e compromisso garantem a continuidade do serviço público.","success",{primaria:"#2e7d32"})
-        };
-        if(temasMensais[mes]) temasMensais[mes]();
-    }
+    // Rodapé
+    const now = new Date();
+    footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
+}
 
     // ***********************************************
     // INICIALIZAÇÃO DO DOM
