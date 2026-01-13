@@ -233,14 +233,24 @@
             justify-content: center;
             z-index: 2000;
         }
-        .modal-content {
-            background: #fff;
-            padding: 25px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 450px;
-        }
-        .history-list { max-height: 300px; overflow-y: auto; margin: 15px 0; padding: 0; list-style: none; }
+       .modal-content {
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh; /* Evita que o modal saia da tela em celulares */
+}
+       .history-list {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+    overflow-y: auto; /* A barra só aparece se o conteúdo exceder o max-height */
+    max-height: 480px; /* Altura confortável para ~12 linhas antes de rolar */
+}
 
         .spinner {
             border: 4px solid rgba(12, 54, 103, 0.2);
@@ -334,203 +344,225 @@
         </div>
     </div>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycsBeQnA-cfZiwCOOvkCBV-aKKxWWJnSkxfljCcNco4PATGCpXoJhsY8hfHA-L-d8-8g/exec";
-        const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br"];
-        window.employeeList = {};
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycsBeQnA-cfZiwCOOvkCBV-aKKxWWJnSkxfljCcNco4PATGCpXoJhsY8hfHA-L-d8-8g/exec";
+    const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br"];
+    window.employeeList = {};
 
-        const matInput = document.getElementById("matricula");
-        const nomeInput = document.getElementById("nome");
-        const matError = document.getElementById("matriculaError");
-        const formDiv = document.getElementById("dersoForm");
-        const statusMessageDiv = document.getElementById("statusMessage");
-        const prazoMessageDiv = document.getElementById("prazoMessage");
+    const matInput = document.getElementById("matricula");
+    const nomeInput = document.getElementById("nome");
+    const matError = document.getElementById("matriculaError");
+    const formDiv = document.getElementById("dersoForm");
+    const statusMessageDiv = document.getElementById("statusMessage");
+    const prazoMessageDiv = document.getElementById("prazoMessage");
 
-        function showPersistentMessage(msg, type="success") {
-            prazoMessageDiv.className = `info-message ${type}`;
-            prazoMessageDiv.innerHTML = msg;
-            prazoMessageDiv.style.display = "block";
+    function showPersistentMessage(msg, type="success") {
+        prazoMessageDiv.className = `info-message ${type}`;
+        prazoMessageDiv.innerHTML = msg;
+        prazoMessageDiv.style.display = "block";
+    }
+
+    function showStatus(msg, type="success") {
+        statusMessageDiv.className = `info-message ${type}`;
+        statusMessageDiv.innerHTML = msg;
+        statusMessageDiv.style.display = "block";
+        setTimeout(() => statusMessageDiv.style.display = "none", 6000);
+    }
+
+    function standardizeMatricula(m) {
+        let num = m.replace(/\D/g,'').slice(0,9);
+        if (!num) return "";
+        return num.startsWith("1000") ? num : "1000" + num;
+    }
+
+    function checkMatricula() {
+        const val = matInput.value.trim();
+        if (!val) {
+            nomeInput.value = "";
+            matInput.classList.remove("is-valid", "is-invalid");
+            return;
         }
-
-        function showStatus(msg, type="success") {
-            statusMessageDiv.className = `info-message ${type}`;
-            statusMessageDiv.innerHTML = msg;
-            statusMessageDiv.style.display = "block";
-            setTimeout(() => statusMessageDiv.style.display = "none", 6000);
+        const std = standardizeMatricula(val);
+        matInput.value = std;
+        
+        if (window.employeeList[std]) {
+            nomeInput.value = window.employeeList[std];
+            matInput.classList.add("is-valid");
+            matInput.classList.remove("is-invalid");
+            matError.textContent = "";
+        } else {
+            nomeInput.value = "";
+            matInput.classList.add("is-invalid");
+            matInput.classList.remove("is-valid");
+            matError.textContent = "Matrícula não cadastrada.";
         }
+    }
 
-        function standardizeMatricula(m) {
-            let num = m.replace(/\D/g,'').slice(0,9);
-            if (!num) return "";
-            return num.startsWith("1000") ? num : "1000" + num;
-        }
+    function initializeForm() {
+        fetch(`${SCRIPT_URL}?action=lista`)
+            .then(r => r.json())
+            .then(data => { 
+                window.employeeList = data;
+                document.getElementById("initialLoading").style.display = "none";
+                formDiv.style.display = "block";
+            });
 
-        function checkMatricula() {
-            const val = matInput.value.trim();
-            if (!val) {
-                nomeInput.value = "";
-                matInput.classList.remove("is-valid", "is-invalid");
-                return;
-            }
-            const std = standardizeMatricula(val);
-            matInput.value = std;
-            
-            if (window.employeeList[std]) {
-                nomeInput.value = window.employeeList[std];
-                matInput.classList.add("is-valid");
-                matInput.classList.remove("is-invalid");
-                matError.textContent = "";
-            } else {
-                nomeInput.value = "";
-                matInput.classList.add("is-invalid");
-                matInput.classList.remove("is-valid");
-                matError.textContent = "Matrícula não cadastrada.";
-            }
-        }
+        fetch(`${SCRIPT_URL}?action=datas`)
+            .then(r => r.json())
+            .then(data => {
+                const intervalo = setInterval(() => {
+                    const agora = new Date();
+                    const abertura = new Date(data.abertura + "-04:00");
+                    const fechamento = new Date(data.fechamento + "-04:00");
+                    
+                    if (agora < abertura) {
+                        showPersistentMessage(`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em breve.`,"error");
+                        formDiv.style.display = "none";
+                    } else if (agora > fechamento) {
+                        showPersistentMessage(`⛔ <b>PRAZO ENCERRADO</b>`,"error");
+                        formDiv.style.display = "none";
+                        clearInterval(intervalo);
+                    } else {
+                        const diff = fechamento - agora;
+                        const d = Math.floor(diff/(1000*60*60*24));
+                        const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+                        const m = Math.floor((diff%(1000*60*60))/(1000*60));
+                        const s = Math.floor((diff%(1000*60))/1000);
+                        const tempoTexto = `${d}d ${h}h ${m}m ${s}s`;
 
-        function initializeForm() {
-            // Carregar lista de nomes
-            fetch(`${SCRIPT_URL}?action=lista`)
-                .then(r => r.json())
-                .then(data => { 
-                    window.employeeList = data;
-                    document.getElementById("initialLoading").style.display = "none";
-                    formDiv.style.display = "block";
-                });
-
-            // Timer de Prazo
-            fetch(`${SCRIPT_URL}?action=datas`)
-                .then(r => r.json())
-                .then(data => {
-                    const intervalo = setInterval(() => {
-                        const agora = new Date();
-                        const abertura = new Date(data.abertura + "-04:00");
-                        const fechamento = new Date(data.fechamento + "-04:00");
-                        
-                        if (agora < abertura) {
-                            showPersistentMessage(`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em breve.`,"error");
-                            formDiv.style.display = "none";
-                        } else if (agora > fechamento) {
-                            showPersistentMessage(`⛔ <b>PRAZO ENCERRADO</b>`,"error");
-                            formDiv.style.display = "none";
-                            clearInterval(intervalo);
+                        if (diff < (2 * 60 * 60 * 1000)) {
+                            showPersistentMessage(`⚠️ <b style="animation:blinker 1s infinite">URGENTE! FECHA EM:</b><br><span style="color:#ff0000; font-size:1.2em;">${tempoTexto}</span>`, "error");
                         } else {
-                            const diff = fechamento - agora;
-                            const d = Math.floor(diff/(1000*60*60*24));
-                            const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-                            const m = Math.floor((diff%(1000*60*60))/(1000*60));
-                            const s = Math.floor((diff%(1000*60))/1000);
-                            const tempoTexto = `${d}d ${h}h ${m}m ${s}s`;
-
-                            if (diff < (2 * 60 * 60 * 1000)) {
-                                showPersistentMessage(`⚠️ <b style="animation:blinker 1s infinite">URGENTE! FECHA EM:</b><br><span style="color:#ff0000; font-size:1.2em;">${tempoTexto}</span>`, "error");
-                            } else {
-                                showPersistentMessage(`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`, "success");
-                            }
+                            showPersistentMessage(`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`, "success");
                         }
-                    }, 1000);
-                });
+                    }
+                }, 1000);
+            });
 
-            // Limites de Data
-            const hoje = new Date();
-            const min = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
-            const max = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
-            document.getElementById("data").min = min.toISOString().split("T")[0];
-            document.getElementById("data").max = max.toISOString().split("T")[0];
-            document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
+        const hoje = new Date();
+        const min = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+        const max = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
+        document.getElementById("data").min = min.toISOString().split("T")[0];
+        document.getElementById("data").max = max.toISOString().split("T")[0];
+        document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
+        document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia/1º BPM - ${hoje.getMonth()+1}/${hoje.getFullYear()}`;
+    }
 
-            // Rodapé
-            document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia/1º BPM - ${hoje.getMonth()+1}/${hoje.getFullYear()}`;
+    async function submitForm(e) {
+        e.preventDefault();
+        if (matInput.classList.contains("is-invalid")) return;
+        document.getElementById("loadingOverlay").style.display = "flex";
+        const fd = new FormData(formDiv);
+        try {
+            const resp = await fetch(SCRIPT_URL, { method: "POST", body: new URLSearchParams(fd) });
+            const res = await resp.json();
+            if (res.success) {
+                showStatus("✅ Solicitação enviada com sucesso!", "success");
+                formDiv.reset();
+                matInput.classList.remove("is-valid");
+            } else {
+                showStatus("❌ Erro: " + (res.error || "Tente novamente."), "error");
+            }
+        } catch (err) {
+            showStatus("❌ Erro de conexão com o servidor.", "error");
+        } finally {
+            document.getElementById("loadingOverlay").style.display = "none";
         }
+    }
 
-        async function submitForm(e) {
-            e.preventDefault();
-            if (matInput.classList.contains("is-invalid")) return;
-            
-            document.getElementById("loadingOverlay").style.display = "flex";
-            const fd = new FormData(formDiv);
+    function applyInstitutionalTheme() {
+        const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
+        const instDiv = document.getElementById("instMessage");
+        const aplicar = (msg) => instDiv.innerHTML = msg;
+
+        const temas = {
+            "1-4": () => {
+                const anosRondonia = hoje.getFullYear() - 1982;
+                aplicar(`🌳 Rondônia: ${anosRondonia} anos de história, bravura e compromisso.`);
+            },
+            "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
+            "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
+            "11-15": () => {
+                const anosRepublica = hoje.getFullYear() - 1889;
+                aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${anosRepublica} anos de Proclamação.`);
+            },
+            "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
+            "12-7": () => {
+                const anosBPM = hoje.getFullYear() - 1983;
+                aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${anosBPM} anos de tradição e compromisso.`);
+            }
+        };
+
+        const chave = `${mes+1}-${dia}`;
+        if (temas[chave]) {
+            temas[chave]();
+        } else {
+            const mensais = {
+                0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos e festas."),
+                1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
+                2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda com dedicação."),
+                3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
+                4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão de cuidar e proteger."),
+                5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade social."),
+                6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
+                7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional de segurança."),
+                8: () => aplicar("🇧🇷 Setembro: Mês da Pátria. Renovando nosso juramento de servir e proteger o Brasil."),
+                9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
+                10: () => {
+                    const anosRepublica = hoje.getFullYear() - 1889;
+                    aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade que formam nossa nação. ${anosRepublica}º ano da República.`);
+                },
+                11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. Boas Festas! ✨")
+            };
+            if (mensais[mes]) mensais[mes]();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initializeForm();
+        applyInstitutionalTheme();
+        matInput.addEventListener("blur", checkMatricula);
+        formDiv.addEventListener("submit", submitForm);
+        
+        document.getElementById("email").addEventListener("input", (e) => {
+            const val = e.target.value;
+            const dl = document.getElementById("emailProviders");
+            if (val.includes("@")) {
+                const [user, domain] = val.split("@");
+                dl.innerHTML = "";
+                emailProviders.forEach(p => { if (p.startsWith(domain)) dl.appendChild(new Option(user + "@" + p)); });
+            }
+        });
+        
+        document.getElementById("btnHistory").onclick = async () => {
+            if (!matInput.value) return alert("Insira a matrícula.");
+            document.getElementById("historyModal").style.display = "flex";
+            document.getElementById("historyBox").innerHTML = "Buscando...";
             
             try {
-                const resp = await fetch(SCRIPT_URL, { method: "POST", body: new URLSearchParams(fd) });
-                const res = await resp.json();
-                if (res.success) {
-                    showStatus("✅ Solicitação enviada com sucesso!", "success");
-                    formDiv.reset();
-                    matInput.classList.remove("is-valid");
-                } else {
-                    showStatus("❌ Erro: " + (res.error || "Tente novamente."), "error");
-                }
-            } catch (err) {
-                showStatus("❌ Erro de conexão com o servidor.", "error");
-            } finally {
-                document.getElementById("loadingOverlay").style.display = "none";
-            }
-        }
-
-        function applyInstitutionalTheme() {
-            const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
-            const instDiv = document.getElementById("instMessage");
-            const aplicar = (msg) => instDiv.innerHTML = msg;
-
-            const temas = {
-                "11-20": "✊🏾 Consciência Negra: Respeito às raízes constrói uma sociedade justa. ⚖️",
-                "12-15": "🛡️ 1º BPM: O Sentinela da Capital. Honra e Tradição.",
-                "12-25": "🎄 Natal: Desejamos um serviço tranquilo e um feliz natal a todos! ✨"
-            };
-
-            const chave = `${mes+1}-${dia}`;
-            if (temas[chave]) {
-                aplicar(temas[chave]);
-            } else {
-                const mensais = [
-                    "🎭 Janeiro: Planejamento para garantir a segurança nas festas.",
-                    "🎊 Fevereiro: Foco e prevenção na tranquilidade de todos.",
-                    "🌷 Março: Homenagem às mulheres que honram a nossa farda.",
-                    "🕊️ Abril: Tempo de reflexão e fortalecimento da união.",
-                    "🤱 Maio: Reconhecemos a missão das Mães da nossa Corporação.",
-                    "🔥 Junho: Valorizando a cultura e as tradições locais.",
-                    "🛡️ Julho: Disciplina e prontidão no policiamento ostensivo.",
-                    "👔 Agosto: A família é o alicerce do profissional de segurança.",
-                    "🇧🇷 Setembro: Independência se faz com Ordem e Progresso.",
-                    "🎗️ Outubro: Prevenção é o melhor caminho para a saúde.",
-                    "📜 Novembro: Compromisso republicano e respeito à nação.",
-                    "🎄 Dezembro: Boas festas e um encerramento de ano seguro! ✨"
-                ];
-                aplicar(mensais[mes]);
-            }
-        }
-
-        // Listeners
-        document.addEventListener("DOMContentLoaded", () => {
-            initializeForm();
-            applyInstitutionalTheme();
-            matInput.addEventListener("blur", checkMatricula);
-            formDiv.addEventListener("submit", submitForm);
-            document.getElementById("email").addEventListener("input", (e) => {
-                const val = e.target.value;
-                const dl = document.getElementById("emailProviders");
-                if (val.includes("@")) {
-                    const [user, domain] = val.split("@");
-                    dl.innerHTML = "";
-                    emailProviders.forEach(p => {
-                        if (p.startsWith(domain)) dl.appendChild(new Option(user + "@" + p));
-                    });
-                }
-            });
-            
-            document.getElementById("btnHistory").onclick = async () => {
-                if (!matInput.value) return alert("Insira a matrícula.");
-                document.getElementById("historyModal").style.display = "flex";
-                document.getElementById("historyBox").innerHTML = "Buscando...";
                 const r = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matInput.value}`);
                 const d = await r.json();
-                let h = "";
-                if (!d.historico || d.historico.length === 0) h = "Nenhum registro.";
-                else d.historico.forEach(i => h += `<div style="border-bottom:1px solid #eee; padding:5px;">${i.Data} - ${i.Folga} (${i.Status || 'Pendente'})</div>`);
+                
+                let h = `<div style="font-weight:bold; color:var(--azul-marinho); margin-bottom:12px; font-size:16px; border-bottom:2px solid var(--dourado-amarelo); padding-bottom:5px;">${d.nome || 'Solicitante'}</div>`;
+                
+                if (!d.historico || d.historico.length === 0) {
+                    h += "Nenhum registro encontrado.";
+                } else {
+                    d.historico.forEach(i => {
+                        let statusExibicao = "";
+                        if (i.Status && i.Status.toLowerCase() !== 'pendente') {
+                            statusExibicao = ` <b>(${i.Status})</b>`;
+                        }
+                        h += `<div style="border-bottom:1px solid #eee; padding:8px 0; font-size:14px;">${i.Data} - ${i.Folga}${statusExibicao}</div>`;
+                    });
+                }
                 document.getElementById("historyBox").innerHTML = h;
-            };
-            document.getElementById("closeHistory").onclick = () => document.getElementById("historyModal").style.display="none";
-        });
-    </script>
+            } catch (err) {
+                document.getElementById("historyBox").innerHTML = "Erro ao carregar histórico.";
+            }
+        };
+        document.getElementById("closeHistory").onclick = () => document.getElementById("historyModal").style.display="none";
+    });
+</script>
 </body>
 </html>
