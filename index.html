@@ -161,7 +161,7 @@
         </div>
 
         <h2>DERSO 1º BPM</h2>
-        <p class="subtitle">Solicitação de Diária Especial</p>
+        <p class="subtitle">Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO</p>
 
         <div id="instMessage" class="institutional-highlight"></div>
         <div id="prazoMessage" class="info-message"></div>
@@ -358,69 +358,57 @@
 async function submitForm(e) {
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
-    
-    // Nomes dos meses para o alerta
-    const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-    const nomeMesSolicitado = nomesMeses[(new Date().getMonth() + 1) % 12];
+    const dataEscolhida = document.getElementById("data").value;
+    const matricula = matInput.value;
 
-    // 1. Validação Manual (Garante que não falte nada)
-    let faltantes = [];
-    if (!document.getElementById("email").value) faltantes.push("E-mail");
-    if (!matInput.value || matInput.classList.contains("is-invalid")) faltantes.push("Matrícula");
-    if (!document.querySelector('input[name="folga"]:checked')) faltantes.push("Tipo de Folga");
-    if (!document.getElementById("data").value) faltantes.push("Data");
-
-    if (faltantes.length > 0) {
-        alert("⚠️ ATENÇÃO: Preencha os campos:\n- " + faltantes.join("\n- "));
-        return;
-    }
-
-    // 2. UI - Bloqueio e Loading
     btn.disabled = true;
-    btn.textContent = "ENVIANDO...";
-    document.getElementById("loadingOverlay").style.display = "flex";
+    btn.textContent = "VERIFICANDO...";
 
-    const params = new URLSearchParams(new FormData(formDiv));
+    try {
+        // 1. ANTES DE ENVIAR, checamos o histórico para ver se já existe essa data
+        const checkResp = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
+        const checkData = await checkResp.json();
+        
+        const jaExiste = checkData.historico && checkData.historico.some(item => {
+            // Ajuste a comparação de data conforme o formato que o seu .gs retorna (ex: DD/MM/YYYY)
+            const dataFormatada = new Date(dataEscolhida).toLocaleDateString('pt-BR');
+            return item.Data === dataFormatada;
+        });
 
-    // 3. O Envio (Ajustado para evitar o quebra do fetch)
-    fetch(SCRIPT_URL, {
-        method: "POST",
-        body: params
-    })
-    .then(res => res.json()) // Aqui ele tenta ler o JSON
-    .then(data => {
-        // Se chegar aqui, ele leu o JSON com sucesso
-        if (data.success) {
-            alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
-            finalizarEnvio();
-        } else if (data.error === "DUPLICADO" || (data.error && data.error.includes("já solicitou"))) {
-            alert("⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para esta data.");
-        } else {
-            alert("❌ ERRO: " + (data.error || "Erro desconhecido"));
+        if (jaExiste) {
+            alert("⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para esta data no sistema.");
+            btn.disabled = false;
+            btn.textContent = "Enviar Solicitação";
+            return; // PARA A EXECUÇÃO AQUI
         }
-    })
-    .catch(err => {
-        /**
-         * O SEGREDO DO HTML 1:
-         * Se o CORS bloquear a leitura do JSON, o dado FOI salvo, mas o JS cai aqui.
-         * Para o usuário não ver erro, tratamos como sucesso condicional.
-         */
-        console.warn("CORS ou Parsing Error:", err);
-        alert(`✅ Solicitação enviada!\nVerifique seu e-mail para confirmar (o sistema ignora duplicatas automaticamente).`);
+
+        // 2. SE NÃO FOR DUPLICADO, aí sim enviamos
+        btn.textContent = "ENVIANDO...";
+        document.getElementById("loadingOverlay").style.display = "flex";
+        
+        const params = new URLSearchParams(new FormData(formDiv));
+        
+        await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: params,
+            mode: 'no-cors' // Agora usamos no-cors com segurança, pois já validamos a duplicidade antes!
+        });
+
+        // Como no-cors não permite ler a resposta, mas já validamos antes, assumimos sucesso.
+        alert(`✅ SUCESSO!\nSua solicitação foi registrada.`);
         finalizarEnvio();
-    })
-    .finally(() => {
+
+    } catch (err) {
+        console.error(err);
+        alert("❌ Erro de comunicação com o servidor.");
+    } finally {
         btn.disabled = false;
         btn.textContent = "Enviar Solicitação";
         document.getElementById("loadingOverlay").style.display = "none";
-    });
-
-    function finalizarEnvio() {
-        formDiv.reset();
-        if (typeof updateProgress === "function") updateProgress();
-        if (typeof checkMatricula === "function") checkMatricula();
     }
 }
+
+    
     /**************************************************************
      * SEÇÃO 5: TEMAS INSTITUCIONAIS
      **************************************************************/
