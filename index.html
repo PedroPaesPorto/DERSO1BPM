@@ -226,7 +226,6 @@
     const nomeInput = document.getElementById("nome");
     const matError = document.getElementById("matriculaError");
     const formDiv = document.getElementById("dersoForm");
-    const statusMessageDiv = document.getElementById("statusMessage");
     const prazoMessageDiv = document.getElementById("prazoMessage");
 
     function showPersistentMessage(msg, type="success") {
@@ -264,18 +263,13 @@
     }
 
     function initializeForm() {
-        // Dispara as duas buscas ao mesmo tempo para ganhar velocidade
-        const listaPromise = fetch(`${SCRIPT_URL}?action=lista`).then(r => r.json());
+        // Dispara as buscas
         const datasPromise = fetch(`${SCRIPT_URL}?action=datas`).then(r => r.json());
+        const listaPromise = fetch(`${SCRIPT_URL}?action=lista`).then(r => r.json());
 
-        listaPromise.then(data => {
-            window.employeeList = data;
-            document.getElementById("initialLoading").style.display = "none";
-            formDiv.style.display = "block";
-        });
-
+        // Processa os prazos primeiro para decidir se mostra o form
         datasPromise.then(data => {
-            const intervalo = setInterval(() => {
+            const atualizarCronometro = () => {
                 const agora = new Date();
                 const abertura = new Date(data.abertura + "-04:00");
                 const fechamento = new Date(data.fechamento + "-04:00");
@@ -283,10 +277,11 @@
                 if (agora < abertura) {
                     showPersistentMessage(`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em breve.`,"error");
                     formDiv.style.display = "none";
+                    return false;
                 } else if (agora > fechamento) {
                     showPersistentMessage(`⛔ <b>PRAZO ENCERRADO</b>`,"error");
                     formDiv.style.display = "none";
-                    clearInterval(intervalo);
+                    return false;
                 } else {
                     const diff = fechamento - agora;
                     const d = Math.floor(diff/(1000*60*60*24));
@@ -300,8 +295,28 @@
                     } else {
                         showPersistentMessage(`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`, "success");
                     }
+                    return true;
                 }
-            }, 1000);
+            };
+
+            // Executa imediatamente para não esperar o primeiro segundo do setInterval
+            const estaAberto = atualizarCronometro();
+            
+            if (estaAberto) {
+                const intervalo = setInterval(() => {
+                    const aindaAberto = atualizarCronometro();
+                    if (!aindaAberto) clearInterval(intervalo);
+                }, 1000);
+
+                // Só carrega a lista e mostra o form se estiver no prazo
+                listaPromise.then(listaData => {
+                    window.employeeList = listaData;
+                    document.getElementById("initialLoading").style.display = "none";
+                    formDiv.style.display = "block";
+                });
+            } else {
+                document.getElementById("initialLoading").style.display = "none";
+            }
         });
 
         const hoje = new Date();
@@ -311,13 +326,6 @@
         document.getElementById("data").max = max.toISOString().split("T")[0];
         document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
         document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
-    }
-
-    function finalizarEnvio() {
-        const form = document.getElementById("dersoForm");
-        form.reset();
-        if (typeof updateProgress === "function") updateProgress();
-        if (typeof checkMatricula === "function") checkMatricula();
     }
 
     async function submitForm(e) {
@@ -337,7 +345,6 @@
         btn.textContent = "VERIFICANDO...";
 
         try {
-            // Verificação de duplicidade preventiva para contornar erro de CORS
             const rCheck = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
             const dCheck = await rCheck.json();
             const [ano, mes, dia] = dataInput.split("-");
@@ -353,13 +360,12 @@
             btn.textContent = "ENVIANDO...";
             document.getElementById("loadingOverlay").style.display = "flex";
             const params = new URLSearchParams(new FormData(formDiv));
-            
             await fetch(SCRIPT_URL, { method: "POST", body: params, mode: 'no-cors' });
 
             alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
-            finalizarEnvio();
+            formDiv.reset();
+            location.reload();
         } catch (err) {
-            console.error(err);
             alert("❌ Erro de conexão. Tente novamente.");
         } finally {
             btn.disabled = false;
@@ -440,21 +446,19 @@
             }
         });
 
-      function updateProgress() {
-    const fields = document.querySelectorAll('#dersoForm [required]');
-    let filled = 0;
-    fields.forEach(f => {
-        if (f.type === 'radio') {
-            if (document.querySelector('input[name="folga"]:checked')) filled++;
-        } else if (f.value.trim() !== '' && !f.classList.contains('is-invalid')) {
-            filled++;
-        }
-    });
-   
-          // Ajuste o cálculo baseado no número total de campos requeridos (ex: 4)
-    const percent = (filled / 4) * 100;
-    document.getElementById("progressBar").style.width = percent + "%";
-}
+        const updateProgress = () => {
+            const fields = document.querySelectorAll('#dersoForm [required]');
+            let filled = 0;
+            fields.forEach(f => {
+                if (f.type === 'radio') {
+                    if (document.querySelector('input[name="folga"]:checked')) filled++;
+                } else if (f.value.trim() !== '' && !f.classList.contains('is-invalid')) {
+                    filled++;
+                }
+            });
+            const percent = (filled / 4) * 100;
+            document.getElementById("progressBar").style.width = percent + "%";
+        };
 
         document.querySelectorAll('#dersoForm input').forEach(i => {
             i.addEventListener('input', updateProgress);
@@ -476,9 +480,7 @@
             } catch (err) { document.getElementById("historyBox").innerHTML = "Erro ao carregar."; }
         };
 
-        const closeMod = () => { document.getElementById("historyModal").style.display="none"; document.body.classList.remove("modal-open"); };
-        document.getElementById("closeHistory").onclick = closeMod;
-        window.addEventListener('keydown', (e) => { if (e.key === "Escape") closeMod(); });
+        document.getElementById("closeHistory").onclick = () => { document.getElementById("historyModal").style.display="none"; };
     });
 </script>
 </body>
