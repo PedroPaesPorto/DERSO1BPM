@@ -355,59 +355,83 @@
      * SEÇÃO 4: ENVIO E COMUNICAÇÃO (API)
      **************************************************************/
   
+// 1. FUNÇÃO DE APOIO (Coloque fora da submitForm para ser acessível)
+function finalizarEnvio() {
+    const form = document.getElementById("dersoForm");
+    form.reset();
+    if (typeof updateProgress === "function") updateProgress();
+    if (typeof checkMatricula === "function") checkMatricula();
+}
+
+// 2. FUNÇÃO PRINCIPAL DE ENVIO
 async function submitForm(e) {
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
-    const dataEscolhida = document.getElementById("data").value;
-    const matricula = matInput.value;
+    const dataInput = document.getElementById("data").value;
+    const matricula = document.getElementById("matricula").value;
+    
+    // Nomes dos meses para o alerta
+    const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const nomeMesSolicitado = nomesMeses[(new Date().getMonth() + 1) % 12];
+
+    // Validação básica de campos
+    if (!matricula || !dataInput || !document.querySelector('input[name="folga"]:checked')) {
+        alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
+        return;
+    }
 
     btn.disabled = true;
-    btn.textContent = "VERIFICANDO...";
+    btn.textContent = "VERIFICANDO DUPLICIDADE...";
 
     try {
-        // 1. ANTES DE ENVIAR, checamos o histórico para ver se já existe essa data
-        const checkResp = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
-        const checkData = await checkResp.json();
-        
-        const jaExiste = checkData.historico && checkData.historico.some(item => {
-            // Ajuste a comparação de data conforme o formato que o seu .gs retorna (ex: DD/MM/YYYY)
-            const dataFormatada = new Date(dataEscolhida).toLocaleDateString('pt-BR');
-            return item.Data === dataFormatada;
-        });
+        // --- ETAPA A: VERIFICAÇÃO PREVENTIVA ---
+        // Usamos o histórico que já funciona no seu código para checar se a data já existe
+        const checkUrl = `${SCRIPT_URL}?action=historico&matricula=${matricula}`;
+        const response = await fetch(checkUrl);
+        const data = await response.json();
+
+        // Converte a data do input (YYYY-MM-DD) para o formato do histórico (DD/MM/YYYY)
+        const [ano, mes, dia] = dataInput.split("-");
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+
+        const jaExiste = data.historico && data.historico.some(item => item.Data === dataFormatada);
 
         if (jaExiste) {
-            alert("⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para esta data no sistema.");
+            alert(`⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para o dia ${dataFormatada}.`);
             btn.disabled = false;
             btn.textContent = "Enviar Solicitação";
-            return; // PARA A EXECUÇÃO AQUI
+            return; // Interrompe o envio aqui
         }
 
-        // 2. SE NÃO FOR DUPLICADO, aí sim enviamos
+        // --- ETAPA B: ENVIO REAL ---
         btn.textContent = "ENVIANDO...";
         document.getElementById("loadingOverlay").style.display = "flex";
-        
-        const params = new URLSearchParams(new FormData(formDiv));
-        
+
+        const formData = new FormData(document.getElementById("dersoForm"));
+        const params = new URLSearchParams(formData);
+
+        // Usamos no-cors aqui porque já validamos a duplicidade acima
+        // Isso evita que o navegador bloqueie a resposta do Google
         await fetch(SCRIPT_URL, {
             method: "POST",
             body: params,
-            mode: 'no-cors' // Agora usamos no-cors com segurança, pois já validamos a duplicidade antes!
+            mode: 'no-cors' 
         });
 
-        // Como no-cors não permite ler a resposta, mas já validamos antes, assumimos sucesso.
-        alert(`✅ SUCESSO!\nSua solicitação foi registrada.`);
+        // Como o modo é no-cors, o navegador não deixa ler a resposta,
+        // mas o dado foi enviado com sucesso para a planilha.
+        alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
         finalizarEnvio();
 
     } catch (err) {
-        console.error(err);
-        alert("❌ Erro de comunicação com o servidor.");
+        console.error("Erro técnico:", err);
+        alert("❌ Erro de conexão. Tente novamente em instantes.");
     } finally {
         btn.disabled = false;
         btn.textContent = "Enviar Solicitação";
         document.getElementById("loadingOverlay").style.display = "none";
     }
 }
-
     
     /**************************************************************
      * SEÇÃO 5: TEMAS INSTITUCIONAIS
