@@ -380,7 +380,7 @@
         const aplicar = (msg) => instDiv.innerHTML = msg;
 
         const temas = {
-            "1-14": () => {
+            "1-4": () => {
                 const anosRondonia = hoje.getFullYear() - 1982;
                 aplicar(`🌳 Rondônia: ${anosRondonia} anos de história, bravura e compromisso.`);
            },
@@ -402,7 +402,7 @@
             temas[chave]();
         } else {
             const mensais = {
-               0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos e festas."),
+               10: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos e festas."),
                 1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
                 2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda com dedicação."),
                 3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
@@ -412,7 +412,7 @@
                 7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional de segurança."),
                 8: () => aplicar("🇧🇷 Setembro: Mês da Pátria. Renovando nosso juramento de servir e proteger o Brasil."),
                 9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
-                10: () => {
+                0: () => {
                    const anosRepublica = hoje.getFullYear() - 1889;
                     aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade que formam nossa nação. ${anosRepublica}º ano da República.`);
                 },
