@@ -229,8 +229,8 @@
      * SCRIPT E PROVEDORES DE EMAIL
      **************************************************************/
     
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZoQX_sDur9tYkXbjVt5FLnsqd6eOuDc0VnIoSyd8IAM5uh5i2n2CkLLsb5GzeR2RMoQ/exec";
-    const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br"];
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqGwmnKXgW-uIu_YmVKQWG4eVfNij9rL8XkpUE6_1SVFwgPzNz2InT4hBZLOPcXeWtvA/exec";
+    const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br", "yahoo.com"];
     window.employeeList = {};
 
      /**************************************************************
@@ -355,11 +355,11 @@
      * SEÇÃO 4: ENVIO E COMUNICAÇÃO (API)
      **************************************************************/
   
-   async function submitForm(e) {
+async function submitForm(e) {
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
     
-    // Cálculo do mês seguinte para o alerta (Ponto 2)
+    // Nomes dos meses para o alerta dinâmico
     const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     const hoje = new Date();
     const proximoMesIndex = (hoje.getMonth() + 1) % 12;
@@ -384,21 +384,21 @@
     const params = new URLSearchParams(new FormData(formDiv));
 
     try {
-        // Removido o mode: 'no-cors' para tentar ler a duplicidade. 
-        // Se o CORS barrar, o catch tratará como sucesso genérico (fallback).
         const resp = await fetch(SCRIPT_URL, { method: "POST", body: params });
-        const res = await resp.json();
+        const res = await resp.json(); // Aqui guardamos em 'res'
 
-        if (res.success) {
+        if (res.success) { // Verificamos 'res'
             alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
             finalizarEnvio();
+        } else if (res.error === "DUPLICADO" || res.error.includes("Você já solicitou")) {
+            alert("⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para esta data. Nada foi salvo.");
         } else {
-            alert("❌ ALERTA:\n" + res.error);
+            alert("❌ ERRO: " + res.error);
         }
+
     } catch (err) {
-        // Se cair aqui (CORS), não temos como saber se foi duplicidade ou sucesso.
-        // Mas como o GAS barra a duplicidade no servidor, o dado não será duplicado na planilha.
-        alert(`✅ SUCESSO!\nSua solicitação para ${nomeMesSolicitado} foi processada.\n\nVerifique sua solicitação em "MINHAS SOLICITAÇÕES".`);
+        // Fallback para erro de CORS: o dado costuma ir, mas o navegador bloqueia a leitura
+        alert(`✅ SUCESSO!\nSua solicitação para o mês de ${nomeMesSolicitado} foi enviada.`);
         finalizarEnvio();
     } finally {
         btn.disabled = false;
@@ -406,15 +406,11 @@
         document.getElementById("loadingOverlay").style.display = "none";
     }
 
+    // Função interna para limpar tudo
     function finalizarEnvio() {
         formDiv.reset();
-        // Proteção contra o erro 'updateProgress is not defined'
-        if (typeof updateProgress === "function") {
-            updateProgress();
-        }
-        if (typeof checkMatricula === "function") {
-            checkMatricula();
-        }
+        if (typeof updateProgress === "function") updateProgress();
+        if (typeof checkMatricula === "function") checkMatricula();
     }
 }
     
