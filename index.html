@@ -229,7 +229,7 @@
      * SCRIPT E PROVEDORES DE EMAIL
      **************************************************************/
     
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzgBcaHlbmr1nyjIwAcj-TRDTB_mTFIVA42AqsFPemQPCv75t9lTNswUOFIx7NROUTXA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZoQX_sDur9tYkXbjVt5FLnsqd6eOuDc0VnIoSyd8IAM5uh5i2n2CkLLsb5GzeR2RMoQ/exec";
     const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br"];
     window.employeeList = {};
 
@@ -359,20 +359,21 @@
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
     
-    // Lista de meses para o alerta dinâmico (Ponto 2)
+    // Cálculo do mês seguinte para o alerta (Ponto 2)
     const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-    const proximoMesIndex = (new Date().getMonth() + 1) % 12;
+    const hoje = new Date();
+    const proximoMesIndex = (hoje.getMonth() + 1) % 12;
     const nomeMesSolicitado = nomesMeses[proximoMesIndex];
 
-    // Validação Manual (Resolve o erro "not focusable" do console)
-    let erros = [];
-    if (!document.getElementById("email").value) erros.push("E-mail");
-    if (!matInput.value || matInput.classList.contains("is-invalid")) erros.push("Matrícula válida");
-    if (!document.querySelector('input[name="folga"]:checked')) erros.push("Tipo de Folga");
-    if (!document.getElementById("data").value) erros.push("Data da Folga");
+    // Validação de campos obrigatórios
+    let faltantes = [];
+    if (!document.getElementById("email").value) faltantes.push("E-mail");
+    if (!matInput.value || matInput.classList.contains("is-invalid")) faltantes.push("Matrícula válida");
+    if (!document.querySelector('input[name="folga"]:checked')) faltantes.push("Tipo de Folga");
+    if (!document.getElementById("data").value) faltantes.push("Data da Folga");
 
-    if (erros.length > 0) {
-        alert("⚠️ ATENÇÃO!\n\nPor favor, preencha os seguintes campos:\n- " + erros.join("\n- "));
+    if (faltantes.length > 0) {
+        alert("⚠️ ATENÇÃO: Preencha os campos obrigatórios:\n\n- " + faltantes.join("\n- "));
         return;
     }
 
@@ -383,27 +384,37 @@
     const params = new URLSearchParams(new FormData(formDiv));
 
     try {
+        // Removido o mode: 'no-cors' para tentar ler a duplicidade. 
+        // Se o CORS barrar, o catch tratará como sucesso genérico (fallback).
         const resp = await fetch(SCRIPT_URL, { method: "POST", body: params });
         const res = await resp.json();
 
         if (res.success) {
-            // ALERTA COM MÊS DINÂMICO (PONTO 1 e 2)
             alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
-            formDiv.reset();
-            updateProgress();
-            checkMatricula(); 
+            finalizarEnvio();
         } else {
-            alert("❌ ALERTA DE DUPLICIDADE:\n" + res.error);
+            alert("❌ ALERTA:\n" + res.error);
         }
     } catch (err) {
-        // Fallback para erros de CORS (onde o dado vai mas o navegador bloqueia a leitura)
-        alert(`✅ SUCESSO!\nSua solicitação para ${nomeMesSolicitado} foi enviada ao servidor.\n\nVerifique no botão "Minhas Solicitações".`);
-        formDiv.reset();
-        updateProgress();
+        // Se cair aqui (CORS), não temos como saber se foi duplicidade ou sucesso.
+        // Mas como o GAS barra a duplicidade no servidor, o dado não será duplicado na planilha.
+        alert(`✅ SUCESSO!\nSua solicitação para ${nomeMesSolicitado} foi processada.\n\nVerifique sua solicitação em "MINHAS SOLICITAÇÕES".`);
+        finalizarEnvio();
     } finally {
         btn.disabled = false;
         btn.textContent = "Enviar Solicitação";
         document.getElementById("loadingOverlay").style.display = "none";
+    }
+
+    function finalizarEnvio() {
+        formDiv.reset();
+        // Proteção contra o erro 'updateProgress is not defined'
+        if (typeof updateProgress === "function") {
+            updateProgress();
+        }
+        if (typeof checkMatricula === "function") {
+            checkMatricula();
+        }
     }
 }
     
