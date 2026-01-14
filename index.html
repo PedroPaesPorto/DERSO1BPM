@@ -263,71 +263,84 @@
     }
 
     function initializeForm() {
-        // Dispara as buscas
-        const datasPromise = fetch(`${SCRIPT_URL}?action=datas`).then(r => r.json());
-        const listaPromise = fetch(`${SCRIPT_URL}?action=lista`).then(r => r.json());
+    const datasPromise = fetch(`${SCRIPT_URL}?action=datas`).then(r => r.json());
+    const listaPromise = fetch(`${SCRIPT_URL}?action=lista`).then(r => r.json());
 
-        // Processa os prazos primeiro para decidir se mostra o form
-        datasPromise.then(data => {
-            const atualizarCronometro = () => {
-                const agora = new Date();
-                const abertura = new Date(data.abertura + "-04:00");
-                const fechamento = new Date(data.fechamento + "-04:00");
+    datasPromise.then(data => {
+        const atualizarCronometro = () => {
+            const agora = new Date();
+            const abertura = new Date(data.abertura + "-04:00");
+            const fechamento = new Date(data.fechamento + "-04:00");
+
+            // --- LÓGICA ANTES DE ABRIR ---
+            if (agora < abertura) {
+                const diffA = abertura - agora;
+                const d = Math.floor(diffA / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diffA % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diffA % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diffA % (1000 * 60)) / 1000);
                 
-                if (agora < abertura) {
-                     showPersistentMessage(`⏳ **FORMULÁRIO FECHADO**<br>Abre em: ${d}d ${h}h ${m}m ${s}s`, "error");
-                    formDiv.style.display = "none";
-                    return false;
-                } else if (agora > fechamento) {
-                    showPersistentMessage(`⛔ **FORMULÁRIO ENCERRADO**<br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")
-                    formDiv.style.display = "none";
-                    return false;
-                } else {
-                    const diff = fechamento - agora;
-                    const d = Math.floor(diff/(1000*60*60*24));
-                    const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-                    const m = Math.floor((diff%(1000*60*60))/(1000*60));
-                    const s = Math.floor((diff%(1000*60))/1000);
-                    const tempoTexto = `${d}d ${h}h ${m}m ${s}s`;
-
-                    if (diff < (2 * 60 * 60 * 1000)) {
-                        showPersistentMessage(`⚠️ <b style="animation:blinker 1s infinite">URGENTE! FECHA EM:</b><br><span style="color:#ff0000; font-size:1.2em;">${tempoTexto}</span>`, "error");
-                    } else {
-                        showPersistentMessage(`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`, "success");
-                    }
-                    return true;
-                }
-            };
-
-            // Executa imediatamente para não esperar o primeiro segundo do setInterval
-            const estaAberto = atualizarCronometro();
+                showPersistentMessage(`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em: ${d}d ${h}h ${m}m ${s}s`, "error");
+                formDiv.style.display = "none";
+                return false;
+            } 
             
-            if (estaAberto) {
-                const intervalo = setInterval(() => {
-                    const aindaAberto = atualizarCronometro();
-                    if (!aindaAberto) clearInterval(intervalo);
-                }, 1000);
+            // --- LÓGICA APÓS FECHAR ---
+            else if (agora > fechamento) {
+                showPersistentMessage(`⛔ <b>FORMULÁRIO ENCERRADO</b><br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")}`, "error");
+                formDiv.style.display = "none";
+                return false;
+            } 
+            
+            // --- LÓGICA DURANTE ABERTO ---
+            else {
+                const diffF = fechamento - agora;
+                const d = Math.floor(diffF / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diffF % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diffF % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diffF % (1000 * 60)) / 1000);
+                const tempoTexto = `${d}d ${h}h ${m}m ${s}s`;
 
-                // Só carrega a lista e mostra o form se estiver no prazo
-                listaPromise.then(listaData => {
-                    window.employeeList = listaData;
-                    document.getElementById("initialLoading").style.display = "none";
-                    formDiv.style.display = "block";
-                });
-            } else {
-                document.getElementById("initialLoading").style.display = "none";
+                if (diffF < (2 * 60 * 60 * 1000)) { // Menos de 2 horas
+                    showPersistentMessage(`⚠️ <b style="animation:blinker 1s infinite">URGENTE! FECHA EM:</b><br><span style="color:#ff0000; font-size:1.2em;">${tempoTexto}</span>`, "error");
+                } else {
+                    showPersistentMessage(`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`, "success");
+                }
+                return true;
             }
-        });
+        };
 
-        const hoje = new Date();
-        const min = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
-        const max = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
-        document.getElementById("data").min = min.toISOString().split("T")[0];
-        document.getElementById("data").max = max.toISOString().split("T")[0];
-        document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
-        document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
-    }
+        const estaAberto = atualizarCronometro();
 
+        // Se estiver fechado mas "Abre em...", precisamos do intervalo para o contador rodar
+        const intervalo = setInterval(() => {
+            const statusAtual = atualizarCronometro();
+            // Se o status mudar de fechado para aberto, podemos recarregar para liberar o form
+            if (statusAtual && formDiv.style.display === "none") {
+                location.reload(); 
+            }
+        }, 1000);
+
+        if (estaAberto) {
+            listaPromise.then(listaData => {
+                window.employeeList = listaData;
+                document.getElementById("initialLoading").style.display = "none";
+                formDiv.style.display = "block";
+            });
+        } else {
+            document.getElementById("initialLoading").style.display = "none";
+        }
+    });
+
+    // Configurações de data (permanecem iguais)
+    const hoje = new Date();
+    const min = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+    const max = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
+    document.getElementById("data").min = min.toISOString().split("T")[0];
+    document.getElementById("data").max = max.toISOString().split("T")[0];
+    document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
+    document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
+}
     async function submitForm(e) {
         e.preventDefault();
         const btn = document.getElementById("btnSubmit");
