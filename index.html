@@ -275,11 +275,11 @@
                 const fechamento = new Date(data.fechamento + "-04:00");
                 
                 if (agora < abertura) {
-                    showPersistentMessage(`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em breve.`,"error");
+                     showPersistentMessage(`⏳ **FORMULÁRIO FECHADO**<br>Abre em: ${d}d ${h}h ${m}m ${s}s`, "error");
                     formDiv.style.display = "none";
                     return false;
                 } else if (agora > fechamento) {
-                    showPersistentMessage(`⛔ <b>PRAZO ENCERRADO</b>`,"error");
+                    showPersistentMessage(`⛔ **FORMULÁRIO ENCERRADO**<br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")
                     formDiv.style.display = "none";
                     return false;
                 } else {
