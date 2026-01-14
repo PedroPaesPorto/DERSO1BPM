@@ -337,48 +337,44 @@
     /**************************************************************
      * SEÇÃO 4: ENVIO E COMUNICAÇÃO (API)
      **************************************************************/
-    async function submitForm(e) {
+   async function submitForm(e) {
     e.preventDefault();
     const btnSubmit = document.getElementById("btnSubmit");
-    
     if (matInput.classList.contains("is-invalid") || btnSubmit.disabled) return;
 
     btnSubmit.disabled = true;
     btnSubmit.textContent = "ENVIANDO...";
     document.getElementById("loadingOverlay").style.display = "flex";
 
-    // Preparação dos dados
+    // Criar os parâmetros para a URL
     const formData = new FormData(formDiv);
-    const params = new URLSearchParams();
-
-    // Loop para garantir que a data seja enviada como DD/MM/YYYY
-    for (const [key, value] of formData.entries()) {
-        if (key === 'data') {
-            const [year, month, day] = value.split('-');
-            params.append(key, `${day}/${month}/${year}`);
-        } else {
-            params.append(key, value);
-        }
-    }
+    const params = new URLSearchParams(formData);
 
     try {
-        // Usamos mode: "no-cors" para contornar o bloqueio de redirecionamento do Google
-        await fetch(SCRIPT_URL, { 
+        // SEM o mode: 'no-cors' para podermos ler o erro de duplicidade
+        const resp = await fetch(SCRIPT_URL, { 
             method: "POST", 
             body: params,
-            mode: "no-cors" 
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
 
-        // Como o modo 'no-cors' não permite ler a resposta JSON, 
-        // tratamos como sucesso se a requisição não disparar o 'catch' (erro de rede).
-        formDiv.style.display = "none";
-        prazoMessageDiv.style.display = "none";
-        successState.style.display = "block";
-        window.scrollTo(0,0);
-
+        const res = await resp.json();
+        
+        if (res.success) {
+            formDiv.style.display = "none";
+            prazoMessageDiv.style.display = "none";
+            successState.style.display = "block";
+            window.scrollTo(0,0);
+        } else {
+            // Aqui ele vai exibir o erro "Você já solicitou DERSO..."
+            showStatus("❌ " + res.error, "error");
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Enviar Solicitação";
+        }
     } catch (err) {
-        console.error("Erro no envio:", err);
-        showStatus("❌ Erro de conexão com o servidor.", "error");
+        // Se der erro de CORS aqui, é porque o Script não foi publicado como "Anyone"
+        console.error(err);
+        showStatus("❌ Erro no servidor ou duplicidade detectada.", "error");
         btnSubmit.disabled = false;
         btnSubmit.textContent = "Enviar Solicitação";
     } finally {
