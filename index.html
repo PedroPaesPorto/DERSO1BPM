@@ -359,21 +359,18 @@ async function submitForm(e) {
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
     
-    // Nomes dos meses para o alerta dinâmico
     const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-    const hoje = new Date();
-    const proximoMesIndex = (hoje.getMonth() + 1) % 12;
-    const nomeMesSolicitado = nomesMeses[proximoMesIndex];
+    const nomeMesSolicitado = nomesMeses[(new Date().getMonth() + 1) % 12];
 
-    // Validação de campos obrigatórios
+    // Validação de campos (Evita o erro "not focusable" da imagem 2)
     let faltantes = [];
     if (!document.getElementById("email").value) faltantes.push("E-mail");
-    if (!matInput.value || matInput.classList.contains("is-invalid")) faltantes.push("Matrícula válida");
+    if (!matInput.value || matInput.classList.contains("is-invalid")) faltantes.push("Matrícula");
     if (!document.querySelector('input[name="folga"]:checked')) faltantes.push("Tipo de Folga");
-    if (!document.getElementById("data").value) faltantes.push("Data da Folga");
+    if (!document.getElementById("data").value) faltantes.push("Data");
 
     if (faltantes.length > 0) {
-        alert("⚠️ ATENÇÃO: Preencha os campos obrigatórios:\n\n- " + faltantes.join("\n- "));
+        alert("⚠️ ATENÇÃO: Preencha os campos:\n- " + faltantes.join("\n- "));
         return;
     }
 
@@ -385,20 +382,23 @@ async function submitForm(e) {
 
     try {
         const resp = await fetch(SCRIPT_URL, { method: "POST", body: params });
-        const res = await resp.json(); // Aqui guardamos em 'res'
+        const res = await resp.json(); // Corrigido de 'm' para 'res'
 
-        if (res.success) { // Verificamos 'res'
+        if (res.success) {
             alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
             finalizarEnvio();
-        } else if (res.error === "DUPLICADO" || res.error.includes("Você já solicitou")) {
-            alert("⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para esta data. Nada foi salvo.");
+        } else if (res.error === "DUPLICADO" || (res.error && res.error.includes("já solicitou"))) {
+            // AQUI ELE BARRA A DUPLICIDADE SE CONSEGUIR LER A RESPOSTA
+            alert("⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para esta data.");
         } else {
-            alert("❌ ERRO: " + res.error);
+            alert("❌ ERRO: " + (res.error || "Erro desconhecido"));
         }
 
     } catch (err) {
-        // Fallback para erro de CORS: o dado costuma ir, mas o navegador bloqueia a leitura
-        alert(`✅ SUCESSO!\nSua solicitação para o mês de ${nomeMesSolicitado} foi enviada.`);
+        // Se houver erro de CORS (Imagem 4), o navegador cai aqui.
+        // Como o Google Script barra a duplicidade lá no servidor, o dado NÃO será salvo se for repetido.
+        // Se você quiser ser 100% rigoroso, pode mudar esta mensagem para algo neutro:
+        alert(`✅ Solicitação enviada!\nVerifique seu e-mail para confirmar se foi aceita (se for duplicada, o sistema ignorará).`);
         finalizarEnvio();
     } finally {
         btn.disabled = false;
@@ -406,7 +406,6 @@ async function submitForm(e) {
         document.getElementById("loadingOverlay").style.display = "none";
     }
 
-    // Função interna para limpar tudo
     function finalizarEnvio() {
         formDiv.reset();
         if (typeof updateProgress === "function") updateProgress();
