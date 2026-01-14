@@ -72,18 +72,11 @@
         .info-message {
             text-align: center; padding: 15px; border-radius: 4px; font-weight: 600;
             margin-bottom: 20px; display: none; border-left: 5px solid;
+            transition: all 0.3s ease;
         }
         .info-message.success { background-color: #e8f5e9; color: var(--sucesso); border-left-color: var(--sucesso); }
         .info-message.error { background-color: #fce4ec; color: var(--erro); border-left-color: var(--erro); }
-
-        /* Estilo do Toast (Pop-up de aviso) */
-.toast-notif {
-    position: fixed; top: 20px; right: 20px; z-index: 9999;
-    padding: 15px 25px; border-radius: 8px; color: white;
-    font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    display: none; animation: slideIn 0.5s ease;
-}
-@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .info-message.loading { background-color: #eee; color: #666; border-left-color: #ccc; display: block; }
 
         /* FORMULÁRIO */
         .form-group, fieldset { margin-bottom: 20px; width: 100%; border: none; padding: 0; }
@@ -164,7 +157,7 @@
         <p class="subtitle">Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO</p>
 
         <div id="instMessage" class="institutional-highlight"></div>
-        <div id="prazoMessage" class="info-message"></div>
+        <div id="prazoMessage" class="info-message loading">⌛ Verificando prazos do sistema...</div>
 
         <div id="successState">
             <div class="check-icon">✓</div>
@@ -225,46 +218,23 @@
     </div>
 
 <script>
- /**************************************************************
-     * SCRIPT E PROVEDORES DE EMAIL
-     **************************************************************/
-    
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3FuQoK3JEZJl6zF2H1dTXNI4xAHgTKBk1g5oFhsR0LedGoVJP6xeipdJN2A9TJiv7wA/exec";
     const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br", "yahoo.com"];
     window.employeeList = {};
 
-     /**************************************************************
-     * OUTROS ELEMENTOS
-     **************************************************************/
-
-    // Elementos do DOM
     const matInput = document.getElementById("matricula");
     const nomeInput = document.getElementById("nome");
     const matError = document.getElementById("matriculaError");
     const formDiv = document.getElementById("dersoForm");
     const statusMessageDiv = document.getElementById("statusMessage");
     const prazoMessageDiv = document.getElementById("prazoMessage");
-    const successState = document.getElementById("successState");
 
-    /**************************************************************
-     * SEÇÃO 1: FUNÇÕES DE UI E MENSAGENS
-     **************************************************************/
     function showPersistentMessage(msg, type="success") {
         prazoMessageDiv.className = `info-message ${type}`;
         prazoMessageDiv.innerHTML = msg;
         prazoMessageDiv.style.display = "block";
     }
 
-    function showStatus(msg, type="success") {
-        statusMessageDiv.className = `info-message ${type}`;
-        statusMessageDiv.innerHTML = msg;
-        statusMessageDiv.style.display = "block";
-        setTimeout(() => statusMessageDiv.style.display = "none", 6000);
-    }
-
-    /**************************************************************
-     * SEÇÃO 2: VALIDAÇÃO DE MATRÍCULA
-     **************************************************************/
     function standardizeMatricula(m) {
         let num = m.replace(/\D/g,'').slice(0,9);
         if (!num) return "";
@@ -280,7 +250,6 @@
         }
         const std = standardizeMatricula(val);
         matInput.value = std;
-        
         if (window.employeeList[std]) {
             nomeInput.value = window.employeeList[std];
             matInput.classList.add("is-valid");
@@ -294,277 +263,174 @@
         }
     }
 
-    /**************************************************************
-     * SEÇÃO 3: INICIALIZAÇÃO E DATAS
-     **************************************************************/
     function initializeForm() {
-        // Carrega Lista de PMs
-        fetch(`${SCRIPT_URL}?action=lista`)
-            .then(r => r.json())
-            .then(data => { 
-                window.employeeList = data;
-                document.getElementById("initialLoading").style.display = "none";
-                formDiv.style.display = "block";
-            });
+        // Dispara as duas buscas ao mesmo tempo para ganhar velocidade
+        const listaPromise = fetch(`${SCRIPT_URL}?action=lista`).then(r => r.json());
+        const datasPromise = fetch(`${SCRIPT_URL}?action=datas`).then(r => r.json());
 
-        // Gerencia Prazo do Formulário
-        fetch(`${SCRIPT_URL}?action=datas`)
-            .then(r => r.json())
-            .then(data => {
-                const intervalo = setInterval(() => {
-                    const agora = new Date();
-                    const abertura = new Date(data.abertura + "-04:00");
-                    const fechamento = new Date(data.fechamento + "-04:00");
-                    
-                    if (agora < abertura) {
-                        showPersistentMessage(`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em breve.`,"error");
-                        formDiv.style.display = "none";
-                    } else if (agora > fechamento) {
-                        showPersistentMessage(`⛔ <b>PRAZO ENCERRADO</b>`,"error");
-                        formDiv.style.display = "none";
-                        clearInterval(intervalo);
+        listaPromise.then(data => {
+            window.employeeList = data;
+            document.getElementById("initialLoading").style.display = "none";
+            formDiv.style.display = "block";
+        });
+
+        datasPromise.then(data => {
+            const intervalo = setInterval(() => {
+                const agora = new Date();
+                const abertura = new Date(data.abertura + "-04:00");
+                const fechamento = new Date(data.fechamento + "-04:00");
+                
+                if (agora < abertura) {
+                    showPersistentMessage(`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em breve.`,"error");
+                    formDiv.style.display = "none";
+                } else if (agora > fechamento) {
+                    showPersistentMessage(`⛔ <b>PRAZO ENCERRADO</b>`,"error");
+                    formDiv.style.display = "none";
+                    clearInterval(intervalo);
+                } else {
+                    const diff = fechamento - agora;
+                    const d = Math.floor(diff/(1000*60*60*24));
+                    const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+                    const m = Math.floor((diff%(1000*60*60))/(1000*60));
+                    const s = Math.floor((diff%(1000*60))/1000);
+                    const tempoTexto = `${d}d ${h}h ${m}m ${s}s`;
+
+                    if (diff < (2 * 60 * 60 * 1000)) {
+                        showPersistentMessage(`⚠️ <b style="animation:blinker 1s infinite">URGENTE! FECHA EM:</b><br><span style="color:#ff0000; font-size:1.2em;">${tempoTexto}</span>`, "error");
                     } else {
-                        const diff = fechamento - agora;
-                        const d = Math.floor(diff/(1000*60*60*24));
-                        const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-                        const m = Math.floor((diff%(1000*60*60))/(1000*60));
-                        const s = Math.floor((diff%(1000*60))/1000);
-                        const tempoTexto = `${d}d ${h}h ${m}m ${s}s`;
-
-                        if (diff < (2 * 60 * 60 * 1000)) {
-                            showPersistentMessage(`⚠️ <b style="animation:blinker 1s infinite">URGENTE! FECHA EM:</b><br><span style="color:#ff0000; font-size:1.2em;">${tempoTexto}</span>`, "error");
-                        } else {
-                            showPersistentMessage(`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`, "success");
-                        }
+                        showPersistentMessage(`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`, "success");
                     }
-                }, 1000);
-            });
+                }
+            }, 1000);
+        });
 
-        // Configura Limites do Calendário (Mês Seguinte)
         const hoje = new Date();
         const min = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
         const max = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
         document.getElementById("data").min = min.toISOString().split("T")[0];
         document.getElementById("data").max = max.toISOString().split("T")[0];
         document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
-        
         document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
     }
 
-    /**************************************************************
-     * SEÇÃO 4: ENVIO E COMUNICAÇÃO (API)
-     **************************************************************/
-  
-// 1. FUNÇÃO DE APOIO (Coloque fora da submitForm para ser acessível)
-function finalizarEnvio() {
-    const form = document.getElementById("dersoForm");
-    form.reset();
-    if (typeof updateProgress === "function") updateProgress();
-    if (typeof checkMatricula === "function") checkMatricula();
-}
-
-// 2. FUNÇÃO PRINCIPAL DE ENVIO
-async function submitForm(e) {
-    e.preventDefault();
-    const btn = document.getElementById("btnSubmit");
-    const dataInput = document.getElementById("data").value;
-    const matricula = document.getElementById("matricula").value;
-    
-    // Nomes dos meses para o alerta
-    const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-    const nomeMesSolicitado = nomesMeses[(new Date().getMonth() + 1) % 12];
-
-    // Validação básica de campos
-    if (!matricula || !dataInput || !document.querySelector('input[name="folga"]:checked')) {
-        alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
-        return;
+    function finalizarEnvio() {
+        const form = document.getElementById("dersoForm");
+        form.reset();
+        if (typeof updateProgress === "function") updateProgress();
+        if (typeof checkMatricula === "function") checkMatricula();
     }
 
-    btn.disabled = true;
-    btn.textContent = "VERIFICANDO DUPLICIDADE...";
+    async function submitForm(e) {
+        e.preventDefault();
+        const btn = document.getElementById("btnSubmit");
+        const dataInput = document.getElementById("data").value;
+        const matricula = matInput.value;
+        const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        const nomeMesSolicitado = nomesMeses[(new Date().getMonth() + 1) % 12];
 
-    try {
-        // --- ETAPA A: VERIFICAÇÃO PREVENTIVA ---
-        // Usamos o histórico que já funciona no seu código para checar se a data já existe
-        const checkUrl = `${SCRIPT_URL}?action=historico&matricula=${matricula}`;
-        const response = await fetch(checkUrl);
-        const data = await response.json();
-
-        // Converte a data do input (YYYY-MM-DD) para o formato do histórico (DD/MM/YYYY)
-        const [ano, mes, dia] = dataInput.split("-");
-        const dataFormatada = `${dia}/${mes}/${ano}`;
-
-        const jaExiste = data.historico && data.historico.some(item => item.Data === dataFormatada);
-
-        if (jaExiste) {
-            alert(`⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para o dia ${dataFormatada}.`);
-            btn.disabled = false;
-            btn.textContent = "Enviar Solicitação";
-            return; // Interrompe o envio aqui
+        if (!matricula || !dataInput || !document.querySelector('input[name="folga"]:checked')) {
+            alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
+            return;
         }
 
-        // --- ETAPA B: ENVIO REAL ---
-        btn.textContent = "ENVIANDO...";
-        document.getElementById("loadingOverlay").style.display = "flex";
+        btn.disabled = true;
+        btn.textContent = "VERIFICANDO...";
 
-        const formData = new FormData(document.getElementById("dersoForm"));
-        const params = new URLSearchParams(formData);
+        try {
+            // Verificação de duplicidade preventiva para contornar erro de CORS
+            const rCheck = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
+            const dCheck = await rCheck.json();
+            const [ano, mes, dia] = dataInput.split("-");
+            const dataFormatada = `${dia}/${mes}/${ano}`;
 
-        // Usamos no-cors aqui porque já validamos a duplicidade acima
-        // Isso evita que o navegador bloqueie a resposta do Google
-        await fetch(SCRIPT_URL, {
-            method: "POST",
-            body: params,
-            mode: 'no-cors' 
-        });
+            if (dCheck.historico && dCheck.historico.some(item => item.Data === dataFormatada)) {
+                alert(`⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para o dia ${dataFormatada}.`);
+                btn.disabled = false;
+                btn.textContent = "Enviar Solicitação";
+                return;
+            }
 
-        // Como o modo é no-cors, o navegador não deixa ler a resposta,
-        // mas o dado foi enviado com sucesso para a planilha.
-        alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
-        finalizarEnvio();
+            btn.textContent = "ENVIANDO...";
+            document.getElementById("loadingOverlay").style.display = "flex";
+            const params = new URLSearchParams(new FormData(formDiv));
+            
+            await fetch(SCRIPT_URL, { method: "POST", body: params, mode: 'no-cors' });
 
-    } catch (err) {
-        console.error("Erro técnico:", err);
-        alert("❌ Erro de conexão. Tente novamente em instantes.");
-    } finally {
-        btn.disabled = false;
-        btn.textContent = "Enviar Solicitação";
-        document.getElementById("loadingOverlay").style.display = "none";
+            alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
+            finalizarEnvio();
+        } catch (err) {
+            console.error(err);
+            alert("❌ Erro de conexão. Tente novamente.");
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Enviar Solicitação";
+            document.getElementById("loadingOverlay").style.display = "none";
+        }
     }
-}
-    
-    /**************************************************************
-     * SEÇÃO 5: TEMAS INSTITUCIONAIS
-     **************************************************************/
 
     function applyInstitutionalTheme() {
         const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
         const instDiv = document.getElementById("instMessage");
         const aplicar = (msg) => instDiv.innerHTML = msg;
-
         const temas = {
-            "1-13": () => {
-                const anosRondonia = hoje.getFullYear() - 1982;
-                aplicar(`🌳 Rondônia: ${anosRondonia} anos de história, bravura e compromisso.`);
-            },
-            "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
-            "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
-            "11-15": () => {
-                const anosRepublica = hoje.getFullYear() - 1889;
-                aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${anosRepublica} anos de Proclamação.`);
-            },
-            "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
-            "12-7": () => {
-                const anosBPM = hoje.getFullYear() - 1983;
-                aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${anosBPM} anos de tradição e compromisso.`);
-            }
+            "1-13": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história.`),
+            "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição.`)
         };
-
         const chave = `${mes+1}-${dia}`;
-        if (temas[chave]) {
-            temas[chave]();
-        } else {
-            const mensais = {
-                0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos e festas."),
-                1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
-                2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda com dedicação."),
-                3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
-                4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão de cuidar e proteger."),
-                5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade social."),
-                6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
-                7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional de segurança."),
-                8: () => aplicar("🇧🇷 Setembro: Mês da Pátria. Renovando nosso juramento de servir e proteger o Brasil."),
-                9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
-                10: () => {
-                    const anosRepublica = hoje.getFullYear() - 1889;
-                    aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade que formam nossa nação. ${anosRepublica}º ano da República.`);
-                },
-                11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. Boas Festas! ✨")
-            };
-            if (mensais[mes]) {
-                mensais[mes]();
-            }
+        if (temas[chave]) temas[chave]();
+        else {
+            const mensais = { 0: "🎭 Janeiro: Planejamento estratégico.", 11: "🎄 Dezembro: Boas Festas! ✨" };
+            if (mensais[mes]) aplicar(mensais[mes]);
         }
     }
 
-   /**************************************************************
-     * SEÇÃO 6: EVENTOS E ACESSIBILIDADE
-     **************************************************************/
     document.addEventListener("DOMContentLoaded", () => {
         initializeForm();
         applyInstitutionalTheme();
-        
         matInput.addEventListener("blur", checkMatricula);
         formDiv.addEventListener("submit", submitForm);
         
-        // Auto-complete de E-mail
         document.getElementById("email").addEventListener("input", (e) => {
             const val = e.target.value;
             const dl = document.getElementById("emailProviders");
             if (val.includes("@")) {
                 const [user, domain] = val.split("@");
                 dl.innerHTML = "";
-                emailProviders.forEach(p => { 
-                    if (p.startsWith(domain)) dl.appendChild(new Option(user + "@" + p)); 
-                });
+                emailProviders.forEach(p => { if (p.startsWith(domain)) dl.appendChild(new Option(user + "@" + p)); });
             }
         });
-        
-        function updateProgress() {
-    const fields = document.querySelectorAll('#dersoForm [required]');
-    let filled = 0;
-    fields.forEach(f => {
-        if (f.type === 'radio') {
-            if (document.querySelector('input[name="folga"]:checked')) filled++;
-        } else if (f.value.trim() !== '' && !f.classList.contains('is-invalid')) {
-            filled++;
-        }
-    });
-    // Ajuste o cálculo baseado no número total de campos requeridos (ex: 4)
-    const percent = (filled / 4) * 100;
-    document.getElementById("progressBar").style.width = percent + "%";
-}
 
-// Adicione ouvintes para disparar a função
-document.querySelectorAll('#dersoForm input').forEach(input => {
-    input.addEventListener('input', updateProgress);
-    input.addEventListener('blur', updateProgress);
-});
-        
-        // Histórico de Solicitações
+        function updateProgress() {
+            const fields = document.querySelectorAll('#dersoForm [required]');
+            let filled = 0;
+            fields.forEach(f => {
+                if (f.type === 'radio') { if (document.querySelector('input[name="folga"]:checked')) filled++; }
+                else if (f.value.trim() !== '' && !f.classList.contains('is-invalid')) { filled++; }
+            });
+            document.getElementById("progressBar").style.width = ((filled / 4) * 100) + "%";
+        }
+
+        document.querySelectorAll('#dersoForm input').forEach(i => {
+            i.addEventListener('input', updateProgress);
+            i.addEventListener('blur', updateProgress);
+        });
+
         document.getElementById("btnHistory").onclick = async () => {
-            if (!matInput.value || matInput.classList.contains("is-invalid")) {
-                return alert("Insira uma matrícula válida.");
-            }
+            if (!matInput.value || matInput.classList.contains("is-invalid")) return alert("Insira uma matrícula válida.");
             const modal = document.getElementById("historyModal");
             modal.style.display = "flex";
-            document.body.classList.add("modal-open");
             document.getElementById("historyBox").innerHTML = "<div class='spinner'></div> Buscando...";
-            
             try {
                 const r = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matInput.value}`);
                 const d = await r.json();
-                let h = `<div style="font-weight:bold; color:var(--azul-marinho); margin-bottom:12px; border-bottom:2px solid var(--dourado-amarelo);">${d.nome || 'Solicitante'}</div>`;
-                
-                if (!d.historico || d.historico.length === 0) {
-                    h += "Nenhum registro encontrado.";
-                } else {
-                    d.historico.forEach(i => {
-                        let status = i.Status && i.Status.toLowerCase() !== 'pendente' ? ` <b>(${i.Status})</b>` : "";
-                        h += `<div style="border-bottom:1px solid #eee; padding:8px 0;">${i.Data} - ${i.Folga}${status}</div>`;
-                    });
-                }
+                let h = `<div style="font-weight:bold; border-bottom:2px solid var(--dourado-amarelo);">${d.nome || 'Solicitante'}</div>`;
+                if (!d.historico || d.historico.length === 0) h += "Nenhum registro.";
+                else d.historico.forEach(i => h += `<div style="border-bottom:1px solid #eee; padding:8px 0;">${i.Data} - ${i.Folga}</div>`);
                 document.getElementById("historyBox").innerHTML = h;
-            } catch (err) {
-                document.getElementById("historyBox").innerHTML = "Erro ao carregar.";
-            }
+            } catch (err) { document.getElementById("historyBox").innerHTML = "Erro ao carregar."; }
         };
 
-        const closeMod = () => {
-            document.getElementById("historyModal").style.display="none";
-            document.body.classList.remove("modal-open");
-        };
-
+        const closeMod = () => { document.getElementById("historyModal").style.display="none"; document.body.classList.remove("modal-open"); };
         document.getElementById("closeHistory").onclick = closeMod;
         window.addEventListener('keydown', (e) => { if (e.key === "Escape") closeMod(); });
     });
