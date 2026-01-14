@@ -362,7 +362,7 @@ async function submitForm(e) {
     const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     const nomeMesSolicitado = nomesMeses[(new Date().getMonth() + 1) % 12];
 
-    // Validação de campos (Evita o erro "not focusable" da imagem 2)
+    // Validação de campos
     let faltantes = [];
     if (!document.getElementById("email").value) faltantes.push("E-mail");
     if (!matInput.value || matInput.classList.contains("is-invalid")) faltantes.push("Matrícula");
@@ -381,25 +381,30 @@ async function submitForm(e) {
     const params = new URLSearchParams(new FormData(formDiv));
 
     try {
-        const resp = await fetch(SCRIPT_URL, { method: "POST", body: params });
-        const res = await resp.json(); // Corrigido de 'm' para 'res'
+        // REMOVIDO 'no-cors' para permitir a leitura da resposta
+        const resp = await fetch(SCRIPT_URL, { 
+            method: "POST", 
+            body: params,
+            redirect: "follow" 
+        });
+
+        // Lemos como texto primeiro para evitar erro de parsing caso o Google mude a URL
+        const text = await resp.text();
+        const res = JSON.parse(text);
 
         if (res.success) {
             alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
             finalizarEnvio();
         } else if (res.error === "DUPLICADO" || (res.error && res.error.includes("já solicitou"))) {
-            // AQUI ELE BARRA A DUPLICIDADE SE CONSEGUIR LER A RESPOSTA
             alert("⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para esta data.");
         } else {
             alert("❌ ERRO: " + (res.error || "Erro desconhecido"));
         }
 
     } catch (err) {
-        // Se houver erro de CORS (Imagem 4), o navegador cai aqui.
-        // Como o Google Script barra a duplicidade lá no servidor, o dado NÃO será salvo se for repetido.
-        // Se você quiser ser 100% rigoroso, pode mudar esta mensagem para algo neutro:
-        alert(`✅ Solicitação enviada!\nVerifique seu e-mail para confirmar se foi aceita (se for duplicada, o sistema ignorará).`);
-        finalizarEnvio();
+        console.error("Erro no envio:", err);
+        // No catch, só avisamos que algo deu errado de verdade, sem fingir sucesso.
+        alert(`❌ ERRO DE CONEXÃO!\nNão conseguimos confirmar o envio. Verifique seu histórico ou e-mail.`);
     } finally {
         btn.disabled = false;
         btn.textContent = "Enviar Solicitação";
@@ -410,9 +415,11 @@ async function submitForm(e) {
         formDiv.reset();
         if (typeof updateProgress === "function") updateProgress();
         if (typeof checkMatricula === "function") checkMatricula();
+        // Opcional: mostrar tela de sucesso completa
+        // document.getElementById("dersoForm").style.display = "none";
+        // document.getElementById("successState").style.display = "block";
     }
 }
-    
     /**************************************************************
      * SEÇÃO 5: TEMAS INSTITUCIONAIS
      **************************************************************/
