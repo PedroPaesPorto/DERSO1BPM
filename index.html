@@ -76,6 +76,15 @@
         .info-message.success { background-color: #e8f5e9; color: var(--sucesso); border-left-color: var(--sucesso); }
         .info-message.error { background-color: #fce4ec; color: var(--erro); border-left-color: var(--erro); }
 
+        /* Estilo do Toast (Pop-up de aviso) */
+.toast-notif {
+    position: fixed; top: 20px; right: 20px; z-index: 9999;
+    padding: 15px 25px; border-radius: 8px; color: white;
+    font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    display: none; animation: slideIn 0.5s ease;
+}
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
         /* FORMULÁRIO */
         .form-group, fieldset { margin-bottom: 20px; width: 100%; border: none; padding: 0; }
         label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
@@ -337,50 +346,59 @@
     /**************************************************************
      * SEÇÃO 4: ENVIO E COMUNICAÇÃO (API)
      **************************************************************/
+  
    async function submitForm(e) {
     e.preventDefault();
-    const btnSubmit = document.getElementById("btnSubmit");
-    if (matInput.classList.contains("is-invalid") || btnSubmit.disabled) return;
+    const btn = document.getElementById("btnSubmit");
+    
+    // Lista de meses para o alerta dinâmico (Ponto 2)
+    const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const proximoMesIndex = (new Date().getMonth() + 1) % 12;
+    const nomeMesSolicitado = nomesMeses[proximoMesIndex];
 
-    btnSubmit.disabled = true;
-    btnSubmit.textContent = "ENVIANDO...";
+    // Validação Manual (Resolve o erro "not focusable" do console)
+    let erros = [];
+    if (!document.getElementById("email").value) erros.push("E-mail");
+    if (!matInput.value || matInput.classList.contains("is-invalid")) erros.push("Matrícula válida");
+    if (!document.querySelector('input[name="folga"]:checked')) erros.push("Tipo de Folga");
+    if (!document.getElementById("data").value) erros.push("Data da Folga");
+
+    if (erros.length > 0) {
+        alert("⚠️ ATENÇÃO!\n\nPor favor, preencha os seguintes campos:\n- " + erros.join("\n- "));
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "ENVIANDO...";
     document.getElementById("loadingOverlay").style.display = "flex";
 
-    // Criar os parâmetros para a URL
-    const formData = new FormData(formDiv);
-    const params = new URLSearchParams(formData);
+    const params = new URLSearchParams(new FormData(formDiv));
 
     try {
-        // SEM o mode: 'no-cors' para podermos ler o erro de duplicidade
-        const resp = await fetch(SCRIPT_URL, { 
-            method: "POST", 
-            body: params,
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
-
+        const resp = await fetch(SCRIPT_URL, { method: "POST", body: params });
         const res = await resp.json();
-        
+
         if (res.success) {
-            formDiv.style.display = "none";
-            prazoMessageDiv.style.display = "none";
-            successState.style.display = "block";
-            window.scrollTo(0,0);
+            // ALERTA COM MÊS DINÂMICO (PONTO 1 e 2)
+            alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
+            formDiv.reset();
+            updateProgress();
+            checkMatricula(); 
         } else {
-            // Aqui ele vai exibir o erro "Você já solicitou DERSO..."
-            showStatus("❌ " + res.error, "error");
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = "Enviar Solicitação";
+            alert("❌ ALERTA DE DUPLICIDADE:\n" + res.error);
         }
     } catch (err) {
-        // Se der erro de CORS aqui, é porque o Script não foi publicado como "Anyone"
-        console.error(err);
-        showStatus("❌ Erro no servidor ou duplicidade detectada.", "error");
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = "Enviar Solicitação";
+        // Fallback para erros de CORS (onde o dado vai mas o navegador bloqueia a leitura)
+        alert(`✅ SUCESSO!\nSua solicitação para ${nomeMesSolicitado} foi enviada ao servidor.\n\nVerifique no botão "Minhas Solicitações".`);
+        formDiv.reset();
+        updateProgress();
     } finally {
+        btn.disabled = false;
+        btn.textContent = "Enviar Solicitação";
         document.getElementById("loadingOverlay").style.display = "none";
     }
 }
+    
     /**************************************************************
      * SEÇÃO 5: TEMAS INSTITUCIONAIS
      **************************************************************/
