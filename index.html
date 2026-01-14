@@ -368,19 +368,59 @@
         }
     }
 
+    /**************************************************************
+
+     * SEÇÃO 5: TEMAS INSTITUCIONAIS
+
+     **************************************************************/
+
     function applyInstitutionalTheme() {
         const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
         const instDiv = document.getElementById("instMessage");
         const aplicar = (msg) => instDiv.innerHTML = msg;
+
         const temas = {
-            "1-13": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história.`),
-            "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição.`)
+            "1-13": () => {
+                const anosRondonia = hoje.getFullYear() - 1982;
+                aplicar(`🌳 Rondônia: ${anosRondonia} anos de história, bravura e compromisso.`);
+           },
+            "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
+            "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
+            "11-15": () => {
+                const anosRepublica = hoje.getFullYear() - 1889;
+                aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${anosRepublica} anos de Proclamação.`);
+            },
+           "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
+            "12-7": () => {
+                const anosBPM = hoje.getFullYear() - 1983;
+                aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${anosBPM} anos de tradição e compromisso.`);
+            }
         };
+
         const chave = `${mes+1}-${dia}`;
-        if (temas[chave]) temas[chave]();
-        else {
-            const mensais = { 0: "🎭 Janeiro: Planejamento estratégico.", 11: "🎄 Dezembro: Boas Festas! ✨" };
-            if (mensais[mes]) aplicar(mensais[mes]);
+        if (temas[chave]) {
+            temas[chave]();
+        } else {
+            const mensais = {
+               0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos e festas."),
+                1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
+                2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda com dedicação."),
+                3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
+                4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão de cuidar e proteger."),
+                5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade social."),
+                6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
+                7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional de segurança."),
+                8: () => aplicar("🇧🇷 Setembro: Mês da Pátria. Renovando nosso juramento de servir e proteger o Brasil."),
+                9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
+                10: () => {
+                   const anosRepublica = hoje.getFullYear() - 1889;
+                    aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade que formam nossa nação. ${anosRepublica}º ano da República.`);
+                },
+                11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. Boas Festas! ✨")
+            };
+            if (mensais[mes]) {
+                mensais[mes]();
+            }
         }
     }
 
@@ -400,15 +440,21 @@
             }
         });
 
-        function updateProgress() {
-            const fields = document.querySelectorAll('#dersoForm [required]');
-            let filled = 0;
-            fields.forEach(f => {
-                if (f.type === 'radio') { if (document.querySelector('input[name="folga"]:checked')) filled++; }
-                else if (f.value.trim() !== '' && !f.classList.contains('is-invalid')) { filled++; }
-            });
-            document.getElementById("progressBar").style.width = ((filled / 4) * 100) + "%";
+      function updateProgress() {
+    const fields = document.querySelectorAll('#dersoForm [required]');
+    let filled = 0;
+    fields.forEach(f => {
+        if (f.type === 'radio') {
+            if (document.querySelector('input[name="folga"]:checked')) filled++;
+        } else if (f.value.trim() !== '' && !f.classList.contains('is-invalid')) {
+            filled++;
         }
+    });
+   
+          // Ajuste o cálculo baseado no número total de campos requeridos (ex: 4)
+    const percent = (filled / 4) * 100;
+    document.getElementById("progressBar").style.width = percent + "%";
+}
 
         document.querySelectorAll('#dersoForm input').forEach(i => {
             i.addEventListener('input', updateProgress);
