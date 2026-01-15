@@ -489,12 +489,13 @@
                 const d = await r.json();
                 let h = `<div style="font-weight:bold; border-bottom:2px solid var(--dourado-amarelo);">${d.nome || 'Solicitante'}</div>`;
                 if (!d.historico || d.historico.length === 0) h += "Nenhum registro.";
-                else d.historico.forEach(i => 
+               else d.historico.forEach(i => 
   h += `<div style="border-bottom:1px solid #eee; padding:8px 0;">
-          ${i.dataSolicitada} - ${i.tipoDeFolga}
+          ${i.Data} - ${i.Folga} (${i.Status})
         </div>`
 );
-                document.getElementById("historyBox").innerHTML = h;
+
+              document.getElementById("historyBox").innerHTML = h;
             } catch (err) { document.getElementById("historyBox").innerHTML = "Erro ao carregar."; }
         };
 
