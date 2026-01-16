@@ -437,35 +437,36 @@ legend {
     }
 }
 
-        /* =========================================================
+/* =========================================================
    BLOCO 7 — FOOTER, TEXTOS AUXILIARES E ACABAMENTO FINAL
    ========================================================= */
 
-/* Footer institucional */
-footer {
-    margin-top: 30px;
-    padding: 15px 10px;
-
+/* Footer institucional (assinatura fina e discreta) */
+.footer {
+    margin-top: 20px;
+    padding: 8px 10px;
     text-align: center;
-    font-size: 12px;
-    color: #666;
+
+    font-size: 10px;          /* menor e discreto */
+    font-weight: 400;          /* leve */
+    font-style: italic;        /* assinatura */
+    color: #666;               /* cor suave */
 
     border-top: 1px solid #ddd;
 }
 
 /* Texto auxiliar (observações, notas, avisos) */
 .texto-auxiliar {
-    font-size: 13px;
+    font-size: 12px;
     color: #555;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 /* Estado vazio (ex: histórico sem registros) */
 .estado-vazio {
     text-align: center;
-    padding: 25px 10px;
-
-    font-size: 14px;
+    padding: 20px 10px;
+    font-size: 13px;
     color: #777;
     font-style: italic;
 }
@@ -487,6 +488,10 @@ footer {
 
     button {
         font-size: 14px;
+    }
+
+    .footer {
+        font-size: 9px; /* ainda mais discreto em telas pequenas */
     }
 }
         
@@ -737,55 +742,67 @@ footer {
 
             /** Função para enviar o formulário de solicitação */
     async function submitForm(e) {
-        e.preventDefault();
-        
-        const btn = document.getElementById("btnSubmit");
-        const dataInput = document.getElementById("data").value;
-        const matricula = matInput.value;
-        const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-        const nomeMesSolicitado = nomesMeses[(new Date().getMonth() + 1) % 12];
+    e.preventDefault();
 
-        // Verifica se todos os campos obrigatórios foram preenchidos
-        if (!matricula || !dataInput || !document.querySelector('input[name="folga"]:checked')) {
-            alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
-            return;
-        }
+    const btn = document.getElementById("btnSubmit");
+    const dataInput = document.getElementById("data").value;
+    const matricula = matInput.value;
+    const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    const nomeMesSolicitado = nomesMeses[(new Date().getMonth() + 1) % 12];
 
-        btn.disabled = true;
-        btn.textContent = "VERIFICANDO...";
+    // --- VERIFICAÇÃO DE CAMPOS OBRIGATÓRIOS ---
+    if (!matricula || !dataInput || !document.querySelector('input[name="folga"]:checked')) {
+        alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
+        return;
+    }
 
-        try {
-            // Busca histórico de solicitações do usuário para evitar duplicidade
-            const rCheck = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
-            const dCheck = await rCheck.json();
+    btn.disabled = true;
+    btn.textContent = "VERIFICANDO...";
 
-            const [ano, mes, dia] = dataInput.split("-");
-            const dataFormatada = `${dia}/${mes}/${ano}`;
+    try {
+        // --- VERIFICAÇÃO DE DUPLICIDADE ---
+        const rCheck = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
+        const dCheck = await rCheck.json();
+        const [ano, mes, dia] = dataInput.split("-");
+        const dataFormatada = `${dia}/${mes}/${ano}`;
 
-            if (dCheck.historico && dCheck.historico.some(item => item.Data === dataFormatada)) {
-                alert(`⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para o dia ${dataFormatada}.`);
-                btn.disabled = false;
-                btn.textContent = "Enviar Solicitação";
-                return;
-            }
-
-            // Mostra overlay de carregamento e envia dados ao GAS
-            btn.textContent = "ENVIANDO...";
-            document.getElementById("loadingOverlay").style.display = "flex";
-            const params = new URLSearchParams(new FormData(formDiv));
-            await fetch(SCRIPT_URL, { method: "POST", body: params, mode: 'no-cors' });
-
-            alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
-            formDiv.reset();
-            location.reload();
-        } catch (err) {
-            alert("❌ Erro de conexão. Tente novamente.");
-        } finally {
+        if (dCheck.historico && dCheck.historico.some(item => item.Data === dataFormatada)) {
+            // SOLICITAÇÃO DUPLICADA
+            alert(`⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para o dia ${dataFormatada}.`);
             btn.disabled = false;
             btn.textContent = "Enviar Solicitação";
-            document.getElementById("loadingOverlay").style.display = "none";
+            return; // Interrompe envio
         }
+
+        // --- ENVIO ---
+        btn.textContent = "ENVIANDO...";
+        document.getElementById("loadingOverlay").style.display = "flex";
+
+        const params = new URLSearchParams(new FormData(formDiv));
+        await fetch(SCRIPT_URL, { method: "POST", body: params, mode: 'no-cors' });
+
+        // --- SUCESSO ---
+        alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
+
+        // --- LIMPAR FORMULÁRIO SEM RECARREGAR ---
+        const emailValor = document.getElementById("email").value;
+        const matriculaValor = matInput.value;
+        const nomeValor = nomeInput.value;
+
+        formDiv.reset(); // limpa todos os campos
+        document.getElementById("email").value = emailValor; // mantém email
+        matInput.value = matriculaValor; // mantém matrícula
+        nomeInput.value = nomeValor; // mantém nome
+        updateProgressBar(); // atualiza barra de progresso
+
+    } catch (err) {
+        alert("❌ Erro de conexão. Tente novamente.");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Enviar Solicitação";
+        document.getElementById("loadingOverlay").style.display = "none";
     }
+}
 
     /** Aplica mensagens institucionais de acordo com datas especiais ou mensais */
     function applyInstitutionalTheme() {
