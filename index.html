@@ -1,135 +1,477 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <!-- =====================================================
+         METADADOS BÁSICOS DO DOCUMENTO
+         ===================================================== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Solicitação de Folga - DERSO</title>
-    
+
+    <!-- =====================================================
+         FONTES INSTITUCIONAIS
+         Merriweather: títulos
+         Roboto: corpo do texto
+         ===================================================== -->
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
+    <!-- =====================================================
+         ESTILOS GERAIS DO SISTEMA
+         Organização por camadas:
+         1. Variáveis
+         2. Estrutura global
+         3. Componentes
+         4. Estados
+         ===================================================== -->
     <style>
+
+        /* =====================================================
+           VARIÁVEIS DE TEMA INSTITUCIONAL
+           Centralizam identidade visual
+           ===================================================== */
         :root {
             --azul-marinho: #0C3667;
             --dourado-amarelo: #FFD700;
             --azul-claro-hover: #1a5ca7;
+
             --erro: #b00020;
             --sucesso: #388e3c;
+
             --cinza-fundo: #f4f7f9;
             --cinza-texto: #333333;
             --borda-campo: #aaa;
         }
 
+        /* =====================================================
+           RESET FUNCIONAL E BODY
+           ===================================================== */
         body {
             background-color: var(--cinza-fundo);
             font-family: 'Roboto', Arial, sans-serif;
             color: var(--cinza-texto);
-            margin: 0; padding: 0;
-            display: flex; justify-content: center; align-items: center;
+
+            margin: 0;
+            padding: 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
             min-height: 100vh;
         }
 
-        body.modal-open { overflow: hidden; }
-
-        .container {
-            width: 95%; max-width: 500px;
-            background-color: #ffffff;
-            border-radius: 8px; padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            border: 1px solid #ccc; box-sizing: border-box;
-            display: flex; flex-direction: column; position: relative;
+        /* Bloqueia rolagem quando modal estiver aberto */
+        body.modal-open {
+            overflow: hidden;
         }
 
-        /* BARRA DE PROGRESSO */
+        /* =====================================================
+           CONTAINER PRINCIPAL
+           ===================================================== */
+        .container {
+            width: 95%;
+            max-width: 500px;
+
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid #ccc;
+
+            box-sizing: border-box;
+
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* =====================================================
+           BARRA DE PROGRESSO SUPERIOR
+           ===================================================== */
         #progressBarContainer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background-color: #e0e0e0; border-radius: 8px 8px 0 0; overflow: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 4px;
+
+            background-color: #e0e0e0;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
         }
 
         #progressBar {
-            width: 0%; height: 100%; background-color: var(--dourado-amarelo);
+            width: 0%;
+            height: 100%;
+            background-color: var(--dourado-amarelo);
             transition: width 0.4s ease;
         }
 
-        /* LOGOS E TÍTULOS */
-        .logos { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; }
-        .logos img { height: 70px; object-fit: contain; }
+        /* =====================================================
+           LOGOTIPOS E TÍTULOS
+           ===================================================== */
+        .logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logos img {
+            height: 70px;
+            object-fit: contain;
+        }
 
         h2 {
-            font-family: 'Merriweather', serif; text-align: center; color: var(--azul-marinho);
-            font-size: 28px; font-weight: 700; margin-bottom: 10px;
-            border-bottom: 2px solid var(--dourado-amarelo); padding-bottom: 5px;
+            font-family: 'Merriweather', serif;
+            text-align: center;
+            color: var(--azul-marinho);
+
+            font-size: 28px;
+            font-weight: 700;
+
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--dourado-amarelo);
+            padding-bottom: 5px;
         }
 
-        .subtitle { text-align: center; font-size: 16px; margin-bottom: 25px; }
-
-        /* MENSAGENS E ALERTAS */
-        .institutional-highlight {
-            text-align: center; font-size: 14px; color: var(--azul-marinho);
-            font-weight: 500; margin-bottom: 20px; padding: 12px;
-            background-color: #fcfcfc; border: 1px solid #eee; font-style: italic;
+        .subtitle {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 25px;
         }
 
-        .info-message {
-            text-align: center; padding: 15px; border-radius: 4px; font-weight: 600;
-            margin-bottom: 20px; display: none; border-left: 5px solid;
-            transition: all 0.3s ease;
-        }
-        .info-message.success { background-color: #e8f5e9; color: var(--sucesso); border-left-color: var(--sucesso); }
-        .info-message.error { background-color: #fce4ec; color: var(--erro); border-left-color: var(--erro); }
-        .info-message.loading { background-color: #eee; color: #666; border-left-color: #ccc; display: block; }
+   /* =========================================================
+   BLOCO 2 — MENSAGENS, ALERTAS E FEEDBACK VISUAL
+   Responsável por avisos de sistema, prazos e destaques
+   ========================================================= */
 
-        /* FORMULÁRIO */
-        .form-group, fieldset { margin-bottom: 20px; width: 100%; border: none; padding: 0; }
-        label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
+/* Destaque institucional (mensagem temática do dia/mês) */
+.institutional-highlight {
+    text-align: center;
+    font-size: 14px;
+    color: var(--azul-marinho);
+    font-weight: 500;
+    margin-bottom: 20px;
+    padding: 12px;
+    background-color: #fcfcfc;
+    border: 1px solid #eee;
+    font-style: italic;
+}
 
-        .form-group input:not([type="radio"]), .form-group select {
-            width: 100%; padding: 12px; border: 1px solid var(--borda-campo);
-            border-radius: 4px; box-sizing: border-box;
-        }
+/* Mensagem persistente de status do sistema (prazo, erro, sucesso) */
+.info-message {
+    text-align: center;
+    padding: 15px;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: none;
+    border-left: 5px solid;
+    transition: all 0.3s ease;
+}
 
-        .is-valid { border-color: var(--sucesso) !important; box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.1); }
-        .is-invalid { border-color: var(--erro) !important; box-shadow: 0 0 0 2px rgba(176, 0, 32, 0.1); }
+/* Estado: sucesso (formulário aberto, ação concluída) */
+.info-message.success {
+    background-color: #e8f5e9;
+    color: var(--sucesso);
+    border-left-color: var(--sucesso);
+}
 
-        /* BOTÕES DE RÁDIO (FOLGAS) */
-        .radio-group-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
-        .radio-group-buttons input { display: none; }
-        .radio-group-buttons label {
-            padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px;
-            cursor: pointer; font-size: 13px; font-weight: 600;
-        }
-        .radio-group-buttons input:checked + label {
-            background-color: var(--azul-marinho); color: var(--dourado-amarelo); border-color: var(--azul-marinho);
-        }
+/* Estado: erro (fora do prazo, encerrado, urgente) */
+.info-message.error {
+    background-color: #fce4ec;
+    color: var(--erro);
+    border-left-color: var(--erro);
+}
 
-        /* BOTÕES GERAIS */
-        .button {
-            background-color: var(--azul-claro-hover); color: #fff; border: none; cursor: pointer; padding: 14px;
-            font-size: 16px; font-weight: 700; border-radius: 4px; width: 100%;
-            text-transform: uppercase; margin-top: 10px;
-        }
-        .button:disabled { background-color: #ccc; cursor: not-allowed; }
-        .button.secondary { background-color: #fff; color: var(--azul-marinho); border: 1px solid var(--azul-marinho); }
+/* Estado: carregando/verificando */
+.info-message.loading {
+    background-color: #eee;
+    color: #666;
+    border-left-color: #ccc;
+    display: block;
+}
 
-        /* ESTADOS DE SUCESSO E CARREGAMENTO */
-        #successState { display: none; text-align: center; padding: 20px; }
-        .check-icon { font-size: 50px; color: var(--sucesso); margin-bottom: 15px; }
+/* =========================================================
+   BLOCO 3 — FORMULÁRIO, CAMPOS E VALIDAÇÃO
+   Define aparência, espaçamento e estados dos inputs
+   ========================================================= */
 
-        .modal-base {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            align-items: center; justify-content: center; z-index: 2000;
-        }
-        .modal-content { background: #fff; padding: 25px; border-radius: 8px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
+/* Estrutura base dos grupos */
+.form-group,
+fieldset {
+    margin-bottom: 20px;
+    width: 100%;
+    border: none;
+    padding: 0;
+}
 
-        .spinner {
-            border: 4px solid rgba(0,0,0,0.1); border-top-color: var(--azul-claro-hover);
-            border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes blinker { 50% { opacity: 0; } }
+/* Labels e legendas */
+label,
+legend {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
 
-        .footer { text-align: center; margin-top: 25px; font-size: 11px; color: #777; }
+/* Inputs e selects (exceto radio) */
+.form-group input:not([type="radio"]),
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--borda-campo);
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+/* Campo somente leitura (nome) */
+.form-group input[readonly] {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+/* Estado válido */
+.is-valid {
+    border-color: var(--sucesso) !important;
+    box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.1);
+}
+
+/* Estado inválido */
+.is-invalid {
+    border-color: var(--erro) !important;
+    box-shadow: 0 0 0 2px rgba(176, 0, 32, 0.1);
+}
+
+/* Mensagem de erro pequena (ex: matrícula inválida) */
+#matriculaError {
+    color: var(--erro);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+        /* =========================================================
+   BLOCO 4 — BOTÕES DE RÁDIO (TIPO DE FOLGA)
+   Radios estilizados como botões institucionais
+   ========================================================= */
+
+/* Container dos botões */
+.radio-group-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Esconde o radio nativo */
+.radio-group-buttons input {
+    display: none;
+}
+
+/* Aparência dos "botões" */
+.radio-group-buttons label {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+/* Hover sutil */
+.radio-group-buttons label:hover {
+    background-color: #f4f4f4;
+}
+
+/* Estado selecionado */
+.radio-group-buttons input:checked + label {
+    background-color: var(--azul-marinho);
+    color: var(--dourado-amarelo);
+    border-color: var(--azul-marinho);
+}
+
+        /* =========================================================
+   BLOCO 5 — BOTÕES GERAIS E ESTADOS
+   Botão principal, secundário e desabilitado
+   ========================================================= */
+
+/* Botão padrão */
+.button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+
+    background-color: var(--azul-claro-hover);
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+
+    transition: background-color 0.25s ease, transform 0.1s ease;
+}
+
+/* Feedback visual ao clicar */
+.button:active {
+    transform: scale(0.98);
+}
+
+/* Botão secundário (ex: histórico) */
+.button.secondary {
+    background-color: #ffffff;
+    color: var(--azul-marinho);
+    border: 1px solid var(--azul-marinho);
+}
+
+/* Hover */
+.button:hover:not(:disabled) {
+    background-color: var(--azul-marinho);
+}
+
+/* Hover do secundário */
+.button.secondary:hover:not(:disabled) {
+    background-color: var(--azul-marinho);
+    color: var(--dourado-amarelo);
+}
+
+/* Estado desabilitado */
+.button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* =========================================================
+   BLOCO 6 — MODAIS, OVERLAY E SPINNER
+   Estados globais do sistema (loading, histórico, alertas)
+   ========================================================= */
+
+/* Base comum de modal / overlay */
+.modal-base {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.6);
+}
+
+/* Conteúdo do modal */
+.modal-content {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 25px;
+
+    width: 90%;
+    max-width: 450px;
+    max-height: 80vh;
+
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+/* Overlay específico de carregamento */
+#loadingOverlay {
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Spinner padrão */
+.spinner {
+    width: 30px;
+    height: 30px;
+    margin: 15px auto;
+
+    border-radius: 50%;
+    border: 4px solid rgba(0,0,0,0.1);
+    border-top-color: var(--azul-claro-hover);
+
+    animation: spin 1s linear infinite;
+}
+
+/* Animações */
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+/* =========================================================
+   BLOCO 7 — FOOTER, TEXTOS AUXILIARES E ACABAMENTO FINAL
+   ========================================================= */
+
+/* Footer institucional */
+footer {
+    margin-top: 30px;
+    padding: 15px 10px;
+
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+
+    border-top: 1px solid #ddd;
+}
+
+/* Texto auxiliar (observações, notas, avisos) */
+.texto-auxiliar {
+    font-size: 13px;
+    color: #555;
+    margin-top: 10px;
+}
+
+/* Estado vazio (ex: histórico sem registros) */
+.estado-vazio {
+    text-align: center;
+    padding: 25px 10px;
+
+    font-size: 14px;
+    color: #777;
+    font-style: italic;
+}
+
+/* Pequenos ajustes gerais */
+.hidden {
+    display: none !important;
+}
+
+/* Responsividade final */
+@media (max-width: 480px) {
+    h1 {
+        font-size: 20px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    button {
+        font-size: 14px;
+    }
+}
+
+
+
     </style>
 </head>
+
 <body>
 
     <div id="loadingOverlay" class="modal-base" style="flex-direction: column; background: rgba(255,255,255,0.9);">
