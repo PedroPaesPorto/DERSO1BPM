@@ -754,7 +754,7 @@ async function submitForm(e) {
 
   // Checa duplicidade via GET
   try {
-    const historicoResp = await fetch(`${GAS_URL}?action=historico&matricula=${matricula}`);
+    const historicoResp = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
     const historicoJSON = await historicoResp.json();
     console.log("[SUBMIT] Histórico retornado:", historicoJSON);
 
@@ -768,7 +768,7 @@ async function submitForm(e) {
     console.log("[SUBMIT] Nenhuma duplicidade. Enviando solicitação...");
 
     // POST da solicitação
-    const resp = await fetch(GAS_URL, {
+    const resp = await fetch(SCRIPT_URL, {
       method: "POST",
       body: new URLSearchParams({ matricula, nome, email, data, folga })
     });
