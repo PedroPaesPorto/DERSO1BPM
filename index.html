@@ -1,219 +1,974 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solicitação de Folga - DERSO</title>
-<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-:root {
-    --azul-marinho: #0C3667;
-    --dourado-amarelo: #FFD700;
-    --erro: #b00020;
-    --sucesso: #388e3c;
-    --cinza-fundo: #f4f7f9;
-}
-body {
-    background: var(--cinza-fundo);
-    font-family: 'Roboto', Arial, sans-serif;
-    color:#333;
-    display:flex;
-    justify-content:center;
-    padding:20px;
-}
-.container {
-    background:#fff;
-    border-radius:8px;
-    padding:25px;
-    width:100%;
-    max-width:500px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.1);
-    position:relative;
-}
-#progressBarContainer{ position:absolute; top:0; left:0; width:100%; height:4px; background:#e0e0e0; border-radius:8px 8px 0 0; overflow:hidden;}
-#progressBar{ width:0%; height:100%; background:var(--dourado-amarelo); transition:0.4s;}
+    <!-- =====================================================
+         METADADOS BÁSICOS DO DOCUMENTO
+         ===================================================== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-.institutional-highlight{
-    text-align:center;
-    font-size:14px;
-    color:var(--azul-marinho);
-    margin-bottom:15px;
-    font-style:italic;
-}
-.info-message{ text-align:center; font-weight:600; margin-bottom:15px; }
+    <title>Solicitação de Folga - DERSO</title>
 
-input, select{
-    width:100%;
-    padding:10px;
-    margin-bottom:12px;
-    border:1px solid #aaa;
-    border-radius:5px;
-}
-input.is-invalid{ border-color:var(--erro); }
-input.is-valid{ border-color:var(--sucesso); }
+    <!-- =====================================================
+         FONTES INSTITUCIONAIS
+         Merriweather: títulos
+         Roboto: corpo do texto
+         ===================================================== -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
-button{
-    width:100%;
-    padding:12px;
-    font-weight:bold;
-    color:#fff;
-    background:var(--azul-marinho);
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
-button:disabled{ background:#888; cursor:not-allowed; }
+    <!-- =====================================================
+         ESTILOS GERAIS DO SISTEMA
+         Organização por camadas:
+         1. Variáveis
+         2. Estrutura global
+         3. Componentes
+         4. Estados
+         ===================================================== -->
+    <style>
 
-.modal{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;}
-.modal-content{ background:#fff; padding:20px; border-radius:8px; max-width:400px; text-align:center;}
+        /* =====================================================
+           VARIÁVEIS DE TEMA INSTITUCIONAL
+           Centralizam identidade visual
+           ===================================================== */
+        :root {
+            --azul-marinho: #0C3667;
+            --dourado-amarelo: #FFD700;
+            --azul-claro-hover: #1a5ca7;
+
+            --erro: #b00020;
+            --sucesso: #388e3c;
+
+            --cinza-fundo: #f4f7f9;
+            --cinza-texto: #333333;
+            --borda-campo: #aaa;
+        }
+
+        /* =====================================================
+           RESET FUNCIONAL E BODY
+           ===================================================== */
+        body {
+            background-color: var(--cinza-fundo);
+            font-family: 'Roboto', Arial, sans-serif;
+            color: var(--cinza-texto);
+
+            margin: 0;
+            padding: 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            min-height: 100vh;
+        }
+
+        /* Bloqueia rolagem quando modal estiver aberto */
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        /* =====================================================
+           CONTAINER PRINCIPAL
+           ===================================================== */
+        .container {
+            width: 95%;
+            max-width: 500px;
+
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid #ccc;
+
+            box-sizing: border-box;
+
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* =====================================================
+           BARRA DE PROGRESSO SUPERIOR
+           ===================================================== */
+        #progressBarContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 4px;
+
+            background-color: #e0e0e0;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        #progressBar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--dourado-amarelo);
+            transition: width 0.4s ease;
+        }
+
+        /* =====================================================
+           LOGOTIPOS E TÍTULOS
+           ===================================================== */
+        .logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logos img {
+            height: 70px;
+            object-fit: contain;
+        }
+
+        h2 {
+            font-family: 'Merriweather', serif;
+            text-align: center;
+            color: var(--azul-marinho);
+
+            font-size: 28px;
+            font-weight: 700;
+
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--dourado-amarelo);
+            padding-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+       /* =====================================================
+   MENSAGENS INSTITUCIONAIS
+   Frases temáticas, comemorativas e informativas
+   ===================================================== */
+.institutional-highlight {
+    text-align: center;
+    font-size: 14px;
+    color: var(--azul-marinho);
+
+    font-weight: 500;
+    font-style: italic;
+
+    margin-bottom: 20px;
+    padding: 12px;
+
+    background-color: #fcfcfc;
+    border: 1px solid #eee;
+}
+
+/* =====================================================
+   MENSAGENS DE STATUS DO SISTEMA
+   Sucesso | Erro | Carregamento
+   ===================================================== */
+.info-message {
+    display: none;
+
+    text-align: center;
+    font-weight: 600;
+
+    padding: 15px;
+    margin-bottom: 20px;
+
+    border-radius: 4px;
+    border-left: 5px solid;
+
+    transition: all 0.3s ease;
+}
+
+/* ----- Estado: Sucesso ----- */
+.info-message.success {
+    background-color: #e8f5e9;
+    color: var(--sucesso);
+    border-left-color: var(--sucesso);
+}
+
+/* ----- Estado: Erro ----- */
+.info-message.error {
+    background-color: #fce4ec;
+    color: var(--erro);
+    border-left-color: var(--erro);
+}
+
+/* ----- Estado: Carregando / Inicial ----- */
+.info-message.loading {
+    display: block;
+    background-color: #eee;
+    color: #666;
+    border-left-color: #ccc;
+}
+
+/* =====================================================
+   ESTADO DE SUCESSO FINAL (ENVIO CONCLUÍDO)
+   ===================================================== */
+#successState {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+.check-icon {
+    font-size: 50px;
+    color: var(--sucesso);
+    margin-bottom: 15px;
+}
+
+        /* =========================================================
+   BLOCO 3 — FORMULÁRIO, CAMPOS E VALIDAÇÃO
+   Define aparência, espaçamento e estados dos inputs
+   ========================================================= */
+
+/* Estrutura base dos grupos */
+.form-group,
+fieldset {
+    margin-bottom: 20px;
+    width: 100%;
+    border: none;
+    padding: 0;
+}
+
+/* Labels e legendas */
+label,
+legend {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+/* Inputs e selects (exceto radio) */
+.form-group input:not([type="radio"]),
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--borda-campo);
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+/* Campo somente leitura (nome) */
+.form-group input[readonly] {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+/* Estado válido */
+.is-valid {
+    border-color: var(--sucesso) !important;
+    box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.1);
+}
+
+/* Estado inválido */
+.is-invalid {
+    border-color: var(--erro) !important;
+    box-shadow: 0 0 0 2px rgba(176, 0, 32, 0.1);
+}
+
+/* Mensagem de erro pequena (ex: matrícula inválida) */
+#matriculaError {
+    color: var(--erro);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+        /* =========================================================
+   BLOCO 4 — BOTÕES DE RÁDIO (TIPO DE FOLGA)
+   Radios estilizados como botões institucionais
+   ========================================================= */
+
+/* Container dos botões */
+.radio-group-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Esconde o radio nativo */
+.radio-group-buttons input {
+    display: none;
+}
+
+/* Aparência dos "botões" */
+.radio-group-buttons label {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+/* Hover sutil */
+.radio-group-buttons label:hover {
+    background-color: #f4f4f4;
+}
+
+/* Estado selecionado */
+.radio-group-buttons input:checked + label {
+    background-color: var(--azul-marinho);
+    color: var(--dourado-amarelo);
+    border-color: var(--azul-marinho);
+}
+
+        /* =========================================================
+   BLOCO 5 — BOTÕES GERAIS E ESTADOS
+   Botão principal, secundário e desabilitado
+   ========================================================= */
+
+/* Botão padrão */
+.button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+
+    background-color: var(--azul-claro-hover);
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+
+    transition: background-color 0.25s ease, transform 0.1s ease;
+}
+
+/* Feedback visual ao clicar */
+.button:active {
+    transform: scale(0.98);
+}
+
+/* Botão secundário (ex: histórico) */
+.button.secondary {
+    background-color: #ffffff;
+    color: var(--azul-marinho);
+    border: 1px solid var(--azul-marinho);
+}
+
+/* Hover */
+.button:hover:not(:disabled) {
+    background-color: var(--azul-marinho);
+}
+
+/* Hover do secundário */
+.button.secondary:hover:not(:disabled) {
+    background-color: var(--azul-marinho);
+    color: var(--dourado-amarelo);
+}
+
+/* Estado desabilitado */
+.button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    transform: none;
+}
+
+        /* =========================================================
+   BLOCO 6 — MODAIS, OVERLAY E SPINNER
+   Estados globais do sistema (loading, histórico, alertas)
+   ========================================================= */
+
+/* Base comum de modal / overlay */
+.modal-base {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.6);
+}
+
+/* Conteúdo do modal */
+.modal-content {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 25px;
+
+    width: 90%;
+    max-width: 450px;
+    max-height: 80vh;
+
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+/* Overlay específico de carregamento */
+#loadingOverlay {
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Spinner padrão */
+.spinner {
+    width: 30px;
+    height: 30px;
+    margin: 15px auto;
+
+    border-radius: 50%;
+    border: 4px solid rgba(0,0,0,0.1);
+    border-top-color: var(--azul-claro-hover);
+
+    animation: spin 1s linear infinite;
+}
+
+/* Animações */
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+        /* =========================================================
+   BLOCO 7 — FOOTER, TEXTOS AUXILIARES E ACABAMENTO FINAL
+   ========================================================= */
+
+/* Footer institucional */
+footer {
+    margin-top: 30px;
+    padding: 15px 10px;
+
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+
+    border-top: 1px solid #ddd;
+}
+
+/* Texto auxiliar (observações, notas, avisos) */
+.texto-auxiliar {
+    font-size: 13px;
+    color: #555;
+    margin-top: 10px;
+}
+
+/* Estado vazio (ex: histórico sem registros) */
+.estado-vazio {
+    text-align: center;
+    padding: 25px 10px;
+
+    font-size: 14px;
+    color: #777;
+    font-style: italic;
+}
+
+/* Pequenos ajustes gerais */
+.hidden {
+    display: none !important;
+}
+
+/* Responsividade final */
+@media (max-width: 480px) {
+    h1 {
+        font-size: 20px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    button {
+        font-size: 14px;
+    }
+}
+        
 </style>
 </head>
+
 <body>
+    <!-- Overlay de carregamento enquanto o formulário está sendo enviado -->
+    <div id="loadingOverlay" class="modal-base" style="flex-direction: column; background: rgba(255,255,255,0.9);">
+        <p style="color: var(--azul-marinho); font-weight: bold;">Enviando sua solicitação...</p>
+        <div class="spinner"></div>
+    </div>
 
-<div class="container">
+    <!-- Modal de histórico de solicitações do usuário -->
+    <div id="historyModal" class="modal-base">
+        <div class="modal-content">
+            <h3 style="color:var(--azul-marinho); margin-top:0;">Histórico Recente</h3>
+            <div id="historyBox"></div>
+            <button type="button" class="button" id="closeHistory">Fechar</button>
+        </div>
+    </div>
+
+    <div class="container">
+    <!-- Barra de progresso indicando preenchimento do formulário -->
     <div id="progressBarContainer"><div id="progressBar"></div></div>
+    
+    <!-- Logos institucionais -->
+    <div class="logos">
+        <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
+        <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1º BPM">
+    </div>
 
+    <!-- Título principal e subtítulo -->
     <h2>DERSO 1º BPM</h2>
+    <p class="subtitle">Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO</p>
 
-    <!-- Seção de temas institucionais -->
+    <!-- Mensagem institucional dinâmica (datas comemorativas ou alertas) -->
     <div id="instMessage" class="institutional-highlight"></div>
 
-    <!-- Mensagem do cronômetro -->
-    <div id="prazoMessage" class="info-message"></div>
+    <!-- Mensagem de prazo do formulário (aberto, fechado, urgência) -->
+    <div id="prazoMessage" class="info-message loading">⌛ Verificando prazos do sistema...</div>
 
-    <!-- Formulário -->
-    <form id="dersoForm">
-        <input type="email" id="email" name="email" placeholder="E-mail" required>
-        <input type="text" id="matricula" name="matricula" placeholder="Matrícula" required>
-        <input type="text" id="nome" name="nome" placeholder="Nome" readonly required>
-
-        <select name="folga" id="folga" required>
-            <option value="">Selecione tipo de folga</option>
-            <option value="Extra">Extra</option>
-            <option value="Compensação">Compensação</option>
-        </select>
-
-        <input type="date" id="data" name="data" required>
-
-        <button type="submit" id="btnSubmit">Enviar Solicitação</button>
-        <button type="button" id="btnHistory">Minhas Solicitações</button>
-    </form>
-</div>
-
-<!-- Modal de histórico -->
-<div id="historyModal" class="modal">
-    <div class="modal-content">
-        <h3>Histórico</h3>
-        <div id="historyBox"></div>
-        <button onclick="document.getElementById('historyModal').style.display='none'">Fechar</button>
+    <!-- Estado de sucesso após envio -->
+    <div id="successState">
+        <div class="check-icon">✓</div>
+        <h3 style="color: var(--sucesso)">ENVIADO COM SUCESSO!</h3>
+        <p>Sua solicitação foi registrada no sistema.</p>
+        <button class="button" onclick="location.reload()">Fazer outra solicitação</button>
     </div>
-</div>
 
+    <!-- Carregamento inicial do sistema antes do formulário aparecer -->
+    <div id="initialLoading">
+        <p style="text-align:center">Carregando sistema...</p>
+        <div class="spinner"></div>
+    </div>
+
+        <form id="dersoForm" style="display: none;">
+    <!-- E-mail -->
+    <div class="form-group">
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" list="emailProviders" required>
+        <datalist id="emailProviders"></datalist>
+    </div>
+
+    <!-- Matrícula -->
+    <div class="form-group">
+        <label for="matricula">Matrícula:</label>
+        <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345">
+        <div id="matriculaError" style="color:var(--erro); font-size:12px; margin-top:4px;"></div>
+    </div>
+
+    <!-- Nome preenchido automaticamente -->
+    <div class="form-group">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" readonly required style="background:#f0f0f0">
+    </div>
+
+    <!-- Tipo de folga -->
+    <fieldset>
+        <legend>Tipo de Folga:</legend>
+        <div class="radio-group-buttons">
+            <input type="radio" id="folga24H" name="folga" value="24H" required><label for="folga24H">24H</label>
+            <input type="radio" id="folga48H" name="folga" value="48H"><label for="folga48H">48H</label>
+            <input type="radio" id="folga72H" name="folga" value="72H"><label for="folga72H">72H</label>
+            <input type="radio" id="folga96H" name="folga" value="96H"><label for="folga96H">96H</label>
+            <input type="radio" id="folgaLE" name="folga" value="FOLGA LE"><label for="folgaLE">FOLGA LE</label>
+            <input type="radio" id="folga1" name="folga" value="1ª Folga"><label for="folga1">1ª FOLGA</label>
+            <input type="radio" id="folga2" name="folga" value="2ª Folga"><label for="folga2">2ª FOLGA</label>
+            <input type="radio" id="folgaExp" name="folga" value="Expediente"><label for="folgaExp">EXPEDIENTE</label>
+        </div>
+    </fieldset>
+
+    <!-- Data da folga -->
+    <div class="form-group">
+        <label for="data">Data da Folga:</label>
+        <input type="date" id="data" name="data" required>
+        <div id="dateLimitMessage" style="font-size: 11px; color: #666; margin-top: 5px;"></div>
+    </div>
+
+    <!-- Botões: Histórico e Enviar -->
+    <button type="button" class="button secondary" id="btnHistory">Minhas Solicitações</button>
+    <button type="submit" class="button" id="btnSubmit">Enviar Solicitação</button>
+</form>
+
+<!-- Mensagem de status do formulário -->
+<div id="statusMessage" class="info-message"></div>
+
+<!-- Rodapé institucional -->
+<div class="footer" id="footerText"></div>
+
+        <!-- BLOCO 10: SCRIPTS PRINCIPAIS -->
 <script>
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbyWAQ0esrOdpHEAHdcHwf6JszhlOIhBvdBQyuEnyeGx23hBjK4lisDfTijVRcvjUOnLvw/exec";
+    // URL do Google Apps Script que processa solicitações
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyWAQ0esrOdpHEAHdcHwf6JszhlOIhBvdBQyuEnyeGx23hBjK4lisDfTijVRcvjUOnLvw/exec";
+    
+    // Lista de provedores de email para sugestão automática
+    const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br", "yahoo.com"];
+    
+    // Objeto global para armazenar funcionários carregados da planilha
+    window.employeeList = {};
 
-const matInput=document.getElementById("matricula");
-const nomeInput=document.getElementById("nome");
-const formDiv=document.getElementById("dersoForm");
-const prazoMessageDiv=document.getElementById("prazoMessage");
+    // Referências a elementos do DOM
+    const matInput = document.getElementById("matricula");
+    const nomeInput = document.getElementById("nome");
+    const matError = document.getElementById("matriculaError");
+    const formDiv = document.getElementById("dersoForm");
+    const prazoMessageDiv = document.getElementById("prazoMessage");
 
-// --- Temas institucionais ---
-function applyInstitutionalTheme(){
-    const hoje=new Date(), m=hoje.getMonth()+1, d=hoje.getDate();
-    const inst=document.getElementById("instMessage");
-    const temas={
-        "1-4":"🌳 Rondônia: história e compromisso.",
-        "5-1":"🛠️ Dia do Trabalhador: serviço público em ação.",
-        "9-7":"🇧🇷 7 de Setembro: independência e segurança.",
-        "11-15":"📜 15 de Novembro: fortalecendo a República.",
-        "11-20":"✊ Consciência Negra: união e respeito.",
-        "12-7":"🛡️ 1º BPM: tradição e compromisso."
-    };
-    inst.textContent = temas[`${m}-${d}`] || "Bem-vindo ao sistema DERSO";
-}
-
-// --- Barra de progresso ---
-function updateProgressBar(){
-    const fields=document.querySelectorAll('#dersoForm [required]');
-    let filled=0;
-    fields.forEach(f=>{
-        if(f.value.trim()!=="") filled++;
-    });
-    document.getElementById("progressBar").style.width=((filled/fields.length)*100)+"%";
-}
-
-// --- Cronômetro ---
-function atualizarCronometro(abertura, fechamento){
-    const agora=new Date();
-    let msg="", classe="";
-
-    if(agora<abertura){
-        msg=`⏳ Formulário abre em: ${Math.ceil((abertura-agora)/1000/60)} minutos`;
-        classe="error"; formDiv.style.display="none";
-    } else if(agora>fechamento){
-        msg="⛔ Formulário encerrado"; classe="error"; formDiv.style.display="none";
-    } else {
-        msg="🚨 Formulário aberto"; classe="success"; formDiv.style.display="block";
+    /** Função para exibir mensagens persistentes de status ou erro */
+    function showPersistentMessage(msg, type="success") {
+        prazoMessageDiv.className = `info-message ${type}`;
+        prazoMessageDiv.innerHTML = msg;
+        prazoMessageDiv.style.display = "block";
     }
-    prazoMessageDiv.className="info-message "+classe;
-    prazoMessageDiv.innerHTML=msg;
-}
 
-// --- Submissão do formulário ---
-formDiv.addEventListener("submit",async e=>{
-    e.preventDefault();
-    const btn=document.getElementById("btnSubmit");
-    btn.disabled=true;
-    try{
-        const params=new URLSearchParams(new FormData(formDiv));
-        await fetch(SCRIPT_URL,{method:"POST",body:params});
-        alert("✅ Solicitação enviada com sucesso!");
-        document.getElementById("data").value=""; // limpa apenas o dia
-    }catch(err){
-        alert("❌ Erro de conexão");
-    }finally{
-        btn.disabled=false;
-        updateProgressBar();
+    /** Padroniza matrícula: remove caracteres não numéricos e garante início com '1000' */
+    function standardizeMatricula(m) {
+        let num = m.replace(/\D/g,'').slice(0,9);
+        if (!num) return "";
+        return num.startsWith("1000") ? num : "1000" + num;
     }
-});
 
-// --- Histórico ---
-document.getElementById("btnHistory").addEventListener("click",async ()=>{
-    if(!matInput.value) return alert("Insira uma matrícula válida.");
-    const modal=document.getElementById("historyModal");
-    modal.style.display="flex";
-    document.getElementById("historyBox").innerHTML="Carregando...";
-    try{
-        const r=await fetch(`${SCRIPT_URL}?action=historico&matricula=${matInput.value}`);
-        const d=await r.json();
-        let h="";
-        if(!d.historico || d.historico.length===0) h="Nenhum registro.";
-        else d.historico.forEach(i=>{ h+=`${i.dataSolicitada} - ${i.tipoDeFolga} (${i.status||'PENDENTE'})<br>`; });
-        document.getElementById("historyBox").innerHTML=h;
-    }catch{ document.getElementById("historyBox").innerHTML="Erro ao carregar"; }
-});
+    /** Valida matrícula ao sair do campo */
+    function checkMatricula() {
+        const val = matInput.value.trim();
+        if (!val) {
+            nomeInput.value = "";
+            matInput.classList.remove("is-valid", "is-invalid");
+            return;
+        }
+        const std = standardizeMatricula(val);
+        matInput.value = std;
+        if (window.employeeList[std]) {
+            nomeInput.value = window.employeeList[std];
+            matInput.classList.add("is-valid");
+            matInput.classList.remove("is-invalid");
+            matError.textContent = "";
+        } else {
+            nomeInput.value = "";
+            matInput.classList.add("is-invalid");
+            matInput.classList.remove("is-valid");
+            matError.textContent = "Matrícula não cadastrada.";
+        }
+    }
 
-// --- Inicialização ---
-document.addEventListener("DOMContentLoaded",()=>{
-    applyInstitutionalTheme();
-    updateProgressBar();
+    /** Inicializa formulário: datas, prazos, lista de funcionários */
+    function initializeForm() {
+        // Promessas para buscar datas de abertura/fechamento e lista de funcionários
+        const datasPromise = fetch(`${SCRIPT_URL}?action=datas`).then(r => r.json());
+        const listaPromise = fetch(`${SCRIPT_URL}?action=lista`).then(r => r.json());
 
-    matInput.addEventListener("input",()=>{
-        if(matInput.value.trim()!=="") matInput.classList.add("is-valid"); else matInput.classList.remove("is-valid");
+        datasPromise.then(data => {
+            // Função que atualiza cronômetro do prazo
+            const atualizarCronometro = () => {
+                const agora = new Date();
+                const abertura = new Date(data.abertura);
+                const fechamento = new Date(data.fechamento);
+
+                // Antes da abertura
+                if (agora < abertura) {
+                    const diffA = abertura - agora;
+                    const d = Math.floor(diffA / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((diffA % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const m = Math.floor((diffA % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((diffA % (1000 * 60)) / 1000);
+                    showPersistentMessage(`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em: ${d}d ${h}h ${m}m ${s}s`, "error");
+                    formDiv.style.display = "none";
+                    return false;
+                } 
+                // Após fechamento
+                else if (agora > fechamento) {
+                    showPersistentMessage(`⛔ <b>FORMULÁRIO ENCERRADO</b><br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")}`, "error");
+                    formDiv.style.display = "none";
+                    return false;
+                } 
+                // Durante período aberto
+                else {
+                    const diffF = fechamento - agora;
+                    const d = Math.floor(diffF / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((diffF % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const m = Math.floor((diffF % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((diffF % (1000 * 60)) / 1000);
+                    const tempoTexto = `${d}d ${h}h ${m}m ${s}s`;
+
+                    if (diffF < (2 * 60 * 60 * 1000)) {
+                        showPersistentMessage(`⚠️ <b style="animation:blinker 1s infinite">URGENTE! FECHA EM:</b><br><span style="color:#ff0000; font-size:1.2em;">${tempoTexto}</span>`, "error");
+                    } else {
+                        showPersistentMessage(`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`, "success");
+                    }
+                    return true;
+                }
+            };
+
+            // Atualiza cronômetro imediatamente
+            const estaAberto = atualizarCronometro();
+
+            // Intervalo de 1 segundo para manter contador atualizado
+            setInterval(() => {
+                const statusAtual = atualizarCronometro();
+                if (statusAtual && formDiv.style.display === "none") {
+                    location.reload();
+                }
+            }, 1000);
+
+            // Se aberto, carregamos lista de funcionários e exibimos o formulário
+            if (estaAberto) {
+                listaPromise.then(listaData => {
+                    window.employeeList = listaData;
+                    document.getElementById("initialLoading").style.display = "none";
+                    formDiv.style.display = "block";
+                });
+            } else {
+                document.getElementById("initialLoading").style.display = "none";
+            }
+        });
+
+        // Configuração do limite de datas para o input
+        const hoje = new Date();
+        const min = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+        const max = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
+        document.getElementById("data").min = min.toISOString().split("T")[0];
+        document.getElementById("data").max = max.toISOString().split("T")[0];
+        document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
+        document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
+    }
+
+    <!-- BLOCO 11: ENVIO, HISTÓRICO E PROGRESSO -->
+
+            /** Função para enviar o formulário de solicitação */
+    async function submitForm(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById("btnSubmit");
+        const dataInput = document.getElementById("data").value;
+        const matricula = matInput.value;
+        const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+        const nomeMesSolicitado = nomesMeses[(new Date().getMonth() + 1) % 12];
+
+        // Verifica se todos os campos obrigatórios foram preenchidos
+        if (!matricula || !dataInput || !document.querySelector('input[name="folga"]:checked')) {
+            alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "VERIFICANDO...";
+
+        try {
+            // Busca histórico de solicitações do usuário para evitar duplicidade
+            const rCheck = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
+            const dCheck = await rCheck.json();
+
+            const [ano, mes, dia] = dataInput.split("-");
+            const dataFormatada = `${dia}/${mes}/${ano}`;
+
+            if (dCheck.historico && dCheck.historico.some(item => item.Data === dataFormatada)) {
+                alert(`⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para o dia ${dataFormatada}.`);
+                btn.disabled = false;
+                btn.textContent = "Enviar Solicitação";
+                return;
+            }
+
+            // Mostra overlay de carregamento e envia dados ao GAS
+            btn.textContent = "ENVIANDO...";
+            document.getElementById("loadingOverlay").style.display = "flex";
+            const params = new URLSearchParams(new FormData(formDiv));
+            await fetch(SCRIPT_URL, { method: "POST", body: params, mode: 'no-cors' });
+
+            alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
+            formDiv.reset();
+            location.reload();
+        } catch (err) {
+            alert("❌ Erro de conexão. Tente novamente.");
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Enviar Solicitação";
+            document.getElementById("loadingOverlay").style.display = "none";
+        }
+    }
+
+    /** Aplica mensagens institucionais de acordo com datas especiais ou mensais */
+    function applyInstitutionalTheme() {
+        const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
+        const instDiv = document.getElementById("instMessage");
+        const aplicar = (msg) => instDiv.innerHTML = msg;
+
+        const temas = {
+            "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história, bravura e compromisso.`),
+            "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
+            "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
+            "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear() - 1889} anos de Proclamação.`),
+            "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
+            "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição e compromisso.`)
+        };
+
+        const chave = `${mes+1}-${dia}`;
+        if (temas[chave]) {
+            temas[chave]();
+        } else {
+            const mensais = {
+                0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos e festas."),
+                1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
+                2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda com dedicação."),
+                3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
+                4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão de cuidar e proteger."),
+                5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade social."),
+                6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
+                7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional de segurança."),
+                8: () => aplicar("🇧🇷 Setembro: Mês da Pátria. Renovando nosso juramento de servir e proteger o Brasil."),
+                9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
+                10: () => aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade que formam nossa nação. ${hoje.getFullYear() - 1889}º ano da República.`),
+                11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. Boas Festas! ✨")
+            };
+            if (mensais[mes]) mensais[mes]();
+        }
+    }
+
+    /** Evento DOMContentLoaded: inicializa formulário, temas, histórico e validação de campos */
+    document.addEventListener("DOMContentLoaded", () => {
+        initializeForm();                  // Carrega datas, lista e configura limites
+        applyInstitutionalTheme();         // Aplica mensagens institucionais
+
+        matInput.addEventListener("blur", checkMatricula);  // Valida matrícula ao sair do campo
+        formDiv.addEventListener("submit", submitForm);    // Submissão do formulário
+
+        // Sugestão automática de emails
+        document.getElementById("email").addEventListener("input", (e) => {
+            const val = e.target.value;
+            const dl = document.getElementById("emailProviders");
+            if (val.includes("@")) {
+                const [user, domain] = val.split("@");
+                dl.innerHTML = "";
+                emailProviders.forEach(p => {
+                    if (p.startsWith(domain)) dl.appendChild(new Option(user + "@" + p));
+                });
+            }
+        });
+
+        /** Atualiza a barra de progresso baseada em campos preenchidos */
+        const updateProgress = () => {
+            const fields = document.querySelectorAll('#dersoForm [required]');
+            let filled = 0;
+            fields.forEach(f => {
+                if (f.type === 'radio') {
+                    if (document.querySelector('input[name="folga"]:checked')) filled++;
+                } else if (f.value.trim() !== '' && !f.classList.contains('is-invalid')) {
+                    filled++;
+                }
+            });
+            const percent = (filled / 4) * 100;  // Considera 4 campos essenciais
+            document.getElementById("progressBar").style.width = percent + "%";
+        };
+
+        document.querySelectorAll('#dersoForm input').forEach(i => {
+            i.addEventListener('input', updateProgress);
+            i.addEventListener('blur', updateProgress);
+        });
+
+        /** BOTÃO DE HISTÓRICO: exibe modal com histórico de solicitações */
+        document.getElementById("btnHistory").onclick = async () => {
+            if (!matInput.value || matInput.classList.contains("is-invalid")) return alert("Insira uma matrícula válida.");
+            const modal = document.getElementById("historyModal");
+            modal.style.display = "flex";
+            document.getElementById("historyBox").innerHTML = "<div class='spinner'></div> Buscando...";
+
+            try {
+                const r = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matInput.value}`);
+                const d = await r.json();
+                
+                let h = `<div style="font-weight:bold; border-bottom:2px solid var(--dourado-amarelo);">${d.nome || 'Solicitante'}</div>`;
+                
+                if (!d.historico || d.historico.length === 0) h += "Nenhum registro.";
+                else d.historico.forEach(i => {
+                    const statusTexto = (i.status && i.status !== "PENDENTE") ? ` (${i.status})` : "";
+                    h += `<div style="border-bottom:1px solid #eee; padding:8px 0;">
+                            ${i.dataSolicitada} - ${i.tipoDeFolga}${statusTexto}
+                          </div>`;
+                });
+
+                document.getElementById("historyBox").innerHTML = h;
+            } catch (err) {
+                document.getElementById("historyBox").innerHTML = "Erro ao carregar.";
+            }
+        };
+
+        /** Fechar modal de histórico */
+        document.getElementById("closeHistory").onclick = () => {
+            document.getElementById("historyModal").style.display="none";
+        };
     });
 
-    // Carregar datas do GAS para cronômetro
-    fetch(`${SCRIPT_URL}?action=datas`).then(r=>r.json()).then(data=>{
-        const abertura=new Date(data.abertura);
-        const fechamento=new Date(data.fechamento);
-        setInterval(()=>atualizarCronometro(abertura,fechamento),1000);
+    <!-- BLOCO 12: FUNÇÕES FINAIS, UTILITÁRIOS E FECHAMENTO -->
+
+       /**************************************************************
+     * FUNÇÕES AUXILIARES E UTILITÁRIOS
+     **************************************************************/
+
+    /** Formata datas no padrão dd/MM/yyyy a partir de Date ou string */
+    function formatDateBR(input) {
+        if (!input) return "";
+        if (input instanceof Date) {
+            const dia = input.getDate().toString().padStart(2, '0');
+            const mes = (input.getMonth() + 1).toString().padStart(2, '0');
+            const ano = input.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        }
+        // Caso seja string yyyy-mm-dd
+        const parts = input.split("-");
+        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        return input;
+    }
+
+    /** Normaliza matrícula removendo caracteres não numéricos e adicionando prefixo 1000 se necessário */
+    function normalizeMatricula(m) {
+        if (!m) return "";
+        let num = m.replace(/\D/g,'').slice(0,9);
+        return num.startsWith("1000") ? num : "1000" + num;
+    }
+
+    /** Abre um modal e insere conteúdo HTML */
+    function showModal(modalId, contentHtml) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        const box = modal.querySelector("#historyBox");
+        if (box) box.innerHTML = contentHtml;
+        modal.style.display = "flex";
+    }
+
+    /** Fecha um modal */
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        modal.style.display = "none";
+    }
+
+    /** Atualiza barra de progresso (reaproveita lógica do bloco anterior) */
+    function updateProgressBar() {
+        const fields = document.querySelectorAll('#dersoForm [required]');
+        let filled = 0;
+        fields.forEach(f => {
+            if (f.type === 'radio') {
+                if (document.querySelector('input[name="folga"]:checked')) filled++;
+            } else if (f.value.trim() !== '' && !f.classList.contains('is-invalid')) {
+                filled++;
+            }
+        });
+        const percent = (filled / 4) * 100;
+        document.getElementById("progressBar").style.width = percent + "%";
+    }
+
+    /** Pequenas otimizações: atualiza progresso automaticamente em blur/input */
+    document.querySelectorAll('#dersoForm input, #dersoForm select').forEach(i => {
+        i.addEventListener('input', updateProgressBar);
+        i.addEventListener('blur', updateProgressBar);
     });
 
-    // Atualizar barra de progresso ao digitar
-    document.querySelectorAll('#dersoForm input, #dersoForm select').forEach(i=>{
-        i.addEventListener('input',updateProgressBar);
+    /** Inicialização final: quando tudo está carregado */
+    window.addEventListener('load', () => {
+        updateProgressBar(); // Garante que progresso inicial seja correto
     });
-});
+
 </script>
+
 </body>
 </html>
