@@ -6,7 +6,7 @@
 <title>Solicitação de Folga - DERSO</title>
 <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ==================== VARIÁVEIS DE CORES ==================== */
+/* === VARIÁVEIS GLOBAIS === */
 :root {
     --azul-marinho: #0C3667;
     --dourado-amarelo: #FFD700;
@@ -18,7 +18,6 @@
     --borda-campo: #aaa;
 }
 
-/* ==================== ESTILO GERAL DO BODY ==================== */
 body {
     background-color: var(--cinza-fundo);
     font-family: 'Roboto', Arial, sans-serif;
@@ -32,24 +31,27 @@ body {
 }
 body.modal-open { overflow: hidden; }
 
-/* ==================== CONTAINER PRINCIPAL ==================== */
 .container {
     width: 95%;
     max-width: 500px;
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 8px;
     padding: 30px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     border: 1px solid #ccc;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     position: relative;
 }
 
-/* ==================== BARRA DE PROGRESSO ==================== */
+/* === BARRA DE PROGRESSO === */
 #progressBarContainer {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 4px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
     background-color: #e0e0e0;
     border-radius: 8px 8px 0 0;
     overflow: hidden;
@@ -61,20 +63,9 @@ body.modal-open { overflow: hidden; }
     transition: width 0.4s ease;
 }
 
-/* ==================== LOGOS ==================== */
-.logos {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-.logos img {
-    height: 70px;
-    object-fit: contain;
-}
-
-/* ==================== TÍTULOS ==================== */
+/* === LOGOS E TÍTULOS === */
+.logos { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; }
+.logos img { height: 70px; object-fit: contain; }
 h2 {
     font-family: 'Merriweather', serif;
     text-align: center;
@@ -85,13 +76,9 @@ h2 {
     border-bottom: 2px solid var(--dourado-amarelo);
     padding-bottom: 5px;
 }
-.subtitle {
-    text-align: center;
-    font-size: 16px;
-    margin-bottom: 25px;
-}
+.subtitle { text-align: center; font-size: 16px; margin-bottom: 25px; }
 
-/* ==================== MENSAGENS ==================== */
+/* === MENSAGENS E ALERTAS === */
 .institutional-highlight {
     text-align: center;
     font-size: 14px;
@@ -117,20 +104,16 @@ h2 {
 .info-message.error { background-color: #fce4ec; color: var(--erro); border-left-color: var(--erro); }
 .info-message.loading { background-color: #eee; color: #666; border-left-color: #ccc; display: block; }
 
-/* ==================== FORMULÁRIO ==================== */
+/* === FORMULÁRIO === */
 .form-group, fieldset { margin-bottom: 20px; width: 100%; border: none; padding: 0; }
 label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
 .form-group input:not([type="radio"]), .form-group select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--borda-campo);
-    border-radius: 4px;
-    box-sizing: border-box;
+    width: 100%; padding: 12px; border: 1px solid var(--borda-campo); border-radius: 4px; box-sizing: border-box;
 }
-.is-valid { border-color: var(--sucesso) !important; box-shadow: 0 0 0 2px rgba(56,142,60,0.1); }
-.is-invalid { border-color: var(--erro) !important; box-shadow: 0 0 0 2px rgba(176,0,32,0.1); }
+.is-valid { border-color: var(--sucesso) !important; box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.1); }
+.is-invalid { border-color: var(--erro) !important; box-shadow: 0 0 0 2px rgba(176, 0, 32, 0.1); }
 
-/* ==================== BOTÕES DE RÁDIO ==================== */
+/* BOTÕES DE RADIO */
 .radio-group-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
 .radio-group-buttons input { display: none; }
 .radio-group-buttons label {
@@ -147,7 +130,7 @@ label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
     border-color: var(--azul-marinho);
 }
 
-/* ==================== BOTÕES ==================== */
+/* BOTÕES GERAIS */
 .button {
     background-color: var(--azul-claro-hover);
     color: #fff;
@@ -168,51 +151,24 @@ label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
     border: 1px solid var(--azul-marinho);
 }
 
-/* ==================== ESTADOS ==================== */
-#successState { display: none; text-align: center; padding: 20px; }
-.check-icon { font-size: 50px; color: var(--sucesso); margin-bottom: 15px; }
-
-/* ==================== MODAIS ==================== */
-.modal-base {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-}
-.modal-content {
-    background: #fff;
-    padding: 25px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 450px;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-.spinner {
-    border: 4px solid rgba(0,0,0,0.1);
-    border-top-color: var(--azul-claro-hover);
-    border-radius: 50%;
-    width: 30px; height: 30px;
-    animation: spin 1s linear infinite;
-    margin: 10px auto;
-}
+/* MODAIS */
+.modal-base { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 2000; }
+.modal-content { background: #fff; padding: 25px; border-radius: 8px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
+.spinner { border: 4px solid rgba(0,0,0,0.1); border-top-color: var(--azul-claro-hover); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 @keyframes blinker { 50% { opacity: 0; } }
 .footer { text-align: center; margin-top: 25px; font-size: 11px; color: #777; }
+
 </style>
 </head>
 <body>
-
-<!-- ==================== MODAL DE LOADING ==================== -->
+<!-- LOADING OVERLAY -->
 <div id="loadingOverlay" class="modal-base" style="flex-direction: column; background: rgba(255,255,255,0.9);">
     <p style="color: var(--azul-marinho); font-weight: bold;">Enviando sua solicitação...</p>
     <div class="spinner"></div>
 </div>
 
-<!-- ==================== MODAL DE HISTÓRICO ==================== -->
+<!-- MODAL HISTÓRICO -->
 <div id="historyModal" class="modal-base">
     <div class="modal-content">
         <h3 style="color:var(--azul-marinho); margin-top:0;">Histórico Recente</h3>
@@ -221,23 +177,16 @@ label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
     </div>
 </div>
 
-<!-- ==================== CONTAINER PRINCIPAL ==================== -->
 <div class="container">
-
-    <!-- BARRA DE PROGRESSO -->
     <div id="progressBarContainer"><div id="progressBar"></div></div>
-
-    <!-- LOGOS -->
     <div class="logos">
         <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
         <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1º BPM">
     </div>
-
-    <!-- TÍTULO -->
     <h2>DERSO 1º BPM</h2>
     <p class="subtitle">Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO</p>
 
-    <!-- MENSAGEM INSTITUCIONAL -->
+    <!-- DIV TEMAS INSTITUCIONAIS -->
     <div id="instMessage" class="institutional-highlight"></div>
 
     <!-- MENSAGEM DE PRAZO -->
@@ -251,13 +200,12 @@ label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
         <button class="button" onclick="location.reload()">Fazer outra solicitação</button>
     </div>
 
-    <!-- LOADING INICIAL -->
+    <!-- FORMULÁRIO -->
     <div id="initialLoading">
         <p style="text-align:center">Carregando sistema...</p>
         <div class="spinner"></div>
     </div>
 
-    <!-- FORMULÁRIO PRINCIPAL -->
     <form id="dersoForm" style="display: none;">
         <div class="form-group">
             <label for="email">E-mail:</label>
@@ -273,8 +221,6 @@ label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
             <label for="nome">Nome:</label>
             <input type="text" id="nome" name="nome" readonly required style="background:#f0f0f0">
         </div>
-
-        <!-- TIPOS DE FOLGA -->
         <fieldset>
             <legend>Tipo de Folga:</legend>
             <div class="radio-group-buttons">
@@ -288,14 +234,11 @@ label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
                 <input type="radio" id="folgaExp" name="folga" value="Expediente"><label for="folgaExp">EXPEDIENTE</label>
             </div>
         </fieldset>
-
         <div class="form-group">
             <label for="data">Data da Folga:</label>
             <input type="date" id="data" name="data" required>
             <div id="dateLimitMessage" style="font-size: 11px; color: #666; margin-top: 5px;"></div>
         </div>
-
-        <!-- BOTÕES -->
         <button type="button" class="button secondary" id="btnHistory">Minhas Solicitações</button>
         <button type="submit" class="button" id="btnSubmit">Enviar Solicitação</button>
     </form>
@@ -304,9 +247,8 @@ label, legend { display: block; margin-bottom: 8px; font-weight: 500; }
     <div class="footer" id="footerText"></div>
 </div>
 
-<!-- ==================== SCRIPTS ==================== -->
 <script>
-/* ==================== CONFIGURAÇÕES INICIAIS ==================== */
+// === CONFIGURAÇÕES ===
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyWAQ0esrOdpHEAHdcHwf6JszhlOIhBvdBQyuEnyeGx23hBjK4lisDfTijVRcvjUOnLvw/exec";
 const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br","yahoo.com"];
 window.employeeList = {};
@@ -317,135 +259,181 @@ const matError = document.getElementById("matriculaError");
 const formDiv = document.getElementById("dersoForm");
 const prazoMessageDiv = document.getElementById("prazoMessage");
 
-/* ==================== TEMAS INSTITUCIONAIS ==================== */
-function applyInstitutionalTheme() {
-    const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
-    const instDiv = document.getElementById("instMessage");
-    const aplicar = (msg) => instDiv.innerHTML = msg;
-
-    const temas = {
-        "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear()-1982} anos de história, bravura e compromisso.`),
-        "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
-        "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
-        "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear()-1889} anos de Proclamação.`),
-        "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
-        "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear()-1983} anos de tradição e compromisso.`)
-    };
-    const chave = `${mes+1}-${dia}`;
-    if(temas[chave]) temas[chave]();
+// === FUNÇÕES DE VALIDAÇÃO ===
+function standardizeMatricula(m){
+    let num = m.replace(/\D/g,'').slice(0,9);
+    if(!num) return "";
+    return num.startsWith("1000") ? num : "1000"+num;
 }
-
-/* ==================== PADRONIZAÇÃO E CHECAGEM DE MATRÍCULA ==================== */
-function standardizeMatricula(m) { let num = m.replace(/\D/g,'').slice(0,9); return num ? (num.startsWith("1000") ? num : "1000"+num) : ""; }
-function checkMatricula() {
+function checkMatricula(){
     const val = matInput.value.trim();
-    if(!val){ nomeInput.value=""; matInput.classList.remove("is-valid","is-invalid"); return; }
-    const std = standardizeMatricula(val); matInput.value=std;
+    if(!val){ nomeInput.value=""; matInput.classList.remove("is-valid","is-invalid"); return;}
+    const std = standardizeMatricula(val);
+    matInput.value = std;
     if(window.employeeList[std]){ nomeInput.value=window.employeeList[std]; matInput.classList.add("is-valid"); matInput.classList.remove("is-invalid"); matError.textContent=""; }
     else { nomeInput.value=""; matInput.classList.add("is-invalid"); matInput.classList.remove("is-valid"); matError.textContent="Matrícula não cadastrada."; }
 }
 
-/* ==================== BARRA DE PROGRESSO ==================== */
-function updateProgressBar() {
-    const fields=document.querySelectorAll('#dersoForm [required]');
-    let filled=0;
-    fields.forEach(f=>{
-        if(f.type==='radio'){ if(document.querySelector('input[name="folga"]:checked')) filled++; }
-        else if(f.value.trim()!=='' && !f.classList.contains('is-invalid')) filled++;
-    });
-    document.getElementById("progressBar").style.width = (filled/4*100) + "%";
-}
-
-/* ==================== INICIALIZAÇÃO DO FORMULÁRIO ==================== */
-function initializeForm() {
-    applyInstitutionalTheme();
+// === INICIALIZAÇÃO DO FORMULÁRIO ===
+function initializeForm(){
     const datasPromise = fetch(`${SCRIPT_URL}?action=datas`).then(r=>r.json());
     const listaPromise = fetch(`${SCRIPT_URL}?action=lista`).then(r=>r.json());
 
     datasPromise.then(data=>{
         const atualizarCronometro = ()=>{
-            const agora=new Date(), abertura=new Date(data.abertura), fechamento=new Date(data.fechamento);
+            const agora = new Date();
+            const abertura = new Date(data.abertura);
+            const fechamento = new Date(data.fechamento);
+
             if(agora<abertura){
-                const diffA=abertura-agora;
-                const d=Math.floor(diffA/(1000*60*60*24)), h=Math.floor((diffA%(1000*60*60*24))/(1000*60*60)), m=Math.floor((diffA%(1000*60*60))/(1000*60)), s=Math.floor((diffA%(1000*60))/1000);
-                prazoMessageDiv.className="info-message error"; prazoMessageDiv.innerHTML=`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em: ${d}d ${h}h ${m}m ${s}s`; formDiv.style.display="none"; return false;
+                const diffA = abertura - agora;
+                const d=Math.floor(diffA/(1000*60*60*24));
+                const h=Math.floor((diffA%(1000*60*60*24))/(1000*60*60));
+                const m=Math.floor((diffA%(1000*60*60))/(1000*60));
+                const s=Math.floor((diffA%(1000*60))/1000);
+                showPersistentMessage(`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em: ${d}d ${h}h ${m}m ${s}s`,"error");
+                formDiv.style.display="none";
+                return false;
             } else if(agora>fechamento){
-                prazoMessageDiv.className="info-message error"; prazoMessageDiv.innerHTML=`⛔ <b>FORMULÁRIO ENCERRADO</b><br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")}`; formDiv.style.display="none"; return false;
+                showPersistentMessage(`⛔ <b>FORMULÁRIO ENCERRADO</b><br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")}`,"error");
+                formDiv.style.display="none";
+                return false;
             } else {
-                const diffF=fechamento-agora;
-                const d=Math.floor(diffF/(1000*60*60*24)), h=Math.floor((diffF%(1000*60*60*24))/(1000*60*60)), m=Math.floor((diffF%(1000*60*60))/(1000*60)), s=Math.floor((diffF%(1000*60))/1000);
-                const tempoTexto=`${d}d ${h}h ${m}m ${s}s`;
-                if(diffF<2*60*60*1000){ prazoMessageDiv.className="info-message error"; prazoMessageDiv.innerHTML=`⚠️ <b style="animation:blinker 1s infinite">URGENTE! FECHA EM:</b><br><span style="color:#ff0000; font-size:1.2em;">${tempoTexto}</span>`; }
-                else { prazoMessageDiv.className="info-message success"; prazoMessageDiv.innerHTML=`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`; }
+                const diffF = fechamento - agora;
+                const d=Math.floor(diffF/(1000*60*60*24));
+                const h=Math.floor((diffF%(1000*60*60*24))/(1000*60*60));
+                const m=Math.floor((diffF%(1000*60*60))/(1000*60));
+                const s=Math.floor((diffF%(1000*60))/1000);
+                const tempoTexto = `${d}d ${h}h ${m}m ${s}s`;
+                if(diffF<(2*60*60*1000)){
+                    showPersistentMessage(`⚠️ <b style="animation:blinker 1s infinite">URGENTE! FECHA EM:</b><br><span style="color:#ff0000; font-size:1.2em;">${tempoTexto}</span>`,"error");
+                } else {
+                    showPersistentMessage(`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`,"success");
+                }
                 return true;
             }
         };
-        const estaAberto=atualizarCronometro();
-        const intervalo=setInterval(()=>{
-            const statusAtual=atualizarCronometro();
-            if(statusAtual && formDiv.style.display==="none") location.reload();
-        },1000);
+        const estaAberto = atualizarCronometro();
+        const intervalo = setInterval(()=>{ atualizarCronometro(); },1000);
+
         if(estaAberto){
             listaPromise.then(listaData=>{
-                window.employeeList=listaData;
+                window.employeeList = listaData;
                 document.getElementById("initialLoading").style.display="none";
                 formDiv.style.display="block";
             });
         } else { document.getElementById("initialLoading").style.display="none"; }
     });
 
-    /* Configurações de data */
-    const hoje=new Date();
-    const min=new Date(hoje.getFullYear(), hoje.getMonth()+1,1);
-    const max=new Date(hoje.getFullYear(), hoje.getMonth()+2,0);
-    const dataInput = document.getElementById("data");
-    dataInput.min=min.toISOString().split("T")[0];
-    dataInput.max=max.toISOString().split("T")[0];
-    document.getElementById("dateLimitMessage").textContent=`Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
-    document.getElementById("footerText").textContent=`Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth()+1).toString().padStart(2,'0')}/${hoje.getFullYear()}`;
+    // CONFIGURAÇÕES DE DATA
+    const hoje = new Date();
+    const min = new Date(hoje.getFullYear(), hoje.getMonth()+1,1);
+    const max = new Date(hoje.getFullYear(), hoje.getMonth()+2,0);
+    document.getElementById("data").min = min.toISOString().split("T")[0];
+    document.getElementById("data").max = max.toISOString().split("T")[0];
+    document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
+    document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth()+1).toString().padStart(2,'0')}/${hoje.getFullYear()}`;
 }
 
-/* ==================== ENVIO DO FORMULÁRIO ==================== */
+// === FUNÇÃO DE POP-UP DE CONFIRMAÇÃO ===
 async function submitForm(e){
     e.preventDefault();
-    const btn=document.getElementById("btnSubmit");
-    const dataInput=document.getElementById("data").value;
-    const matricula=matInput.value;
-    const nomeMesSolicitado = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"][(new Date().getMonth()+1)%12];
-    if(!matricula || !dataInput || !document.querySelector('input[name="folga"]:checked')) { alert("⚠️ Preencha todos os campos."); return; }
+    const btn = document.getElementById("btnSubmit");
+    const dataInput = document.getElementById("data").value;
+    const matricula = matInput.value;
+    if(!matricula || !dataInput || !document.querySelector('input[name="folga"]:checked')){
+        alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
+        return;
+    }
     btn.disabled=true; btn.textContent="VERIFICANDO...";
-    try{
-        const rCheck=await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
-        const dCheck=await rCheck.json();
-        const [ano,mes,dia]=dataInput.split("-");
-        const dataFormatada=`${dia}/${mes}/${ano}`;
-        if(dCheck.historico && dCheck.historico.some(item=>item.Data===dataFormatada)){ alert(`⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para o dia ${dataFormatada}.`); btn.disabled=false; btn.textContent="Enviar Solicitação"; return; }
-        btn.textContent="ENVIANDO...";
+    try {
         document.getElementById("loadingOverlay").style.display="flex";
-        const params=new URLSearchParams(new FormData(formDiv));
-        await fetch(SCRIPT_URL,{method:"POST",body:params,mode:'no-cors'});
-        alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
-        formDiv.reset(); location.reload();
-    } catch(err){ alert("❌ Erro de conexão. Tente novamente."); }
-    finally{ btn.disabled=false; btn.textContent="Enviar Solicitação"; document.getElementById("loadingOverlay").style.display="none"; }
+        const params = new URLSearchParams(new FormData(formDiv));
+        await fetch(SCRIPT_URL, { method:"POST", body: params, mode:'no-cors' });
+        alert("✅ Sucesso! Sua solicitação foi registrada.");
+        formDiv.reset();
+        location.reload();
+    } catch(err){
+        alert("❌ Erro de conexão. Tente novamente.");
+    } finally {
+        btn.disabled=false; btn.textContent="Enviar Solicitação";
+        document.getElementById("loadingOverlay").style.display="none";
+    }
 }
 
-/* ==================== EVENTOS ==================== */
+// === TEMAS INSTITUCIONAIS ===
+function applyInstitutionalTheme(){
+    const hoje=new Date(), mes=hoje.getMonth(), dia=hoje.getDate();
+    const instDiv = document.getElementById("instMessage");
+    const aplicar = msg=>instDiv.innerHTML=msg;
+
+    const temas={
+        "1-4":()=>{ const anos=hoje.getFullYear()-1982; aplicar(`🌳 Rondônia: ${anos} anos de história, bravura e compromisso.`); },
+        "5-1":()=>aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
+        "9-7":()=>aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
+        "11-15":()=>{ const anos=hoje.getFullYear()-1889; aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${anos} anos de Proclamação.`); },
+        "11-20":()=>aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
+        "12-7":()=>{ const anos=hoje.getFullYear()-1983; aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${anos} anos de tradição e compromisso.`); }
+    };
+    const chave=`${mes+1}-${dia}`;
+    if(temas[chave]) temas[chave]();
+    else {
+        const mensais={
+            0:()=>aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos e festas."),
+            1:()=>aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
+            2:()=>aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda com dedicação."),
+            3:()=>aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
+            4:()=>aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão de cuidar e proteger."),
+            5:()=>aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade social."),
+            6:()=>aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
+            7:()=>aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional de segurança."),
+            8:()=>aplicar("🇧🇷 Setembro: Mês da Pátria. Renovando nosso juramento de servir e proteger o Brasil."),
+            9:()=>aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
+            10:()=>{ const anos=hoje.getFullYear()-1889; aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade que formam nossa nação. ${anos}º ano da República.`); },
+            11:()=>aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. Boas Festas! ✨")
+        };
+        if(mensais[mes]) mensais[mes]();
+    }
+}
+
+// === DOM READY ===
 document.addEventListener("DOMContentLoaded",()=>{
     initializeForm();
-    matInput.addEventListener("blur",checkMatricula);
-    formDiv.addEventListener("submit",submitForm);
-    document.getElementById("email").addEventListener("input", (e)=>{
-        const val=e.target.value; const dl=document.getElementById("emailProviders");
+    applyInstitutionalTheme();
+    matInput.addEventListener("blur", checkMatricula);
+    formDiv.addEventListener("submit", submitForm);
+
+    document.getElementById("email").addEventListener("input",(e)=>{
+        const val=e.target.value;
+        const dl=document.getElementById("emailProviders");
         if(val.includes("@")){
-            const [user,domain]=val.split("@"); dl.innerHTML="";
+            const [user, domain]=val.split("@");
+            dl.innerHTML="";
             emailProviders.forEach(p=>{ if(p.startsWith(domain)) dl.appendChild(new Option(user+"@"+p)); });
         }
     });
-    document.querySelectorAll('#dersoForm input').forEach(i=>{ i.addEventListener('input',updateProgressBar); i.addEventListener('blur',updateProgressBar); });
-    document.getElementById("btnHistory").onclick=async()=>{
+
+    // === BARRA DE PROGRESSO DINÂMICA ===
+    const updateProgress = ()=>{
+        const fields=document.querySelectorAll('#dersoForm [required]');
+        let filled=0;
+        fields.forEach(f=>{
+            if(f.type==='radio'){ if(document.querySelector('input[name="folga"]:checked')) filled++; }
+            else if(f.value.trim()!=='' && !f.classList.contains('is-invalid')) filled++;
+        });
+        const percent = (filled / 4) * 100;
+        document.getElementById("progressBar").style.width = percent+"%";
+    };
+    document.querySelectorAll('#dersoForm input').forEach(i=>{
+        i.addEventListener('input', updateProgress);
+        i.addEventListener('blur', updateProgress);
+    });
+
+    // === MODAL HISTÓRICO ===
+    document.getElementById("btnHistory").onclick=async ()=>{
         if(!matInput.value || matInput.classList.contains("is-invalid")) return alert("Insira uma matrícula válida.");
-        const modal=document.getElementById("historyModal"); modal.style.display="flex";
+        const modal=document.getElementById("historyModal");
+        modal.style.display="flex";
         document.getElementById("historyBox").innerHTML="<div class='spinner'></div> Buscando...";
         try{
             const r=await fetch(`${SCRIPT_URL}?action=historico&matricula=${matInput.value}`);
@@ -453,7 +441,7 @@ document.addEventListener("DOMContentLoaded",()=>{
             let h=`<div style="font-weight:bold; border-bottom:2px solid var(--dourado-amarelo);">${d.nome||'Solicitante'}</div>`;
             if(!d.historico || d.historico.length===0) h+="Nenhum registro.";
             else d.historico.forEach(i=>{
-                const statusTexto=(i.status && i.status!=="PENDENTE")?(` (${i.status})`):"";
+                const statusTexto=(i.status && i.status!=="PENDENTE")?` (${i.status})`:"";
                 h+=`<div style="border-bottom:1px solid #eee; padding:8px 0;">${i.dataSolicitada} - ${i.tipoDeFolga}${statusTexto}</div>`;
             });
             document.getElementById("historyBox").innerHTML=h;
