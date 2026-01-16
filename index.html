@@ -748,26 +748,26 @@ async function submitForm(e) {
   const nome = document.getElementById("nome").value.trim();
   const email = document.getElementById("email").value.trim();
   const data = document.getElementById("data").value;
-  const folga = document.getElementById("folga").value;
+  const folga = document.querySelector('input[name="folga"]:checked')?.value || "";
 
   console.log(`[SUBMIT] Verificando duplicidade para matrícula ${matricula} e data ${data}...`);
 
   // Checa duplicidade via GET
-  const historicoResp = await fetch(`${GAS_URL}?action=historico&matricula=${matricula}`);
-  const historicoJSON = await historicoResp.json();
-  console.log("[SUBMIT] Histórico retornado:", historicoJSON);
-
-  const duplicado = historicoJSON.historico.some(item => item.Data === data);
-  if (duplicado) {
-    console.warn("[SUBMIT] Solicitação DUPLICADA detectada!");
-    alert("Você já solicitou DERSO para esta data. Verifique seu histórico.");
-    return;
-  }
-
-  console.log("[SUBMIT] Nenhuma duplicidade. Enviando solicitação...");
-
-  // POST da solicitação
   try {
+    const historicoResp = await fetch(`${GAS_URL}?action=historico&matricula=${matricula}`);
+    const historicoJSON = await historicoResp.json();
+    console.log("[SUBMIT] Histórico retornado:", historicoJSON);
+
+    const duplicado = historicoJSON.historico?.some(item => item.dataSolicitada === data);
+    if (duplicado) {
+      console.warn("[SUBMIT] Solicitação DUPLICADA detectada!");
+      alert("⚠️ Você já solicitou DERSO para esta data. Verifique seu histórico.");
+      return;
+    }
+
+    console.log("[SUBMIT] Nenhuma duplicidade. Enviando solicitação...");
+
+    // POST da solicitação
     const resp = await fetch(GAS_URL, {
       method: "POST",
       body: new URLSearchParams({ matricula, nome, email, data, folga })
@@ -778,7 +778,7 @@ async function submitForm(e) {
 
     if (result.success) {
       alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
-      document.getElementById("data").value = ""; // limpa apenas o dia
+      document.getElementById("data").value = ""; // limpa apenas a data
     } else if (result.error) {
       alert(`⚠️ ERRO: ${result.error}`);
     }
