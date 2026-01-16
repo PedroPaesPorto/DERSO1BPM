@@ -742,67 +742,71 @@ legend {
 
             /** Função para enviar o formulário de solicitação */
     async function submitForm(e) {
-    e.preventDefault();
+    e.preventDefault(); // Evita que a página recarregue
 
     const btn = document.getElementById("btnSubmit");
     const dataInput = document.getElementById("data").value;
     const matricula = matInput.value;
-    const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-    const nomeMesSolicitado = nomesMeses[(new Date().getMonth() + 1) % 12];
+    const folgaSelecionada = document.querySelector('input[name="folga"]:checked')?.value;
 
-    // --- VERIFICAÇÃO DE CAMPOS OBRIGATÓRIOS ---
-    if (!matricula || !dataInput || !document.querySelector('input[name="folga"]:checked')) {
+    // --- VALIDANDO CAMPOS OBRIGATÓRIOS ---
+    if (!matricula || !dataInput || !folgaSelecionada) {
+        console.log("[SUBMIT] Campos obrigatórios incompletos.");
         alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
         return;
     }
 
     btn.disabled = true;
-    btn.textContent = "VERIFICANDO...";
+    btn.textContent = "VERIFICANDO DUPLICIDADE...";
+    console.log(`[SUBMIT] Verificando duplicidade para matrícula ${matricula} e data ${dataInput}...`);
 
     try {
-        // --- VERIFICAÇÃO DE DUPLICIDADE ---
+        // --- BUSCA HISTÓRICO DO FUNCIONÁRIO ---
         const rCheck = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
         const dCheck = await rCheck.json();
+        console.log("[SUBMIT] Histórico retornado:", dCheck);
+
+        // --- FORMATA DATA DO INPUT PARA COMPARAÇÃO ---
         const [ano, mes, dia] = dataInput.split("-");
         const dataFormatada = `${dia}/${mes}/${ano}`;
 
-        if (dCheck.historico && dCheck.historico.some(item => item.Data === dataFormatada)) {
-            // SOLICITAÇÃO DUPLICADA
+        // --- CHECANDO DUPLICIDADE ---
+        const duplicada = dCheck.historico?.some(item => item.Data === dataFormatada);
+        if (duplicada) {
+            console.warn(`[SUBMIT] Solicitação duplicada detectada para ${dataFormatada}`);
             alert(`⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para o dia ${dataFormatada}.`);
             btn.disabled = false;
             btn.textContent = "Enviar Solicitação";
-            return; // Interrompe envio
+            return;
         }
 
-        // --- ENVIO ---
+        // --- ENVIANDO DADOS AO GAS ---
+        console.log("[SUBMIT] Nenhuma duplicidade. Enviando solicitação...");
         btn.textContent = "ENVIANDO...";
         document.getElementById("loadingOverlay").style.display = "flex";
 
         const params = new URLSearchParams(new FormData(formDiv));
-        await fetch(SCRIPT_URL, { method: "POST", body: params, mode: 'no-cors' });
+        await fetch(SCRIPT_URL, { method: "POST", body: params });
 
         // --- SUCESSO ---
-        alert(`✅ SUCESSO!\nSua solicitação foi registrada para o mês de ${nomeMesSolicitado}.`);
+        console.log(`[SUBMIT] Solicitação enviada com sucesso para ${dataFormatada}`);
+        alert(`✅ SUCESSO!\nSua solicitação foi registrada para o dia ${dataFormatada}.`);
 
-        // --- LIMPAR FORMULÁRIO SEM RECARREGAR ---
-        const emailValor = document.getElementById("email").value;
-        const matriculaValor = matInput.value;
-        const nomeValor = nomeInput.value;
-
-        formDiv.reset(); // limpa todos os campos
-        document.getElementById("email").value = emailValor; // mantém email
-        matInput.value = matriculaValor; // mantém matrícula
-        nomeInput.value = nomeValor; // mantém nome
-        updateProgressBar(); // atualiza barra de progresso
+        // --- LIMPA APENAS O CAMPO DE DATA, mantendo E-mail, Matrícula e Nome ---
+        document.getElementById("data").value = "";
+        btn.disabled = false;
+        btn.textContent = "Enviar Solicitação";
+        document.getElementById("loadingOverlay").style.display = "none";
 
     } catch (err) {
-        alert("❌ Erro de conexão. Tente novamente.");
-    } finally {
+        console.error("[SUBMIT] Erro ao enviar solicitação:", err);
+        alert("❌ Erro de conexão ou processamento. Tente novamente.");
         btn.disabled = false;
         btn.textContent = "Enviar Solicitação";
         document.getElementById("loadingOverlay").style.display = "none";
     }
 }
+
 
     /** Aplica mensagens institucionais de acordo com datas especiais ou mensais */
     function applyInstitutionalTheme() {
