@@ -4,24 +4,66 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solicitação de Folga - DERSO</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
     --azul-marinho: #0C3667;
     --dourado-amarelo: #FFD700;
     --erro: #b00020;
     --sucesso: #388e3c;
+    --cinza-fundo: #f4f7f9;
 }
-body { font-family: Arial, sans-serif; background:#f4f7f9; color:#333; display:flex; justify-content:center; padding:20px;}
-.container { background:#fff; border-radius:8px; padding:20px; width:100%; max-width:500px; box-shadow:0 5px 20px rgba(0,0,0,0.1); position:relative;}
+body {
+    background: var(--cinza-fundo);
+    font-family: 'Roboto', Arial, sans-serif;
+    color:#333;
+    display:flex;
+    justify-content:center;
+    padding:20px;
+}
+.container {
+    background:#fff;
+    border-radius:8px;
+    padding:25px;
+    width:100%;
+    max-width:500px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.1);
+    position:relative;
+}
 #progressBarContainer{ position:absolute; top:0; left:0; width:100%; height:4px; background:#e0e0e0; border-radius:8px 8px 0 0; overflow:hidden;}
 #progressBar{ width:0%; height:100%; background:var(--dourado-amarelo); transition:0.4s;}
-.institutional-highlight{ text-align:center; font-size:14px; color:var(--azul-marinho); margin-bottom:15px;}
-.info-message{ text-align:center; font-weight:600; margin-bottom:15px;}
-input, select{ width:100%; padding:10px; margin-bottom:12px; border:1px solid #aaa; border-radius:5px; }
+
+.institutional-highlight{
+    text-align:center;
+    font-size:14px;
+    color:var(--azul-marinho);
+    margin-bottom:15px;
+    font-style:italic;
+}
+.info-message{ text-align:center; font-weight:600; margin-bottom:15px; }
+
+input, select{
+    width:100%;
+    padding:10px;
+    margin-bottom:12px;
+    border:1px solid #aaa;
+    border-radius:5px;
+}
 input.is-invalid{ border-color:var(--erro); }
 input.is-valid{ border-color:var(--sucesso); }
-button{ width:100%; padding:12px; font-weight:bold; color:#fff; background:var(--azul-marinho); border:none; border-radius:5px; cursor:pointer; }
+
+button{
+    width:100%;
+    padding:12px;
+    font-weight:bold;
+    color:#fff;
+    background:var(--azul-marinho);
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
 button:disabled{ background:#888; cursor:not-allowed; }
+
 .modal{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;}
 .modal-content{ background:#fff; padding:20px; border-radius:8px; max-width:400px; text-align:center;}
 </style>
@@ -30,26 +72,35 @@ button:disabled{ background:#888; cursor:not-allowed; }
 
 <div class="container">
     <div id="progressBarContainer"><div id="progressBar"></div></div>
+
     <h2>DERSO 1º BPM</h2>
+
+    <!-- Seção de temas institucionais -->
     <div id="instMessage" class="institutional-highlight"></div>
+
+    <!-- Mensagem do cronômetro -->
     <div id="prazoMessage" class="info-message"></div>
 
+    <!-- Formulário -->
     <form id="dersoForm">
         <input type="email" id="email" name="email" placeholder="E-mail" required>
         <input type="text" id="matricula" name="matricula" placeholder="Matrícula" required>
         <input type="text" id="nome" name="nome" placeholder="Nome" readonly required>
+
         <select name="folga" id="folga" required>
             <option value="">Selecione tipo de folga</option>
             <option value="Extra">Extra</option>
             <option value="Compensação">Compensação</option>
         </select>
+
         <input type="date" id="data" name="data" required>
+
         <button type="submit" id="btnSubmit">Enviar Solicitação</button>
         <button type="button" id="btnHistory">Minhas Solicitações</button>
     </form>
 </div>
 
-<!-- MODAL HISTÓRICO -->
+<!-- Modal de histórico -->
 <div id="historyModal" class="modal">
     <div class="modal-content">
         <h3>Histórico</h3>
@@ -66,7 +117,7 @@ const nomeInput=document.getElementById("nome");
 const formDiv=document.getElementById("dersoForm");
 const prazoMessageDiv=document.getElementById("prazoMessage");
 
-// --- Função para temas institucionais ---
+// --- Temas institucionais ---
 function applyInstitutionalTheme(){
     const hoje=new Date(), m=hoje.getMonth()+1, d=hoje.getDate();
     const inst=document.getElementById("instMessage");
@@ -81,7 +132,7 @@ function applyInstitutionalTheme(){
     inst.textContent = temas[`${m}-${d}`] || "Bem-vindo ao sistema DERSO";
 }
 
-// --- Função de barra de progresso ---
+// --- Barra de progresso ---
 function updateProgressBar(){
     const fields=document.querySelectorAll('#dersoForm [required]');
     let filled=0;
@@ -113,12 +164,11 @@ formDiv.addEventListener("submit",async e=>{
     e.preventDefault();
     const btn=document.getElementById("btnSubmit");
     btn.disabled=true;
-
     try{
         const params=new URLSearchParams(new FormData(formDiv));
         await fetch(SCRIPT_URL,{method:"POST",body:params});
         alert("✅ Solicitação enviada com sucesso!");
-        document.getElementById("data").value=""; // Limpa apenas o dia
+        document.getElementById("data").value=""; // limpa apenas o dia
     }catch(err){
         alert("❌ Erro de conexão");
     }finally{
@@ -148,7 +198,9 @@ document.addEventListener("DOMContentLoaded",()=>{
     applyInstitutionalTheme();
     updateProgressBar();
 
-    matInput.addEventListener("input",()=>{ if(matInput.value.trim()!=="") matInput.classList.add("is-valid"); else matInput.classList.remove("is-valid"); });
+    matInput.addEventListener("input",()=>{
+        if(matInput.value.trim()!=="") matInput.classList.add("is-valid"); else matInput.classList.remove("is-valid");
+    });
 
     // Carregar datas do GAS para cronômetro
     fetch(`${SCRIPT_URL}?action=datas`).then(r=>r.json()).then(data=>{
@@ -156,12 +208,12 @@ document.addEventListener("DOMContentLoaded",()=>{
         const fechamento=new Date(data.fechamento);
         setInterval(()=>atualizarCronometro(abertura,fechamento),1000);
     });
-    // Atualizar barra ao digitar
+
+    // Atualizar barra de progresso ao digitar
     document.querySelectorAll('#dersoForm input, #dersoForm select').forEach(i=>{
         i.addEventListener('input',updateProgressBar);
     });
 });
 </script>
-
 </body>
 </html>
