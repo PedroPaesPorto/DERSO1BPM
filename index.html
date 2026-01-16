@@ -605,7 +605,7 @@ legend {
         <!-- BLOCO 10: SCRIPTS PRINCIPAIS -->
 <script>
     // URL do Google Apps Script que processa solicitações
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPtB7vA70-BcoJxh_KD6UEA1XYQ7bdP3DWJ6DVDMF4kGho11yzWBSyifiZJeZtkds5Jg/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxyIEtO9JwtnSHDZsajqXGSz_ONjIrbN2gdMW6kcPBjYsjByK55AmkAz2Ov8YesV7cKDA/exec";
     
     // Lista de provedores de email para sugestão automática
     const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br", "yahoo.com"];
@@ -741,72 +741,53 @@ legend {
     <!-- BLOCO 11: ENVIO, HISTÓRICO E PROGRESSO -->
 
             /** Função para enviar o formulário de solicitação */
-    async function submitForm(e) {
-    e.preventDefault(); // Evita que a página recarregue
+async function submitForm(e) {
+  e.preventDefault(); // NÃO recarrega a página
 
-    const btn = document.getElementById("btnSubmit");
-    const dataInput = document.getElementById("data").value;
-    const matricula = matInput.value;
-    const folgaSelecionada = document.querySelector('input[name="folga"]:checked')?.value;
+  const matricula = document.getElementById("matricula").value.trim();
+  const nome = document.getElementById("nome").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const data = document.getElementById("data").value;
+  const folga = document.getElementById("folga").value;
 
-    // --- VALIDANDO CAMPOS OBRIGATÓRIOS ---
-    if (!matricula || !dataInput || !folgaSelecionada) {
-        console.log("[SUBMIT] Campos obrigatórios incompletos.");
-        alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
-        return;
+  console.log(`[SUBMIT] Verificando duplicidade para matrícula ${matricula} e data ${data}...`);
+
+  // Checa duplicidade via GET
+  const historicoResp = await fetch(`${GAS_URL}?action=historico&matricula=${matricula}`);
+  const historicoJSON = await historicoResp.json();
+  console.log("[SUBMIT] Histórico retornado:", historicoJSON);
+
+  const duplicado = historicoJSON.historico.some(item => item.Data === data);
+  if (duplicado) {
+    console.warn("[SUBMIT] Solicitação DUPLICADA detectada!");
+    alert("Você já solicitou DERSO para esta data. Verifique seu histórico.");
+    return;
+  }
+
+  console.log("[SUBMIT] Nenhuma duplicidade. Enviando solicitação...");
+
+  // POST da solicitação
+  try {
+    const resp = await fetch(GAS_URL, {
+      method: "POST",
+      body: new URLSearchParams({ matricula, nome, email, data, folga })
+    });
+
+    const result = await resp.json();
+    console.log("[SUBMIT] Resposta do POST:", result);
+
+    if (result.success) {
+      alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
+      document.getElementById("data").value = ""; // limpa apenas o dia
+    } else if (result.error) {
+      alert(`⚠️ ERRO: ${result.error}`);
     }
 
-    btn.disabled = true;
-    btn.textContent = "VERIFICANDO DUPLICIDADE...";
-    console.log(`[SUBMIT] Verificando duplicidade para matrícula ${matricula} e data ${dataInput}...`);
-
-    try {
-        // --- BUSCA HISTÓRICO DO FUNCIONÁRIO ---
-        const rCheck = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
-        const dCheck = await rCheck.json();
-        console.log("[SUBMIT] Histórico retornado:", dCheck);
-
-        // --- FORMATA DATA DO INPUT PARA COMPARAÇÃO ---
-        const [ano, mes, dia] = dataInput.split("-");
-        const dataFormatada = `${dia}/${mes}/${ano}`;
-
-        // --- CHECANDO DUPLICIDADE ---
-        const duplicada = dCheck.historico?.some(item => item.Data === dataFormatada);
-        if (duplicada) {
-            console.warn(`[SUBMIT] Solicitação duplicada detectada para ${dataFormatada}`);
-            alert(`⚠️ SOLICITAÇÃO DUPLICADA!\nVocê já possui um pedido para o dia ${dataFormatada}.`);
-            btn.disabled = false;
-            btn.textContent = "Enviar Solicitação";
-            return;
-        }
-
-        // --- ENVIANDO DADOS AO GAS ---
-        console.log("[SUBMIT] Nenhuma duplicidade. Enviando solicitação...");
-        btn.textContent = "ENVIANDO...";
-        document.getElementById("loadingOverlay").style.display = "flex";
-
-        const params = new URLSearchParams(new FormData(formDiv));
-        await fetch(SCRIPT_URL, { method: "POST", body: params });
-
-        // --- SUCESSO ---
-        console.log(`[SUBMIT] Solicitação enviada com sucesso para ${dataFormatada}`);
-        alert(`✅ SUCESSO!\nSua solicitação foi registrada para o dia ${dataFormatada}.`);
-
-        // --- LIMPA APENAS O CAMPO DE DATA, mantendo E-mail, Matrícula e Nome ---
-        document.getElementById("data").value = "";
-        btn.disabled = false;
-        btn.textContent = "Enviar Solicitação";
-        document.getElementById("loadingOverlay").style.display = "none";
-
-    } catch (err) {
-        console.error("[SUBMIT] Erro ao enviar solicitação:", err);
-        alert("❌ Erro de conexão ou processamento. Tente novamente.");
-        btn.disabled = false;
-        btn.textContent = "Enviar Solicitação";
-        document.getElementById("loadingOverlay").style.display = "none";
-    }
+  } catch (err) {
+    console.error("[SUBMIT] Erro ao enviar solicitação:", err);
+    alert("❌ Falha ao enviar. Veja o console para detalhes.");
+  }
 }
-
 
     /** Aplica mensagens institucionais de acordo com datas especiais ou mensais */
     function applyInstitutionalTheme() {
