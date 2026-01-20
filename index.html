@@ -777,8 +777,11 @@ async function submitForm(e) {
 if (result.success) {
   alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
   document.getElementById("data").value = "";
+} catch (error) {
+    console.error("Erro no envio:", error);
+    alert("❌ Erro ao enviar solicitação.");
+  }
 }
-
 
     /** Aplica mensagens institucionais de acordo com datas especiais ou mensais */
     function applyInstitutionalTheme() {
