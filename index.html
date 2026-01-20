@@ -605,7 +605,7 @@ legend {
         <!-- BLOCO 10: SCRIPTS PRINCIPAIS -->
 <script>
     // URL do Google Apps Script que processa solicitações
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxyIEtO9JwtnSHDZsajqXGSz_ONjIrbN2gdMW6kcPBjYsjByK55AmkAz2Ov8YesV7cKDA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzouQziHwagyBUixq5y56f3znncmzYUwDHnXqqytDDpKfHCSU5cKAg8l7RMKYPoQvN7ww/exec";
     
     // Lista de provedores de email para sugestão automática
     const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br", "yahoo.com"];
@@ -738,7 +738,7 @@ legend {
         document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
     }
 
-    <!-- BLOCO 11: ENVIO, HISTÓRICO E PROGRESSO -->
+   // BLOCO 11: ENVIO, HISTÓRICO E PROGRESSO
 
             /** Função para enviar o formulário de solicitação */
 async function submitForm(e) {
@@ -753,35 +753,32 @@ async function submitForm(e) {
   console.log(`[SUBMIT] Verificando duplicidade para matrícula ${matricula} e data ${data}...`);
 
   // Checa duplicidade via GET
-  try {
-    const historicoResp = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
-    const historicoJSON = await historicoResp.json();
-    console.log("[SUBMIT] Histórico retornado:", historicoJSON);
-
-    const duplicado = historicoJSON.historico?.some(item => item.dataSolicitada === data);
-    if (duplicado) {
-      console.warn("[SUBMIT] Solicitação DUPLICADA detectada!");
-      alert("⚠️ Você já solicitou DERSO para esta data. Verifique seu histórico.");
-      return;
-    }
-
+ 
+    console.log("[SUBMIT] Datas recebidas:", historicoJSON.historico?.map(i => i.dataSolicitada));
     console.log("[SUBMIT] Nenhuma duplicidade. Enviando solicitação...");
 
-    // POST da solicitação
-    const resp = await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: new URLSearchParams({ matricula, nome, email, data, folga })
-    });
+   // Monta parâmetros para envio via GET (evita CORS)
+const params = new URLSearchParams({
+  matricula,
+  nome,
+  email,
+  data,
+  folga
+});
 
-    const result = await resp.json();
-    console.log("[SUBMIT] Resposta do POST:", result);
+const resp = await fetch(`${SCRIPT_URL}?${params.toString()}`);
 
-    if (result.success) {
-      alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
-      document.getElementById("data").value = ""; // limpa apenas a data
-    } else if (result.error) {
-      alert(`⚠️ ERRO: ${result.error}`);
-    }
+
+   if (result.success) {
+  alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
+  document.getElementById("data").value = "";
+} else if (result.error === "DUPLICADO") {
+  alert("⚠️ Solicitação DUPLICADA.\nVocê já pediu DERSO para esta data.");
+  document.getElementById("data").classList.add("is-invalid");
+} else if (result.error) {
+  alert(`❌ ERRO: ${result.error}`);
+}
+
 
   } catch (err) {
     console.error("[SUBMIT] Erro ao enviar solicitação:", err);
@@ -900,7 +897,7 @@ async function submitForm(e) {
         };
     });
 
-    <!-- BLOCO 12: FUNÇÕES FINAIS, UTILITÁRIOS E FECHAMENTO -->
+  // BLOCO 12: FUNÇÕES FINAIS, UTILITÁRIOS E FECHAMENTO
 
        /**************************************************************
      * FUNÇÕES AUXILIARES E UTILITÁRIOS
