@@ -742,43 +742,37 @@ legend {
 
             /** Função para enviar o formulário de solicitação */
 async function submitForm(e) {
-  e.preventDefault(); // NÃO recarrega a página
+  e.preventDefault();
 
-  const matricula = document.getElementById("matricula").value.trim();
-  const nome = document.getElementById("nome").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const data = document.getElementById("data").value;
-  const folga = document.querySelector('input[name="folga"]:checked')?.value || "";
+  try {
+    const matricula = document.getElementById("matricula").value.trim();
+    const nome = document.getElementById("nome").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const data = document.getElementById("data").value;
+    const folga = document.querySelector('input[name="folga"]:checked')?.value || "";
 
-  console.log(`[SUBMIT] Verificando duplicidade para matrícula ${matricula} e data ${data}...`);
+    console.log(`[SUBMIT] Enviando solicitação ${matricula} - ${data}`);
 
-  // Checa duplicidade via GET
- 
-    console.log("[SUBMIT] Datas recebidas:", historicoJSON.historico?.map(i => i.dataSolicitada));
-    console.log("[SUBMIT] Nenhuma duplicidade. Enviando solicitação...");
+    const params = new URLSearchParams({
+      matricula,
+      nome,
+      email,
+      data,
+      folga
+    });
 
-   // Monta parâmetros para envio via GET (evita CORS)
-const params = new URLSearchParams({
-  matricula,
-  nome,
-  email,
-  data,
-  folga
-});
+    const resp = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+    const result = await resp.json();
 
-const resp = await fetch(`${SCRIPT_URL}?${params.toString()}`);
-
-
-   if (result.success) {
-  alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
-  document.getElementById("data").value = "";
-} else if (result.error === "DUPLICADO") {
-  alert("⚠️ Solicitação DUPLICADA.\nVocê já pediu DERSO para esta data.");
-  document.getElementById("data").classList.add("is-invalid");
-} else if (result.error) {
-  alert(`❌ ERRO: ${result.error}`);
-}
-
+    if (result.success) {
+      alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
+      document.getElementById("data").value = "";
+    } else if (result.error === "DUPLICADO") {
+      alert("⚠️ Solicitação DUPLICADA.\nVocê já pediu DERSO para esta data.");
+      document.getElementById("data").classList.add("is-invalid");
+    } else {
+      alert(`❌ ERRO: ${result.error || "Erro desconhecido"}`);
+    }
 
   } catch (err) {
     console.error("[SUBMIT] Erro ao enviar solicitação:", err);
