@@ -573,7 +573,7 @@ legend {
     <fieldset>
         <legend>Tipo de Folga:</legend>
         <div class="radio-group-buttons">
-            <input type="radio" id="folga24H" name="folga" value="24H" required><label for="folga24H">24H</label>
+            <input type="radio" id="folga24H" name="folga" value="24H"><label for="folga24H">24H</label>
             <input type="radio" id="folga48H" name="folga" value="48H"><label for="folga48H">48H</label>
             <input type="radio" id="folga72H" name="folga" value="72H"><label for="folga72H">72H</label>
             <input type="radio" id="folga96H" name="folga" value="96H"><label for="folga96H">96H</label>
@@ -749,7 +749,14 @@ async function submitForm(e) {
     const nome = document.getElementById("nome").value.trim();
     const email = document.getElementById("email").value.trim();
     const data = document.getElementById("data").value;
-    const folga = document.querySelector('input[name="folga"]:checked')?.value || "";
+
+    // ✅ VALIDAÇÃO CORRETA DO RADIO "folga"
+    const folgaInput = document.querySelector('input[name="folga"]:checked');
+    if (!folgaInput) {
+      alert("⚠️ Selecione o tipo de folga.");
+      return;
+    }
+    const folga = folgaInput.value;
 
     console.log(`[SUBMIT] Enviando solicitação ${matricula} - ${data}`);
 
@@ -777,6 +784,7 @@ async function submitForm(e) {
     if (result.success) {
       alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
       document.getElementById("data").value = "";
+      document.querySelectorAll('input[name="folga"]').forEach(r => r.checked = false);
     }
 
   } catch (error) {
@@ -784,7 +792,6 @@ async function submitForm(e) {
     alert("❌ Erro ao enviar solicitação.");
   }
 }
-
 
 
     /** Aplica mensagens institucionais de acordo com datas especiais ou mensais */
