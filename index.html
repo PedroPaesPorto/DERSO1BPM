@@ -764,21 +764,21 @@ async function submitForm(e) {
     const resp = await fetch(`${SCRIPT_URL}?${params.toString()}`);
     const result = await resp.json();
 
-    if (result.success) {
-      alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
-      document.getElementById("data").value = "";
-    } else if (result.error === "DUPLICADO") {
-      alert("⚠️ Solicitação DUPLICADA.\nVocê já pediu DERSO para esta data.");
-      document.getElementById("data").classList.add("is-invalid");
-    } else {
-      alert(`❌ ERRO: ${result.error || "Erro desconhecido"}`);
-    }
-
-  } catch (err) {
-    console.error("[SUBMIT] Erro ao enviar solicitação:", err);
-    alert("❌ Falha ao enviar. Veja o console para detalhes.");
+   if (result.error) {
+  if (result.error.toUpperCase().includes("DERSO")) {
+    alert("⚠️ Solicitação DUPLICADA.\nVocê já pediu DERSO para esta data.");
+    document.getElementById("data").classList.add("is-invalid");
+  } else {
+    alert(`❌ ERRO: ${result.error}`);
   }
+  return;
 }
+
+if (result.success) {
+  alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
+  document.getElementById("data").value = "";
+}
+
 
     /** Aplica mensagens institucionais de acordo com datas especiais ou mensais */
     function applyInstitutionalTheme() {
