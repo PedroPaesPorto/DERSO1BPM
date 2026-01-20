@@ -605,7 +605,7 @@ legend {
         <!-- BLOCO 10: SCRIPTS PRINCIPAIS -->
 <script>
     // URL do Google Apps Script que processa solicitações
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzGB14KknX8Nn7kOHGobqBrC3WLLPUdZ3fmq1TFRXWz-G-DueM8Y422D5XHwvBcEwyy-Q/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycmXa6Jn6t1RF8L1jQFkLlcvtg7p63oVD4VN37waqWuwgs9KynLVCa_aIA_qfL6v_vog/exec";
     
     // Lista de provedores de email para sugestão automática
     const emailProviders = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br", "yahoo.com"];
@@ -764,24 +764,28 @@ async function submitForm(e) {
     const resp = await fetch(`${SCRIPT_URL}?${params.toString()}`);
     const result = await resp.json();
 
-   if (result.error) {
-  if (result.error.toUpperCase().includes("DERSO")) {
-    alert("⚠️ Solicitação DUPLICADA.\nVocê já pediu DERSO para esta data.");
-    document.getElementById("data").classList.add("is-invalid");
-  } else {
-    alert(`❌ ERRO: ${result.error}`);
-  }
-  return;
-}
+    if (result.error) {
+      if (String(result.error).toUpperCase().includes("DERSO")) {
+        alert("⚠️ Solicitação DUPLICADA.\nVocê já pediu DERSO para esta data.");
+        document.getElementById("data").classList.add("is-invalid");
+      } else {
+        alert(`❌ ERRO: ${result.error}`);
+      }
+      return;
+    }
 
-if (result.success) {
-  alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
-  document.getElementById("data").value = "";
-} catch (error) {
+    if (result.success) {
+      alert(`✅ SUCESSO!\nSua solicitação foi registrada para ${data}`);
+      document.getElementById("data").value = "";
+    }
+
+  } catch (error) {
     console.error("Erro no envio:", error);
     alert("❌ Erro ao enviar solicitação.");
   }
 }
+
+
 
     /** Aplica mensagens institucionais de acordo com datas especiais ou mensais */
     function applyInstitutionalTheme() {
