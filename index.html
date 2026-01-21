@@ -10,19 +10,17 @@
     <style>
         :root {
             --azul-marinho: #0C3667; 
-            --dourado-amarelo: #FFD700; 
-            --azul-claro-hover: #1a5ca7; 
+            --ouro-velho: #C5A059; /* Tom latão militar */
+            --dourado-brilhante: #FFD700; 
             --erro: #b00020; 
             --sucesso: #388e3c; 
             --cinza-fundo: #f4f7f9; 
-            --cinza-texto: #333333; 
             --borda-campo: #aaa;
         }
 
         body {
             background-color: var(--cinza-fundo);
             font-family: 'Roboto', Arial, sans-serif;
-            color: var(--cinza-texto);
             margin: 0;
             padding: 20px 0;
             display: flex;
@@ -56,22 +54,31 @@
             width: 0%;
             height: 100%;
             background: var(--azul-marinho);
-            transition: width 0.4s ease, background-color 0.4s ease;
+            transition: width 0.4s ease;
+        }
+
+        /* 1 & 2 - CRONÔMETRO E MENSAGEM INSTITUCIONAL */
+        #prazoMessage { 
+            padding: 15px; 
+            border-radius: 6px; 
+            margin-bottom: 10px; 
+            font-weight: bold; 
+            font-size: 16px; 
+            text-align: center;
+            border: 1px solid #c8e6c9;
+            background: #e8f5e9;
+            color: #2e7d32;
         }
 
         #instMessage {
-            background-color: #f0f4f8;
-            border-left: 4px solid var(--azul-marinho);
-            padding: 12px;
+            background-color: #f9f9f9;
+            border-left: 4px solid var(--ouro-velho);
+            padding: 10px;
             margin-bottom: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-style: italic;
             color: var(--azul-marinho);
             text-align: center;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .logos {
@@ -81,8 +88,7 @@
             gap: 15px;
             margin-bottom: 15px;
         }
-
-        .logos img { height: 60px; object-fit: contain; }
+        .logos img { height: 60px; }
 
         h2 {
             font-family: 'Merriweather', serif;
@@ -90,13 +96,13 @@
             color: var(--azul-marinho);
             font-size: 24px;
             margin-bottom: 5px;
-            border-bottom: 2px solid var(--dourado-amarelo);
+            border-bottom: 2px solid var(--ouro-velho);
         }
 
-        .subtitle { text-align: center; font-size: 14px; margin-bottom: 20px; opacity: 0.8; }
+        .subtitle { text-align: center; font-size: 13px; margin-bottom: 20px; color: #666; font-weight: bold; }
 
         .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 5px; font-weight: 500; }
+        label { display: block; margin-bottom: 5px; font-weight: 700; color: var(--azul-marinho); font-size: 14px;}
 
         input:not([type="radio"]), select {
             width: 100%;
@@ -104,67 +110,50 @@
             border: 1px solid var(--borda-campo);
             border-radius: 4px;
             box-sizing: border-box;
-            font-size: 16px;
         }
 
-        input.is-invalid { border-color: var(--erro) !important; background-color: #fff8f8; }
-        input.is-valid { border-color: var(--sucesso) !important; }
-
+        /* 3 - BOTÕES ESTILO MILITAR (AZUL COM LETRA OURO VELHO) */
         .radio-group-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
         .radio-group-buttons input { display: none; }
         .radio-group-buttons label {
-            padding: 10px 14px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
+            font-weight: 800;
             flex: 1 1 calc(33% - 8px);
             text-align: center;
-            transition: 0.2s;
+            background-color: #eee;
+            color: #666;
         }
 
         .radio-group-buttons input:checked + label {
             background-color: var(--azul-marinho);
-            color: white;
+            color: var(--ouro-velho); /* Letras em Ouro Velho */
             border-color: var(--azul-marinho);
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
         }
 
         .button {
             width: 100%;
             padding: 14px;
             background-color: var(--azul-marinho);
-            color: white;
+            color: var(--ouro-velho); /* Letras em Ouro Velho */
             border: none;
             border-radius: 4px;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
             text-transform: uppercase;
+            letter-spacing: 1px;
             margin-top: 10px;
         }
 
-        .button.secondary { background-color: transparent; color: var(--azul-marinho); border: 1px solid var(--azul-marinho); margin-bottom: 10px; }
-
-        .modal-base {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        .button.secondary { 
+            background-color: transparent; 
+            color: var(--azul-marinho); 
+            border: 2px solid var(--azul-marinho); 
+            margin-bottom: 5px;
         }
 
         #loadingOverlay {
@@ -178,28 +167,28 @@
             border-radius: 50%;
             width: 40px; height: 40px;
             animation: spin 1s linear infinite;
-            margin-bottom: 15px;
         }
-
-        #prazoMessage { padding: 12px; border-radius: 6px; margin-bottom: 15px; font-weight: bold; font-size: 14px; }
-        .msg-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        .msg-error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
-
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes blinker { 50% { opacity: 0.3; } }
+
+        .modal-base {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            align-items: center; justify-content: center; z-index: 4000; padding: 20px;
+        }
+        .modal-content { background: #fff; padding: 30px; border-radius: 8px; text-align: center; max-width: 400px; width: 100%; }
     </style>
 </head>
 <body>
 
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <p><strong>Enviando solicitação...</strong></p>
+        <p><strong>PROCESSANDO...</strong></p>
     </div>
 
     <div class="container">
         <div id="progressBarContainer"><div id="progressBar"></div></div>
         
-        <div id="instMessage">Iniciando...</div>
+        <div id="prazoMessage">Calculando tempo restante...</div>
+        <div id="instMessage">Carregando mensagem institucional...</div>
 
         <div class="logos">
             <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
@@ -207,35 +196,32 @@
         </div>
 
         <h2>DERSO 1º BPM</h2>
-        <p class="subtitle">Solicitação de Diária Especial</p>
-
-        <div id="prazoMessage" style="display:none; text-align: center;"></div>
+        <p class="subtitle">1ª CIA / SENTINELA DA CAPITAL</p>
 
         <div id="initialLoading" style="text-align: center; padding: 20px;">
             <div class="spinner" style="margin: 0 auto;"></div>
-            <p>Conectando ao servidor...</p>
         </div>
 
         <form id="dersoForm" style="display: none;">
+            
             <div class="form-group">
-                <label for="matricula">Matrícula:</label>
-                <input type="text" id="matricula" name="matricula" required placeholder="Ex: 100012345">
-                <div id="matriculaError" style="color:var(--erro); font-size:12px; margin-top:4px;"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="nome">Nome Completo:</label>
-                <input type="text" id="nome" name="nome" readonly required style="background:#f9f9f9; color: #666;">
-            </div>
-
-            <div class="form-group">
-                <label for="email">E-mail de Confirmação:</label>
-                <input type="email" id="email" name="email" list="emailProviders" required placeholder="email@exemplo.com">
+                <label for="email">E-MAIL PARA CONFIRMAÇÃO:</label>
+                <input type="email" id="email" name="email" list="emailProviders" required placeholder="Digite seu e-mail">
                 <datalist id="emailProviders"></datalist>
             </div>
 
             <div class="form-group">
-                <label>Tipo de Folga:</label>
+                <label for="matricula">MATRÍCULA:</label>
+                <input type="text" id="matricula" name="matricula" required placeholder="Ex: 1000xxxxx">
+            </div>
+
+            <div class="form-group">
+                <label for="nome">NOME COMPLETO:</label>
+                <input type="text" id="nome" name="nome" readonly required style="background:#eee;">
+            </div>
+
+            <div class="form-group">
+                <label>TIPO DE FOLGA:</label>
                 <div class="radio-group-buttons">
                     <input type="radio" id="f24" name="folga" value="24H" required><label for="f24">24H</label>
                     <input type="radio" id="f48" name="folga" value="48H"><label for="f48">48H</label>
@@ -247,45 +233,70 @@
             </div>
 
             <div class="form-group">
-                <label for="data">Data do DERSO:</label>
+                <label for="data">DATA DO DERSO:</label>
                 <input type="date" id="data" name="data" required>
-                <div id="dateLimitMessage" style="font-size: 11px; margin-top: 5px; color: #666;"></div>
+                <div id="dateLimitMessage" style="font-size: 11px; margin-top: 5px; color: #666; font-weight: bold;"></div>
             </div>
 
-            <button type="button" class="button secondary" id="btnHistory">VER MEU HISTÓRICO</button>
-            <button type="submit" class="button" id="btnSubmit">ENVIAR SOLICITAÇÃO</button>
+            <button type="button" class="button secondary" id="btnHistory">VER HISTÓRICO</button>
+            <button type="submit" class="button" id="btnSubmit">SOLICITAR AGORA</button>
         </form>
 
-        <div id="footerText" style="text-align:center; font-size:10px; margin-top:20px; color:#aaa;"></div>
-    </div>
-
-    <div id="historyModal" class="modal-base">
-        <div class="modal-content">
-            <h3 style="color:var(--azul-marinho); margin-top:0; border-bottom: 2px solid var(--dourado-amarelo); padding-bottom: 5px;">Histórico</h3>
-            <div id="historyBox" style="max-height: 250px; overflow-y: auto; text-align: left; margin: 15px 0;"></div>
-            <button class="button" onclick="document.getElementById('historyModal').style.display='none'">FECHAR</button>
-        </div>
+        <div id="footerText" style="text-align:center; font-size:10px; margin-top:20px; color:#999;"></div>
     </div>
 
     <div id="successModal" class="modal-base">
         <div class="modal-content">
-            <div style="font-size: 60px; color: var(--sucesso); margin-bottom: 10px;">✓</div>
-            <h3 style="margin-bottom: 10px;">Solicitação Registrada!</h3>
-            <p id="successDetail" style="font-size: 14px; color: #555;"></p>
-            <button class="button" style="background-color: var(--sucesso);" onclick="location.reload()">NOVA SOLICITAÇÃO</button>
+            <div style="font-size: 50px; color: var(--sucesso);">🎖️</div>
+            <h3 style="color: var(--azul-marinho)">SOLICITAÇÃO ENVIADA!</h3>
+            <p id="successDetail" style="font-size: 14px; color: #444; margin-bottom: 20px;"></p>
+            <button class="button" onclick="location.reload()">OK</button>
         </div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3FuQoK3JEZJl6zF2H1dTXNI4xAHgTKBk1g5oFhsR0LedGoVJP6xeipdJN2A9TJiv7wA/exec";
-        const emailSuffixes = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br", "yahoo.com"];
+        const emailSuffixes = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br"];
         window.employeeList = {};
 
         document.addEventListener("DOMContentLoaded", () => {
             applyInstitutionalTheme();
             initializeForm();
-            setupAutoProgress();
         });
+
+        // 1 - LÓGICA DO CRONÔMETRO REVERSO
+        function startCountdown(fechamentoStr) {
+            const display = document.getElementById("prazoMessage");
+            const fechamento = new Date(fechamentoStr).getTime();
+
+            const interval = setInterval(() => {
+                const agora = new Date().getTime();
+                const dist = fechamento - agora;
+
+                if (dist < 0) {
+                    clearInterval(interval);
+                    display.innerHTML = "⛔ PRAZO ENCERRADO";
+                    display.style.background = "#ffebee";
+                    display.style.color = "#c62828";
+                    document.getElementById("dersoForm").style.display = "none";
+                    return;
+                }
+
+                const d = Math.floor(dist / (1000 * 60 * 60 * 24));
+                const h = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((dist % (1000 * 60)) / 1000);
+
+                display.innerHTML = `⏳ FECHA EM: ${d}d ${h}h ${m}m ${s}s`;
+                
+                // Urgência (menos de 2 horas)
+                if (dist < 7200000) {
+                    display.style.background = "#fff3e0";
+                    display.style.color = "#e65100";
+                    display.style.animation = "blinker 1.5s infinite";
+                }
+            }, 1000);
+        }
 
         function applyInstitutionalTheme() {
             const hoje = new Date();
@@ -325,45 +336,18 @@
                     fetch(`${SCRIPT_URL}?action=datas`),
                     fetch(`${SCRIPT_URL}?action=lista`)
                 ]);
-                
                 const config = await dResp.json();
                 window.employeeList = await lResp.json();
 
-                startTimer(config);
+                startCountdown(config.fechamento);
                 setupDateLimits();
+                setupInteractions();
 
                 document.getElementById("initialLoading").style.display = "none";
                 document.getElementById("dersoForm").style.display = "block";
-            } catch (err) {
-                document.getElementById("initialLoading").innerHTML = "❌ Erro ao conectar. Verifique sua internet.";
+            } catch (e) {
+                document.getElementById("initialLoading").innerHTML = "Erro de conexão.";
             }
-        }
-
-        function startTimer(data) {
-            const display = document.getElementById("prazoMessage");
-            const update = () => {
-                const agora = new Date();
-                const abertura = new Date(data.abertura);
-                const fechamento = new Date(data.fechamento);
-
-                if (agora < abertura) {
-                    display.className = "msg-error";
-                    display.innerHTML = "⏳ FORMULÁRIO FECHADO";
-                    display.style.display = "block";
-                    document.getElementById("btnSubmit").disabled = true;
-                } else if (agora > fechamento) {
-                    display.className = "msg-error";
-                    display.innerHTML = "⛔ PRAZO ENCERRADO";
-                    display.style.display = "block";
-                    document.getElementById("btnSubmit").disabled = true;
-                } else {
-                    display.className = "msg-success";
-                    display.innerHTML = "🚨 SISTEMA DISPONÍVEL";
-                    display.style.display = "block";
-                }
-            };
-            setInterval(update, 1000);
-            update();
         }
 
         function setupDateLimits() {
@@ -371,28 +355,25 @@
             const hoje = new Date();
             const min = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
             const max = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
-            
             input.min = min.toISOString().split("T")[0];
             input.max = max.toISOString().split("T")[0];
-            document.getElementById("dateLimitMessage").textContent = `Agendamento: ${min.toLocaleDateString('pt-BR')} a ${max.toLocaleDateString('pt-BR')}`;
-            document.getElementById("footerText").textContent = `1ª CIA / 1º BPM - Pedro Porto - ${hoje.getFullYear()}`;
+            document.getElementById("dateLimitMessage").textContent = `VÁLIDO PARA: ${min.toLocaleDateString('pt-BR')} ATÉ ${max.toLocaleDateString('pt-BR')}`;
+            document.getElementById("footerText").textContent = `1ª CIA / 1º BPM - PVSA PORTO - 2026`;
         }
 
-        function setupAutoProgress() {
-            const fields = ["matricula", "email", "data", "folga"];
+        function setupInteractions() {
             const matIn = document.getElementById("matricula");
+            const emailIn = document.getElementById("email");
             const prog = document.getElementById("progressBar");
 
-            const update = () => {
-                let points = 0;
-                if (window.employeeList[matIn.value]) points++;
-                if (document.getElementById("email").value.includes("@")) points++;
-                if (document.getElementById("data").value) points++;
-                if (document.querySelector('input[name="folga"]:checked')) points++;
-
-                const percent = (points / 4) * 100;
-                prog.style.width = percent + "%";
-                prog.style.backgroundColor = percent === 100 ? "var(--sucesso)" : "var(--azul-marinho)";
+            // Barra de Progresso Reativa
+            const updateProgress = () => {
+                let pts = 0;
+                if(emailIn.value.includes("@")) pts++;
+                if(window.employeeList[matIn.value]) pts++;
+                if(document.getElementById("data").value) pts++;
+                if(document.querySelector('input[name="folga"]:checked')) pts++;
+                prog.style.width = (pts/4)*100 + "%";
             };
 
             matIn.addEventListener("blur", () => {
@@ -400,79 +381,29 @@
                 if(!val) return;
                 const std = val.startsWith("1000") ? val : "1000" + val;
                 matIn.value = std;
-                if (window.employeeList[std]) {
-                    document.getElementById("nome").value = window.employeeList[std];
-                    matIn.classList.add("is-valid");
-                    matIn.classList.remove("is-invalid");
-                } else {
-                    document.getElementById("nome").value = "";
-                    matIn.classList.add("is-invalid");
-                }
-                update();
+                document.getElementById("nome").value = window.employeeList[std] || "";
+                updateProgress();
             });
 
-            document.querySelectorAll("input").forEach(i => {
-                i.addEventListener("change", update);
-                i.addEventListener("input", update);
-            });
+            document.querySelectorAll("input").forEach(i => i.addEventListener("change", updateProgress));
 
-            // Email Autocomplete
-            document.getElementById("email").addEventListener("input", (e) => {
-                const val = e.target.value;
-                const dl = document.getElementById("emailProviders");
-                if (val.includes("@")) {
-                    const [user, domain] = val.split("@");
-                    dl.innerHTML = "";
-                    emailSuffixes.forEach(s => {
-                        if (s.startsWith(domain)) dl.appendChild(new Option(user + "@" + s));
-                    });
-                }
-            });
-
-            // SUBMIT
+            // Envio
             document.getElementById("dersoForm").onsubmit = async (e) => {
                 e.preventDefault();
                 document.getElementById("loadingOverlay").style.display = "flex";
-
+                const fd = new FormData(e.target);
                 try {
-                    const fd = new FormData(e.target);
-                    const params = new URLSearchParams(fd);
-                    const resp = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+                    const resp = await fetch(`${SCRIPT_URL}?${new URLSearchParams(fd).toString()}`);
                     const res = await resp.json();
-
                     document.getElementById("loadingOverlay").style.display = "none";
-
-                    if (res.success) {
-                        document.getElementById("successDetail").innerHTML = `<b>Data:</b> ${document.getElementById("data").value}<br><b>Tipo:</b> ${fd.get("folga")}`;
+                    if(res.success) {
+                        document.getElementById("successDetail").innerText = `Solicitação para o dia ${fd.get("data")} registrada com sucesso.`;
                         document.getElementById("successModal").style.display = "flex";
-                    } else {
-                        alert("⚠️ Erro: " + (res.error || "Não foi possível enviar."));
                     }
-                } catch (err) {
+                } catch (err) { 
                     document.getElementById("loadingOverlay").style.display = "none";
-                    alert("❌ Falha crítica de conexão.");
+                    alert("Erro ao enviar."); 
                 }
-            };
-
-            // HISTORICO
-            document.getElementById("btnHistory").onclick = async () => {
-                const mat = matIn.value;
-                if(!window.employeeList[mat]) return alert("Insira uma matrícula válida.");
-                
-                const box = document.getElementById("historyBox");
-                document.getElementById("historyModal").style.display = "flex";
-                box.innerHTML = "<div class='spinner' style='width:20px; height:20px; border-width:2px;'></div> Carregando...";
-
-                try {
-                    const r = await fetch(`${SCRIPT_URL}?action=historico&matricula=${mat}`);
-                    const d = await r.json();
-                    let h = `<p><strong>${d.nome}</strong></p><hr>`;
-                    if(!d.historico || d.historico.length === 0) h += "Nenhuma solicitação encontrada.";
-                    else d.historico.forEach(i => {
-                        h += `<div style="padding:8px; border-bottom:1px solid #eee; font-size:13px;">📅 ${i.dataSolicitada} - <b>${i.tipoDeFolga}</b></div>`;
-                    });
-                    box.innerHTML = h;
-                } catch (e) { box.innerHTML = "Erro ao buscar histórico."; }
             };
         }
     </script>
