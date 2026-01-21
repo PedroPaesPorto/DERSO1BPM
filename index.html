@@ -282,24 +282,33 @@
             });
 
             // Lógica do Histórico
-            document.getElementById("btnHistory").onclick = async () => {
-                const matricula = matIn.value;
-                if(!matricula) return alert("Digite a matrícula primeiro.");
-                
-                document.getElementById("modalHistory").style.display = "flex";
-                document.getElementById("historyBox").innerHTML = "Buscando...";
-                
-                const resp = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
-                const data = await resp.json();
-                
-                if(data.length === 0) {
-                    document.getElementById("historyBox").innerHTML = "Nenhuma solicitação encontrada.";
-                } else {
-                    document.getElementById("historyBox").innerHTML = data.map(i => 
-                        `<div style="padding:8px; border-bottom:1px solid #eee;">📅 ${i.data} - <strong>${i.folga}</strong></div>`
-                    ).join('');
-                }
-            };
+           document.getElementById("btnHistory").onclick = async () => {
+    const matricula = matIn.value;
+    if(!matricula) return alert("Digite a matrícula primeiro.");
+    
+    document.getElementById("modalHistory").style.display = "flex";
+    const historyBox = document.getElementById("historyBox");
+    historyBox.innerHTML = "Buscando...";
+    
+    try {
+        const resp = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
+        const data = await resp.json();
+        
+        // Verifica se data é um Array e se não está vazio
+        if(Array.isArray(data) && data.length > 0) {
+            historyBox.innerHTML = data.map(i => 
+                `<div style="padding:8px; border-bottom:1px solid #eee;">
+                    📅 ${i.data} - <strong>${i.folga}</strong>
+                 </div>`
+            ).join('');
+        } else {
+            historyBox.innerHTML = "Nenhuma solicitação encontrada ou formato inválido.";
+        }
+    } catch (e) {
+        historyBox.innerHTML = "Erro ao carregar histórico. Verifique a conexão.";
+        console.error("Erro no Histórico:", e);
+    }
+};
 
             const hoje = new Date();
             document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
