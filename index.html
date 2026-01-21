@@ -274,75 +274,235 @@
             setupInteractions();
         });
 
-        function applyInstitutionalTheme() {
-            const hoje = new Date();
-            const mes = hoje.getMonth() + 1;
-            const dia = hoje.getDate();
-            const instDiv = document.getElementById("instMessage");
-            const chave = `${mes}-${dia}`;
+       function applyInstitutionalTheme() {
 
-            const temas = {
-                "1-4": `🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história e bravura!`,
-                "12-7": `🛡️ 1º BPM: Sentinela da Capital há ${hoje.getFullYear() - 1983} anos.`,
-                "9-7": "🇧🇷 7 de Setembro: Independência, Ordem e Progresso.",
-                "5-1": "🛠️ Dia do Trabalhador: Servir com honra."
-            };
+        const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
+
+        const instDiv = document.getElementById("instMessage");
+
+        const aplicar = (msg) => instDiv.innerHTML = msg;
+
+
+
+        const temas = {
+
+            "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história, bravura e compromisso.`),
+
+            "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
+
+            "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
+
+            "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear() - 1889} anos de Proclamação.`),
+
+            "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
+
+            "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição e compromisso.`)
+
+        };
+
+
+
+        const chave = `${mes+1}-${dia}`;
+
+        if (temas[chave]) {
+
+            temas[chave]();
+
+        } else {
 
             const mensais = {
-                1: "🎭 Janeiro: Planejamento estratégico e foco na missão.",
-                10: "🎗️ Outubro: Saúde e prevenção são prioridades.",
-                12: "🎄 Dezembro: Compromisso e segurança nas festividades."
+
+                0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos e festas."),
+
+                1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
+
+                2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda com dedicação."),
+
+                3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
+
+                4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão de cuidar e proteger."),
+
+                5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade social."),
+
+                6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
+
+                7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional de segurança."),
+
+                8: () => aplicar("🇧🇷 Setembro: Mês da Pátria. Renovando nosso juramento de servir e proteger o Brasil."),
+
+                9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
+
+                10: () => aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade que formam nossa nação. ${hoje.getFullYear() - 1889}º ano da República.`),
+
+                11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. Boas Festas! ✨")
+
             };
 
+            if (mensais[mes]) mensais[mes]();
+
+        }
+
+    }
             instDiv.innerHTML = temas[chave] || mensais[mes] || "🛡️ 1º BPM: Disciplina, Honra e Segurança.";
         }
 
-        async function initializeForm() {
-            try {
-                const [datasResp, listaResp] = await Promise.all([
-                    fetch(`${SCRIPT_URL}?action=datas`),
-                    fetch(`${SCRIPT_URL}?action=lista`)
-                ]);
-                
-                const config = await datasResp.json();
-                window.employeeList = await listaResp.json();
+         function initializeForm() {
 
-                setupTimer(config);
-                setupDateLimits();
-                
-                document.getElementById("initialLoading").style.display = "none";
-                document.getElementById("dersoForm").style.display = "block";
-                
-            } catch (e) {
-                document.getElementById("initialLoading").innerHTML = "⚠️ Erro ao conectar ao servidor.";
-            }
-        }
+        // Promessas para buscar datas de abertura/fechamento e lista de funcionários
 
-        function setupTimer(data) {
-            const msgDiv = document.getElementById("prazoMessage");
-            const update = () => {
+        const datasPromise = fetch(`${SCRIPT_URL}?action=datas`).then(r => r.json());
+
+        const listaPromise = fetch(`${SCRIPT_URL}?action=lista`).then(r => r.json());
+
+
+
+        datasPromise.then(data => {
+
+            // Função que atualiza cronômetro do prazo
+
+            const atualizarCronometro = () => {
+
                 const agora = new Date();
+
                 const abertura = new Date(data.abertura);
+
                 const fechamento = new Date(data.fechamento);
 
+
+
+                // Antes da abertura
+
                 if (agora < abertura) {
-                    msgDiv.className = "info-message error";
-                    msgDiv.innerHTML = "⏳ <b>FORMULÁRIO FECHADO</b><br>Aguarde a abertura.";
-                    msgDiv.style.display = "block";
-                    document.getElementById("dersoForm").style.display = "none";
-                } else if (agora > fechamento) {
-                    msgDiv.style.background = "#ffebee";
-                    msgDiv.innerHTML = "⛔ <b>PRAZO ENCERRADO</b>";
-                    msgDiv.style.display = "block";
-                    document.getElementById("dersoForm").style.display = "none";
-                } else {
-                    msgDiv.style.background = "#e8f5e9";
-                    msgDiv.innerHTML = "🚨 <b>SISTEMA ABERTO</b>";
-                    msgDiv.style.display = "block";
+
+                    const diffA = abertura - agora;
+
+                    const d = Math.floor(diffA / (1000 * 60 * 60 * 24));
+
+                    const h = Math.floor((diffA % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+                    const m = Math.floor((diffA % (1000 * 60 * 60)) / (1000 * 60));
+
+                    const s = Math.floor((diffA % (1000 * 60)) / 1000);
+
+                    showPersistentMessage(`⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em: ${d}d ${h}h ${m}m ${s}s`, "error");
+
+                    formDiv.style.display = "none";
+
+                    return false;
+
+                } 
+
+                // Após fechamento
+
+                else if (agora > fechamento) {
+
+                    showPersistentMessage(`⛔ <b>FORMULÁRIO ENCERRADO</b><br>O prazo terminou em ${fechamento.toLocaleString("pt-BR")}`, "error");
+
+                    formDiv.style.display = "none";
+
+                    return false;
+
+                } 
+
+                // Durante período aberto
+
+                else {
+
+                    const diffF = fechamento - agora;
+
+                    const d = Math.floor(diffF / (1000 * 60 * 60 * 24));
+
+                    const h = Math.floor((diffF % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+                    const m = Math.floor((diffF % (1000 * 60 * 60)) / (1000 * 60));
+
+                    const s = Math.floor((diffF % (1000 * 60)) / 1000);
+
+                    const tempoTexto = `${d}d ${h}h ${m}m ${s}s`;
+
+
+
+                    if (diffF < (2 * 60 * 60 * 1000)) {
+
+                        showPersistentMessage(`⚠️ <b style="animation:blinker 1s infinite">URGENTE! FECHA EM:</b><br><span style="color:#ff0000; font-size:1.2em;">${tempoTexto}</span>`, "error");
+
+                    } else {
+
+                        showPersistentMessage(`🚨 <b>FORMULÁRIO ABERTO</b><br>Encerra em: <b>${tempoTexto}</b>`, "success");
+
+                    }
+
+                    return true;
+
                 }
+
             };
-            setInterval(update, 1000);
-            update();
+
+
+
+            // Atualiza cronômetro imediatamente
+
+            const estaAberto = atualizarCronometro();
+
+
+
+            // Intervalo de 1 segundo para manter contador atualizado
+
+            setInterval(() => {
+
+                const statusAtual = atualizarCronometro();
+
+                if (statusAtual && formDiv.style.display === "none") {
+
+                    location.reload();
+
+                }
+
+            }, 1000);
+
+
+
+            // Se aberto, carregamos lista de funcionários e exibimos o formulário
+
+            if (estaAberto) {
+
+                listaPromise.then(listaData => {
+
+                    window.employeeList = listaData;
+
+                    document.getElementById("initialLoading").style.display = "none";
+
+                    formDiv.style.display = "block";
+
+                });
+
+            } else {
+
+                document.getElementById("initialLoading").style.display = "none";
+
+            }
+
+        });
+
+
+
+        // Configuração do limite de datas para o input
+
+        const hoje = new Date();
+
+        const min = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+
+        const max = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
+
+        document.getElementById("data").min = min.toISOString().split("T")[0];
+
+        document.getElementById("data").max = max.toISOString().split("T")[0];
+
+        document.getElementById("dateLimitMessage").textContent = `Agendamento para: ${min.toLocaleDateString('pt-BR')} até ${max.toLocaleDateString('pt-BR')}`;
+
+        document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
+
+    }
         }
 
         function setupDateLimits() {
