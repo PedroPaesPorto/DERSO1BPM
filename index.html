@@ -228,7 +228,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhU0lTHk87ZGp4soe8kSYMKc6wC5cRD_pNJ1gxGRTBOAH5rYpiWelq5mBOd_N1IqZu0g/exec";
         window.employeeList = {};
 
@@ -317,13 +317,14 @@
         function startCountdown(endTime) {
             const display = document.getElementById("timerDisplay");
             const end = new Date(endTime).getTime();
-            setInterval(() => {
+            const interval = setInterval(() => {
                 const now = new Date().getTime();
                 const diff = end - now;
                 if (diff <= 0) {
                     display.innerHTML = "⛔ FORMULÁRIO ENCERRADO";
                     document.getElementById("dersoForm").style.opacity = "0.5";
                     document.getElementById("dersoForm").style.pointerEvents = "none";
+                    clearInterval(interval);
                     return;
                 }
                 const d = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -340,9 +341,9 @@
             const dataIn = document.getElementById("data");
             const nomeIn = document.getElementById("nome");
             const form = document.getElementById("dersoForm");
+            const hoje = new Date();
 
             // Configuração do Calendário
-            const hoje = new Date();
             const inicioProxMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
             const fimProxMes = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
             const formatarParaInput = (d) => d.toISOString().split('T')[0];
@@ -417,7 +418,6 @@
                 e.preventDefault();
                 const btn = document.getElementById("btnEnviar");
                 
-                // Validação básica antes de enviar
                 if (nomeIn.value === "NÃO ENCONTRADO" || !nomeIn.value) {
                     alert("Por favor, insira uma matrícula válida.");
                     return;
@@ -430,7 +430,6 @@
                 const params = new URLSearchParams(formData);
 
                 try {
-                    // Removido o no-cors para conseguir ler a resposta da planilha
                     const resp = await fetch(SCRIPT_URL, {
                         method: 'POST',
                         body: params
@@ -439,73 +438,18 @@
                     const res = await resp.json();
 
                     if (res.success) {
-                        // SUCESSO: Abre modal e limpa campos temporários
                         document.getElementById("modalSuccess").style.display = "flex";
-                        
                         document.getElementById("data").value = "";
                         document.getElementById("data").classList.remove('campo-validado');
                         const radios = document.getElementsByName("folga");
                         radios.forEach(r => r.checked = false);
-                        
-                        console.log("[LOG] Enviado com sucesso.");
                     } else {
-                        // ERRO DE DUPLICIDADE OU OUTRO (Vindo do GAS)
                         alert(res.message || "Erro ao processar solicitação.");
                     }
 
                 } catch (err) {
-                    // Fallback para erros de rede ou CORS
                     console.error("Erro no fetch:", err);
-                    alert("⚠️ form.onsubmit = async (e) => {
-                e.preventDefault();
-                const btn = document.getElementById("btnEnviar");
-                
-                // Validação básica antes de enviar
-                if (nomeIn.value === "NÃO ENCONTRADO" || !nomeIn.value) {
-                    alert("Por favor, insira uma matrícula válida.");
-                    return;
-                }
-
-                btn.disabled = true;
-                btn.innerText = "VERIFICANDO...";
-
-                const formData = new FormData(form);
-                const params = new URLSearchParams(formData);
-
-                try {
-                    // Removido o no-cors para conseguir ler a resposta da planilha
-                    const resp = await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        body: params
-                    });
-
-                    const res = await resp.json();
-
-                    if (res.success) {
-                        // SUCESSO: Abre modal e limpa campos temporários
-                        document.getElementById("modalSuccess").style.display = "flex";
-                        
-                        document.getElementById("data").value = "";
-                        document.getElementById("data").classList.remove('campo-validado');
-                        const radios = document.getElementsByName("folga");
-                        radios.forEach(r => r.checked = false);
-                        
-                        console.log("[LOG] Enviado com sucesso.");
-                    } else {
-                        // ERRO DE DUPLICIDADE OU OUTRO (Vindo do GAS)
-                        alert(res.message || "Erro ao processar solicitação.");
-                    }
-
-                } catch (err) {
-                    // Fallback para erros de rede ou CORS
-                    console.error("Erro no fetch:", err);
-                    alert("⚠️ Erro de comunicação ou Duplicidade detectada.\nVerifique se já solicitou esta data no Histórico.");
-                } finally {
-                    btn.disabled = false;
-                    btn.innerText = "ENVIAR SOLICITAÇÃO";
-                    atualizarProgresso();
-                }
-            };.");
+                    alert("⚠️ Já existe solicitação para esta data/folga.");
                 } finally {
                     btn.disabled = false;
                     btn.innerText = "ENVIAR SOLICITAÇÃO";
