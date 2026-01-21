@@ -14,6 +14,8 @@
             --sucesso-border: #4CAF50;
             --cinza-fundo: #F0F2F5;
             --borda: #ccc;
+            /* ADICIONADO: Sombra verde para validação */
+            --sombra-validacao: 0 0 10px rgba(76, 175, 80, 0.5);
         }
 
         body {
@@ -33,6 +35,20 @@
         .top-bar {
             position: absolute; top: 0; left: 0; width: 100%; height: 4px;
             background: #FFD700; border-radius: 4px 4px 0 0;
+            z-index: 2;
+        }
+
+        /* ADICIONADO: Estilo da Barra de Progresso Parcial */
+        #barraProgresso {
+            position: absolute; top: 0; left: 0; width: 0%; height: 4px;
+            background: var(--sucesso-border); border-radius: 4px 4px 0 0;
+            transition: width 0.4s ease; z-index: 3;
+        }
+
+        /* ADICIONADO: Classe para aplicar a sombra verde */
+        .campo-validado {
+            border-color: var(--sucesso-border) !important;
+            box-shadow: var(--sombra-validacao) !important;
         }
 
         .header { text-align: center; margin-bottom: 20px; }
@@ -68,6 +84,7 @@
         input:not([type="radio"]) {
             width: 100%; padding: 12px; border: 1px solid var(--borda);
             border-radius: 4px; box-sizing: border-box; font-size: 15px;
+            transition: all 0.3s ease;
         }
 
         .radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -77,6 +94,7 @@
             padding: 10px 2px; border: 1px solid var(--borda);
             text-align: center; cursor: pointer; border-radius: 4px;
             font-size: 11px; font-weight: bold; background: #fff;
+            transition: all 0.2s;
         }
         .radio-group input:checked + label {
             background: var(--azul-marinho); color: var(--ouro-velho);
@@ -114,6 +132,7 @@
 <body>
 
     <div class="container">
+        <div id="barraProgresso"></div>
         <div class="top-bar"></div>
         
         <div class="header">
@@ -158,7 +177,7 @@
 
                 <div class="form-group">
                     <label>Tipo de Folga:</label>
-                    <div class="radio-group">
+                    <div class="radio-group" id="radioFolgaGroup">
                         <input type="radio" id="f24" name="folga" value="24H" required><label for="f24">24H</label>
                         <input type="radio" id="f48" name="folga" value="48H"><label for="f48">48H</label>
                         <input type="radio" id="f72" name="folga" value="72H"><label for="f72">72H</label>
@@ -195,6 +214,20 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRj7T5Ul3YCGsIRmtucg5z2ssEZo-xNosK7Z_jNDSy51Iw6ZDlsln42i6MAVAjJvxmMg/exec";
         window.employeeList = {};
+
+        // ADICIONADO: Função de Log e Barra de Progresso
+        function atualizarProgresso() {
+            const campos = [
+                document.getElementById('email').value.includes('@'),
+                document.getElementById('nome').value !== "" && document.getElementById('nome').value !== "NÃO ENCONTRADO",
+                document.querySelector('input[name="folga"]:checked') !== null,
+                document.getElementById('data').value !== ""
+            ];
+            const concluidos = campos.filter(Boolean).length;
+            const porcentagem = (concluidos / campos.length) * 100;
+            document.getElementById('barraProgresso').style.width = porcentagem + "%";
+            console.log(`[LOG] Progresso: ${porcentagem}% (${concluidos}/4 etapas concluídas)`);
+        }
 
         function applyInstitutionalTheme() {
             const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
@@ -233,6 +266,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", async () => {
+            console.log("[LOG] Iniciando carregamento de dados...");
             try {
                 const [dResp, lResp] = await Promise.all([
                     fetch(`${SCRIPT_URL}?action=datas`),
@@ -241,6 +275,7 @@
                 const config = await dResp.json();
                 window.employeeList = await lResp.json();
 
+                console.log("[LOG] Dados recebidos com sucesso.");
                 document.getElementById("loadingScreen").style.display = "none";
                 document.getElementById("formContent").style.display = "block";
                 
@@ -248,6 +283,7 @@
                 startCountdown(config.fechamento);
                 setupForm();
             } catch (e) {
+                console.error("[ERRO] Falha ao conectar:", e);
                 document.getElementById("loadingScreen").innerHTML = "<p style='color:red'>Erro de conexão.</p>";
             }
         });
@@ -261,6 +297,7 @@
                 if (diff <= 0) {
                     display.innerHTML = "⛔ FORMULÁRIO ENCERRADO";
                     document.getElementById("dersoForm").style.opacity = "0.5";
+                    document.getElementById("dersoForm").style.pointerEvents = "none";
                     return;
                 }
                 const d = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -273,42 +310,85 @@
 
         function setupForm() {
             const matIn = document.getElementById("matricula");
+            const emailIn = document.getElementById("email");
+            const dataIn = document.getElementById("data");
+            const nomeIn = document.getElementById("nome");
+
+            // ADICIONADO: Evento para E-mail
+            emailIn.addEventListener("input", () => {
+                if(emailIn.value.includes('@')) {
+                    emailIn.classList.add('campo-validado');
+                } else {
+                    emailIn.classList.remove('campo-validado');
+                }
+                atualizarProgresso();
+            });
+
             matIn.addEventListener("blur", () => {
+                console.log("[LOG] Validando matrícula...");
                 let val = matIn.value.replace(/\D/g,'');
                 if(!val) return;
                 const std = val.startsWith("1000") ? val : "1000" + val;
                 matIn.value = std;
-                document.getElementById("nome").value = window.employeeList[std] || "NÃO ENCONTRADO";
+                
+                const policialNome = window.employeeList[std];
+                if (policialNome) {
+                    nomeIn.value = policialNome;
+                    matIn.classList.add('campo-validado');
+                    nomeIn.classList.add('campo-validado');
+                    console.log(`[LOG] Policial encontrado: ${policialNome}`);
+                } else {
+                    nomeIn.value = "NÃO ENCONTRADO";
+                    matIn.classList.remove('campo-validado');
+                    nomeIn.classList.remove('campo-validado');
+                    console.warn("[AVISO] Matrícula não reconhecida.");
+                }
+                atualizarProgresso();
             });
 
-            // Lógica do Histórico
-           document.getElementById("btnHistory").onclick = async () => {
-    const matricula = matIn.value;
-    if(!matricula) return alert("Digite a matrícula primeiro.");
-    
-    document.getElementById("modalHistory").style.display = "flex";
-    const historyBox = document.getElementById("historyBox");
-    historyBox.innerHTML = "Buscando...";
-    
-    try {
-        const resp = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
-        const data = await resp.json();
-        
-        // Verifica se data é um Array e se não está vazio
-        if(Array.isArray(data) && data.length > 0) {
-            historyBox.innerHTML = data.map(i => 
-                `<div style="padding:8px; border-bottom:1px solid #eee;">
-                    📅 ${i.data} - <strong>${i.folga}</strong>
-                 </div>`
-            ).join('');
-        } else {
-            historyBox.innerHTML = "Nenhuma solicitação encontrada ou formato inválido.";
-        }
-    } catch (e) {
-        historyBox.innerHTML = "Erro ao carregar histórico. Verifique a conexão.";
-        console.error("Erro no Histórico:", e);
-    }
-};
+            // ADICIONADO: Evento para Radio Buttons
+            document.getElementById('radioFolgaGroup').addEventListener('change', (e) => {
+                console.log(`[LOG] Tipo de folga selecionado: ${e.target.value}`);
+                atualizarProgresso();
+            });
+
+            // ADICIONADO: Evento para Data
+            dataIn.addEventListener("change", () => {
+                if(dataIn.value) {
+                    dataIn.classList.add('campo-validado');
+                    console.log(`[LOG] Data selecionada: ${dataIn.value}`);
+                }
+                atualizarProgresso();
+            });
+
+            document.getElementById("btnHistory").onclick = async () => {
+                const matricula = matIn.value;
+                if(!matricula) return alert("Digite a matrícula primeiro.");
+                
+                console.log("[LOG] Abrindo histórico...");
+                document.getElementById("modalHistory").style.display = "flex";
+                const historyBox = document.getElementById("historyBox");
+                historyBox.innerHTML = "Buscando...";
+                
+                try {
+                    const resp = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
+                    const data = await resp.json();
+                    
+                    if(Array.isArray(data) && data.length > 0) {
+                        console.log(`[LOG] ${data.length} solicitações encontradas.`);
+                        historyBox.innerHTML = data.map(i => 
+                            `<div style="padding:8px; border-bottom:1px solid #eee;">
+                                📅 ${i.data} - <strong>${i.folga}</strong>
+                             </div>`
+                        ).join('');
+                    } else {
+                        historyBox.innerHTML = "Nenhuma solicitação encontrada.";
+                    }
+                } catch (e) {
+                    console.error("[ERRO] Falha no histórico:", e);
+                    historyBox.innerHTML = "Erro ao carregar histórico.";
+                }
+            };
 
             const hoje = new Date();
             document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
