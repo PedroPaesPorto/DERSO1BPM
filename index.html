@@ -416,36 +416,100 @@
             form.onsubmit = async (e) => {
                 e.preventDefault();
                 const btn = document.getElementById("btnEnviar");
+                
+                // Validação básica antes de enviar
+                if (nomeIn.value === "NÃO ENCONTRADO" || !nomeIn.value) {
+                    alert("Por favor, insira uma matrícula válida.");
+                    return;
+                }
+
                 btn.disabled = true;
-                btn.innerText = "ENVIANDO...";
+                btn.innerText = "VERIFICANDO...";
 
                 const formData = new FormData(form);
                 const params = new URLSearchParams(formData);
 
                 try {
+                    // Removido o no-cors para conseguir ler a resposta da planilha
                     const resp = await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        body: params,
-                        mode: 'no-cors' // Google Apps Script requer no-cors para POST simples ou tratar via redirect
+                        body: params
                     });
 
-                    // Como no-cors não permite ler a resposta, assumimos sucesso ou fazemos um check manual
-                    // Para garantir a mensagem, usamos um pequeno delay ou mudamos para GET se preferir
-                    document.getElementById("modalSuccess").style.display = "flex";
-                    
-                    // LIMPEZA SELETIVA
-                    document.getElementById("data").value = "";
-                    document.getElementById("data").classList.remove('campo-validado');
-                    const radios = document.getElementsByName("folga");
-                    radios.forEach(r => r.checked = false);
-                    
-                    atualizarProgresso();
+                    const res = await resp.json();
+
+                    if (res.success) {
+                        // SUCESSO: Abre modal e limpa campos temporários
+                        document.getElementById("modalSuccess").style.display = "flex";
+                        
+                        document.getElementById("data").value = "";
+                        document.getElementById("data").classList.remove('campo-validado');
+                        const radios = document.getElementsByName("folga");
+                        radios.forEach(r => r.checked = false);
+                        
+                        console.log("[LOG] Enviado com sucesso.");
+                    } else {
+                        // ERRO DE DUPLICIDADE OU OUTRO (Vindo do GAS)
+                        alert(res.message || "Erro ao processar solicitação.");
+                    }
 
                 } catch (err) {
-                    alert("Erro ao enviar. Verifique sua conexão.");
+                    // Fallback para erros de rede ou CORS
+                    console.error("Erro no fetch:", err);
+                    alert("⚠️ form.onsubmit = async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById("btnEnviar");
+                
+                // Validação básica antes de enviar
+                if (nomeIn.value === "NÃO ENCONTRADO" || !nomeIn.value) {
+                    alert("Por favor, insira uma matrícula válida.");
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerText = "VERIFICANDO...";
+
+                const formData = new FormData(form);
+                const params = new URLSearchParams(formData);
+
+                try {
+                    // Removido o no-cors para conseguir ler a resposta da planilha
+                    const resp = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: params
+                    });
+
+                    const res = await resp.json();
+
+                    if (res.success) {
+                        // SUCESSO: Abre modal e limpa campos temporários
+                        document.getElementById("modalSuccess").style.display = "flex";
+                        
+                        document.getElementById("data").value = "";
+                        document.getElementById("data").classList.remove('campo-validado');
+                        const radios = document.getElementsByName("folga");
+                        radios.forEach(r => r.checked = false);
+                        
+                        console.log("[LOG] Enviado com sucesso.");
+                    } else {
+                        // ERRO DE DUPLICIDADE OU OUTRO (Vindo do GAS)
+                        alert(res.message || "Erro ao processar solicitação.");
+                    }
+
+                } catch (err) {
+                    // Fallback para erros de rede ou CORS
+                    console.error("Erro no fetch:", err);
+                    alert("⚠️ Erro de comunicação ou Duplicidade detectada.\nVerifique se já solicitou esta data no Histórico.");
                 } finally {
                     btn.disabled = false;
                     btn.innerText = "ENVIAR SOLICITAÇÃO";
+                    atualizarProgresso();
+                }
+            };.");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = "ENVIAR SOLICITAÇÃO";
+                    atualizarProgresso();
                 }
             };
 
