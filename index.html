@@ -10,19 +10,15 @@
     <style>
         :root {
             --azul-marinho: #0C3667; 
-            --ouro-velho: #C5A059; /* Tom latão militar */
-            --dourado-brilhante: #FFD700; 
-            --erro: #b00020; 
-            --sucesso: #388e3c; 
-            --cinza-fundo: #f4f7f9; 
-            --borda-campo: #aaa;
+            --ouro-velho: #C5A059; 
+            --cinza-fundo: #f0f2f5;
+            --borda-campo: #ccc;
         }
 
         body {
             background-color: var(--cinza-fundo);
             font-family: 'Roboto', Arial, sans-serif;
             margin: 0;
-            padding: 20px 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -31,380 +27,252 @@
 
         .container {
             width: 95%;
-            max-width: 500px;
+            max-width: 600px;
             background-color: #ffffff; 
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             position: relative;
-            overflow: hidden;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* BARRA DE PROGRESSO NO TOPO (AMARELA CONFORME IMAGEM) */
         #progressBarContainer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 6px;
+            height: 4px;
             background-color: #e0e0e0;
         }
 
         #progressBar {
-            width: 0%;
+            width: 30%; /* Iniciando em 30% como no print */
             height: 100%;
-            background: var(--azul-marinho);
-            transition: width 0.4s ease;
+            background: #FFD700;
+            transition: width 0.5s ease;
         }
 
-        /* 1 & 2 - CRONÔMETRO E MENSAGEM INSTITUCIONAL */
-        #prazoMessage { 
-            padding: 15px; 
-            border-radius: 6px; 
-            margin-bottom: 10px; 
-            font-weight: bold; 
-            font-size: 16px; 
+        /* HEADER IDENTICO AO PRINT */
+        .header-print {
             text-align: center;
-            border: 1px solid #c8e6c9;
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        #instMessage {
-            background-color: #f9f9f9;
-            border-left: 4px solid var(--ouro-velho);
-            padding: 10px;
             margin-bottom: 20px;
-            font-size: 13px;
-            font-style: italic;
-            color: var(--azul-marinho);
-            text-align: center;
         }
 
-        .logos {
+        .logos-print {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 20px;
+            margin-bottom: 30px;
         }
-        .logos img { height: 60px; }
+        .logos-print img { height: 80px; width: auto; }
 
-        h2 {
-            font-family: 'Merriweather', serif;
-            text-align: center;
+        h2.titulo-print {
+            font-family: 'Roboto', sans-serif;
             color: var(--azul-marinho);
-            font-size: 24px;
-            margin-bottom: 5px;
-            border-bottom: 2px solid var(--ouro-velho);
-        }
-
-        .subtitle { text-align: center; font-size: 13px; margin-bottom: 20px; color: #666; font-weight: bold; }
-
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 5px; font-weight: 700; color: var(--azul-marinho); font-size: 14px;}
-
-        input:not([type="radio"]), select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--borda-campo);
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        /* 3 - BOTÕES ESTILO MILITAR (AZUL COM LETRA OURO VELHO) */
-        .radio-group-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
-        .radio-group-buttons input { display: none; }
-        .radio-group-buttons label {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 800;
-            flex: 1 1 calc(33% - 8px);
-            text-align: center;
-            background-color: #eee;
-            color: #666;
-        }
-
-        .radio-group-buttons input:checked + label {
-            background-color: var(--azul-marinho);
-            color: var(--ouro-velho); /* Letras em Ouro Velho */
-            border-color: var(--azul-marinho);
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
-        }
-
-        .button {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--azul-marinho);
-            color: var(--ouro-velho); /* Letras em Ouro Velho */
-            border: none;
-            border-radius: 4px;
-            font-weight: 800;
-            cursor: pointer;
-            text-transform: uppercase;
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
             letter-spacing: 1px;
-            margin-top: 10px;
         }
 
-        .button.secondary { 
-            background-color: transparent; 
-            color: var(--azul-marinho); 
-            border: 2px solid var(--azul-marinho); 
-            margin-bottom: 5px;
+        .divisor-amarelo {
+            width: 100%;
+            height: 1px;
+            background-color: #FFD700;
+            margin: 20px 0;
         }
 
-        #loadingOverlay {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.9);
-            display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 3000;
+        .subtitulo-print {
+            color: var(--azul-marinho);
+            font-size: 18px;
+            line-height: 1.4;
+            margin-bottom: 40px;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .spinner {
+        /* TELA DE CARREGAMENTO (ESTADO INICIAL) */
+        #initialLoading {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .loader-circle {
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--azul-marinho);
             border-radius: 50%;
-            width: 40px; height: 40px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .modal-base {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-            align-items: center; justify-content: center; z-index: 4000; padding: 20px;
+        /* FORMULÁRIO (OCULTO INICIALMENTE) */
+        #formWrapper { display: none; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--azul-marinho); }
+        input { width: 100%; padding: 12px; border: 1px solid var(--borda-campo); border-radius: 4px; box-sizing: border-box; }
+
+        .radio-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .radio-group input { display: none; }
+        .radio-group label {
+            flex: 1; padding: 10px; border: 1px solid #ccc; text-align: center; cursor: pointer; border-radius: 4px;
+            background: #f8f9fa; color: #555; transition: 0.3s;
         }
-        .modal-content { background: #fff; padding: 30px; border-radius: 8px; text-align: center; max-width: 400px; width: 100%; }
+        .radio-group input:checked + label { background: var(--azul-marinho); color: var(--ouro-velho); border-color: var(--azul-marinho); }
+
+        .btn-submit {
+            width: 100%; padding: 15px; background: var(--azul-marinho); color: var(--ouro-velho);
+            border: none; border-radius: 4px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 20px;
+        }
+
+        #prazoCountdown {
+            background: #fff8e1; border: 1px solid #ffe082; padding: 10px; border-radius: 4px;
+            text-align: center; font-weight: bold; margin-bottom: 15px; font-size: 14px;
+        }
+
+        .footer-print {
+            margin-top: auto;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            padding-top: 20px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div id="loadingOverlay">
-        <div class="spinner"></div>
-        <p><strong>PROCESSANDO...</strong></p>
-    </div>
-
     <div class="container">
         <div id="progressBarContainer"><div id="progressBar"></div></div>
-        
-        <div id="prazoMessage">Calculando tempo restante...</div>
-        <div id="instMessage">Carregando mensagem institucional...</div>
 
-        <div class="logos">
-            <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
-            <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1º BPM">
+        <div class="header-print">
+            <div class="logos-print">
+                <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="Brasão Rondônia">
+                <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="Brasão 1º BPM">
+            </div>
+            <h2 class="titulo-print">DERSO 1º BPM</h2>
+            <div class="divisor-amarelo"></div>
+            <p class="subtitulo-print">Formulário de Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO</p>
         </div>
 
-        <h2>DERSO 1º BPM</h2>
-        <p class="subtitle">1ª CIA / SENTINELA DA CAPITAL</p>
-
-        <div id="initialLoading" style="text-align: center; padding: 20px;">
-            <div class="spinner" style="margin: 0 auto;"></div>
+        <div id="initialLoading">
+            <p style="color: #555; font-size: 18px; margin-bottom: 20px;">Carregando dados do sistema...</p>
+            <div class="loader-circle"></div>
         </div>
 
-        <form id="dersoForm" style="display: none;">
+        <div id="formWrapper">
+            <div id="prazoCountdown">⏳ VERIFICANDO PRAZO...</div>
             
-            <div class="form-group">
-                <label for="email">E-MAIL PARA CONFIRMAÇÃO:</label>
-                <input type="email" id="email" name="email" list="emailProviders" required placeholder="Digite seu e-mail">
-                <datalist id="emailProviders"></datalist>
-            </div>
-
-            <div class="form-group">
-                <label for="matricula">MATRÍCULA:</label>
-                <input type="text" id="matricula" name="matricula" required placeholder="Ex: 1000xxxxx">
-            </div>
-
-            <div class="form-group">
-                <label for="nome">NOME COMPLETO:</label>
-                <input type="text" id="nome" name="nome" readonly required style="background:#eee;">
-            </div>
-
-            <div class="form-group">
-                <label>TIPO DE FOLGA:</label>
-                <div class="radio-group-buttons">
-                    <input type="radio" id="f24" name="folga" value="24H" required><label for="f24">24H</label>
-                    <input type="radio" id="f48" name="folga" value="48H"><label for="f48">48H</label>
-                    <input type="radio" id="fLE" name="folga" value="FOLGA LE"><label for="fLE">LE</label>
-                    <input type="radio" id="fExp" name="folga" value="Expediente"><label for="fExp">EXP</label>
-                    <input type="radio" id="f1" name="folga" value="1ª Folga"><label for="f1">1ª F</label>
-                    <input type="radio" id="f2" name="folga" value="2ª Folga"><label for="f2">2ª F</label>
+            <form id="dersoForm">
+                <div class="form-group">
+                    <label>E-MAIL PARA CONFIRMAÇÃO:</label>
+                    <input type="email" name="email" id="email" required placeholder="Digite seu e-mail">
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="data">DATA DO DERSO:</label>
-                <input type="date" id="data" name="data" required>
-                <div id="dateLimitMessage" style="font-size: 11px; margin-top: 5px; color: #666; font-weight: bold;"></div>
-            </div>
+                <div class="form-group">
+                    <label>MATRÍCULA:</label>
+                    <input type="text" name="matricula" id="matricula" required placeholder="1000xxxxx">
+                </div>
 
-            <button type="button" class="button secondary" id="btnHistory">VER HISTÓRICO</button>
-            <button type="submit" class="button" id="btnSubmit">SOLICITAR AGORA</button>
-        </form>
+                <div class="form-group">
+                    <label>NOME COMPLETO:</label>
+                    <input type="text" id="nome" readonly style="background: #f0f0f0;">
+                </div>
 
-        <div id="footerText" style="text-align:center; font-size:10px; margin-top:20px; color:#999;"></div>
-    </div>
+                <div class="form-group">
+                    <label>TIPO DE FOLGA:</label>
+                    <div class="radio-group">
+                        <input type="radio" id="f24" name="folga" value="24H" required><label for="f24">24H</label>
+                        <input type="radio" id="f48" name="folga" value="48H"><label for="f48">48H</label>
+                        <input type="radio" id="fLE" name="folga" value="FOLGA LE"><label for="fLE">LE</label>
+                        <input type="radio" id="fExp" name="folga" value="Expediente"><label for="fExp">EXP</label>
+                    </div>
+                </div>
 
-    <div id="successModal" class="modal-base">
-        <div class="modal-content">
-            <div style="font-size: 50px; color: var(--sucesso);">🎖️</div>
-            <h3 style="color: var(--azul-marinho)">SOLICITAÇÃO ENVIADA!</h3>
-            <p id="successDetail" style="font-size: 14px; color: #444; margin-bottom: 20px;"></p>
-            <button class="button" onclick="location.reload()">OK</button>
+                <div class="form-group">
+                    <label>DATA DO DERSO:</label>
+                    <input type="date" name="data" id="data" required>
+                </div>
+
+                <button type="submit" class="btn-submit">ENVIAR SOLICITAÇÃO</button>
+            </form>
+        </div>
+
+        <div class="footer-print">
+            Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - 01/2026
         </div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3FuQoK3JEZJl6zF2H1dTXNI4xAHgTKBk1g5oFhsR0LedGoVJP6xeipdJN2A9TJiv7wA/exec";
-        const emailSuffixes = ["gmail.com","hotmail.com","outlook.com","pm.ro.gov.br"];
         window.employeeList = {};
 
-        document.addEventListener("DOMContentLoaded", () => {
-            applyInstitutionalTheme();
-            initializeForm();
-        });
-
-        // 1 - LÓGICA DO CRONÔMETRO REVERSO
-        function startCountdown(fechamentoStr) {
-            const display = document.getElementById("prazoMessage");
-            const fechamento = new Date(fechamentoStr).getTime();
-
-            const interval = setInterval(() => {
-                const agora = new Date().getTime();
-                const dist = fechamento - agora;
-
-                if (dist < 0) {
-                    clearInterval(interval);
-                    display.innerHTML = "⛔ PRAZO ENCERRADO";
-                    display.style.background = "#ffebee";
-                    display.style.color = "#c62828";
-                    document.getElementById("dersoForm").style.display = "none";
-                    return;
-                }
-
-                const d = Math.floor(dist / (1000 * 60 * 60 * 24));
-                const h = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((dist % (1000 * 60)) / 1000);
-
-                display.innerHTML = `⏳ FECHA EM: ${d}d ${h}h ${m}m ${s}s`;
-                
-                // Urgência (menos de 2 horas)
-                if (dist < 7200000) {
-                    display.style.background = "#fff3e0";
-                    display.style.color = "#e65100";
-                    display.style.animation = "blinker 1.5s infinite";
-                }
-            }, 1000);
-        }
-
-        function applyInstitutionalTheme() {
-            const hoje = new Date();
-            const mes = hoje.getMonth(); 
-            const dia = hoje.getDate();
-            const instDiv = document.getElementById("instMessage");
-            const chave = `${mes + 1}-${dia}`;
-
-            const temas = {
-                "1-4": `🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história e bravura!`,
-                "12-7": `🛡️ 1º BPM: Sentinela da Capital há ${hoje.getFullYear() - 1983} anos.`,
-                "9-7": "🇧🇷 7 de Setembro: Independência se faz com Segurança.",
-                "12-25": "🎄 O 1º BPM deseja um Feliz Natal a todos!"
-            };
-
-            const mensais = [
-                "🎭 Janeiro: Planejamento estratégico para um ano seguro.",
-                "🎊 Fevereiro: Foco e prevenção na tranquilidade social.",
-                "🌷 Março: Homenagem às mulheres da nossa Corporação.",
-                "🕊️ Abril: Renovação e fortalecimento da união familiar.",
-                "🤱 Maio: Mães da Segurança: Protegendo a sociedade e a família.",
-                "🔥 Junho: Valorizando a nossa cultura e tradições.",
-                "👮 Julho: Disciplina e prontidão no policiamento.",
-                "👔 Agosto: A família é o alicerce do policial militar.",
-                "🇧🇷 Setembro: Mês da Pátria. Servir e Proteger!",
-                "🎗️ Outubro: Saúde e prevenção são o melhor caminho.",
-                "📜 Novembro: Compromisso com a República e a Ordem.",
-                "✨ Dezembro: Boas festas com segurança e paz!"
-            ];
-
-            instDiv.innerHTML = temas[chave] || mensais[mes];
-        }
-
-        async function initializeForm() {
+        // SIMULAÇÃO DE CARREGAMENTO PARA MOSTRAR A TELA
+        document.addEventListener("DOMContentLoaded", async () => {
             try {
+                // Busca os dados simultaneamente
                 const [dResp, lResp] = await Promise.all([
                     fetch(`${SCRIPT_URL}?action=datas`),
                     fetch(`${SCRIPT_URL}?action=lista`)
                 ]);
+                
                 const config = await dResp.json();
                 window.employeeList = await lResp.json();
 
-                startCountdown(config.fechamento);
-                setupDateLimits();
-                setupInteractions();
-
+                // Após carregar, esconde o loading e mostra o form
                 document.getElementById("initialLoading").style.display = "none";
-                document.getElementById("dersoForm").style.display = "block";
+                document.getElementById("formWrapper").style.display = "block";
+                document.getElementById("progressBar").style.width = "100%";
+                
+                startCountdown(config.fechamento);
+                setupLogic();
             } catch (e) {
-                document.getElementById("initialLoading").innerHTML = "Erro de conexão.";
+                document.getElementById("initialLoading").innerHTML = "<p style='color:red'>Erro ao conectar com o servidor.</p>";
             }
+        });
+
+        function startCountdown(endTime) {
+            const timer = document.getElementById("prazoCountdown");
+            const end = new Date(endTime).getTime();
+
+            setInterval(() => {
+                const now = new Date().getTime();
+                const diff = end - now;
+                if (diff < 0) {
+                    timer.innerHTML = "⛔ PRAZO ENCERRADO";
+                    document.getElementById("dersoForm").style.opacity = "0.5";
+                    document.getElementById("dersoForm").style.pointerEvents = "none";
+                    return;
+                }
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                timer.innerHTML = `⏳ FECHA EM: ${d}d ${h}h ${m}m ${s}s`;
+            }, 1000);
         }
 
-        function setupDateLimits() {
-            const input = document.getElementById("data");
-            const hoje = new Date();
-            const min = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
-            const max = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
-            input.min = min.toISOString().split("T")[0];
-            input.max = max.toISOString().split("T")[0];
-            document.getElementById("dateLimitMessage").textContent = `VÁLIDO PARA: ${min.toLocaleDateString('pt-BR')} ATÉ ${max.toLocaleDateString('pt-BR')}`;
-            document.getElementById("footerText").textContent = `1ª CIA / 1º BPM - PVSA PORTO - 2026`;
-        }
-
-        function setupInteractions() {
+        function setupLogic() {
             const matIn = document.getElementById("matricula");
-            const emailIn = document.getElementById("email");
-            const prog = document.getElementById("progressBar");
-
-            // Barra de Progresso Reativa
-            const updateProgress = () => {
-                let pts = 0;
-                if(emailIn.value.includes("@")) pts++;
-                if(window.employeeList[matIn.value]) pts++;
-                if(document.getElementById("data").value) pts++;
-                if(document.querySelector('input[name="folga"]:checked')) pts++;
-                prog.style.width = (pts/4)*100 + "%";
-            };
-
             matIn.addEventListener("blur", () => {
                 let val = matIn.value.replace(/\D/g,'');
                 if(!val) return;
                 const std = val.startsWith("1000") ? val : "1000" + val;
                 matIn.value = std;
-                document.getElementById("nome").value = window.employeeList[std] || "";
-                updateProgress();
+                document.getElementById("nome").value = window.employeeList[std] || "POLICIAL NÃO ENCONTRADO";
             });
-
-            document.querySelectorAll("input").forEach(i => i.addEventListener("change", updateProgress));
-
-            // Envio
-            document.getElementById("dersoForm").onsubmit = async (e) => {
-                e.preventDefault();
-                document.getElementById("loadingOverlay").style.display = "flex";
-                const fd = new FormData(e.target);
-                try {
-                    const resp = await fetch(`${SCRIPT_URL}?${new URLSearchParams(fd).toString()}`);
-                    const res = await resp.json();
-                    document.getElementById("loadingOverlay").style.display = "none";
-                    if(res.success) {
-                        document.getElementById("successDetail").innerText = `Solicitação para o dia ${fd.get("data")} registrada com sucesso.`;
-                        document.getElementById("successModal").style.display = "flex";
-                    }
-                } catch (err) { 
-                    document.getElementById("loadingOverlay").style.display = "none";
-                    alert("Erro ao enviar."); 
-                }
-            };
         }
     </script>
 </body>
