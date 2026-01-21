@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitação de Folga - DERSO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --azul-marinho: #2E5894; /* Azul conforme a imagem */
+            --azul-marinho: #2E5894;
             --ouro-velho: #C5A059; 
             --sucesso-bg: #E8F5E9;
             --sucesso-border: #4CAF50;
@@ -30,7 +30,6 @@
             position: relative;
         }
 
-        /* Barra Amarela no Topo */
         .top-bar {
             position: absolute; top: 0; left: 0; width: 100%; height: 4px;
             background: #FFD700; border-radius: 4px 4px 0 0;
@@ -40,24 +39,28 @@
         .logos { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
         .logos img { height: 65px; }
 
-        h2 { color: #1A3C6E; font-size: 26px; margin: 0; font-family: 'Roboto', sans-serif; }
+        h2 { color: #1A3C6E; font-size: 26px; margin: 0; }
         .divisor { width: 100%; height: 1px; background: #FFD700; margin: 15px 0; }
-        .subtitle { font-size: 14px; color: #333; line-height: 1.4; margin-bottom: 25px; }
+        .subtitle { font-size: 14px; color: #333; line-height: 1.4; margin-bottom: 25px; text-align: center; }
 
         /* QUADRO DO CRONÔMETRO */
         #prazoBox {
             background: var(--sucesso-bg);
             border-left: 5px solid var(--sucesso-border);
             padding: 15px; text-align: center;
-            border-radius: 4px; margin-bottom: 15px;
+            border-radius: 4px; margin-bottom: 10px;
         }
-        #prazoBox strong { color: #2E7D32; display: block; font-size: 15px; }
 
-        /* MENSAGEM INSTITUCIONAL ABAIXO DO CRONÔMETRO */
-        #instMessage {
-            font-size: 13px; color: #555; text-align: center;
-            margin-bottom: 25px; font-style: italic; padding: 0 10px;
+        /* NOVO: QUADRO DA MENSAGEM INSTITUCIONAL */
+        #instContainer {
+            border: 1px solid #ddd;
+            background-color: #fcfcfc;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            text-align: center;
         }
+        #instMessage { font-size: 13px; color: #555; font-weight: 500; }
 
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 14px; }
@@ -67,14 +70,13 @@
             border-radius: 4px; box-sizing: border-box; font-size: 15px;
         }
 
-        /* BOTÕES DE FOLGA */
-        .radio-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
         .radio-group input { display: none; }
         .radio-group label {
-            flex: 1 1 calc(25% - 8px); min-width: 60px;
-            padding: 8px 4px; border: 1px solid var(--borda);
+            flex: 1 1 calc(25% - 8px); min-width: 65px;
+            padding: 10px 2px; border: 1px solid var(--borda);
             text-align: center; cursor: pointer; border-radius: 4px;
-            font-size: 11px; font-weight: bold; background: #fff; color: #444;
+            font-size: 11px; font-weight: bold; background: #fff;
         }
         .radio-group input:checked + label {
             background: var(--azul-marinho); color: var(--ouro-velho);
@@ -84,20 +86,27 @@
         .btn {
             width: 100%; padding: 14px; border-radius: 4px; border: none;
             font-weight: bold; cursor: pointer; text-transform: uppercase;
-            font-size: 15px; letter-spacing: 0.5px; margin-top: 10px;
+            font-size: 14px; margin-top: 10px;
         }
         .btn-outline { background: #fff; color: var(--azul-marinho); border: 2px solid var(--azul-marinho); }
         .btn-primary { background: var(--azul-marinho); color: #fff; }
-        .btn-primary:hover { opacity: 0.9; }
+
+        /* MODAL DE HISTÓRICO */
+        .modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-content {
+            background: #fff; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px;
+        }
+        .history-list { max-height: 250px; overflow-y: auto; margin: 15px 0; font-size: 13px; }
 
         .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #888; }
-
-        /* Tela de Carregamento igual ao seu print */
         #loadingScreen { text-align: center; padding: 50px 0; }
         .spinner {
             border: 4px solid #f3f3f3; border-top: 4px solid var(--azul-marinho);
-            border-radius: 50%; width: 40px; height: 40px;
-            animation: spin 1s linear infinite; margin: 20px auto;
+            border-radius: 50%; width: 35px; height: 35px;
+            animation: spin 1s linear infinite; margin: 15px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -127,8 +136,8 @@
                 <strong id="timerDisplay">⌛ CALCULANDO PRAZO...</strong>
             </div>
 
-            <div id="instMessage">
-                🛡️ "Sentinela da Capital: Disciplina e Honra no Serviço ao Cidadão."
+            <div id="instContainer">
+                <div id="instMessage">Aguarde...</div>
             </div>
 
             <form id="dersoForm">
@@ -139,7 +148,7 @@
 
                 <div class="form-group">
                     <label>Matrícula:</label>
-                    <input type="text" name="matricula" id="matricula" placeholder="Ex: 12345 ou 100012345" required>
+                    <input type="text" name="matricula" id="matricula" placeholder="Ex: 1000xxxxx" required>
                 </div>
 
                 <div class="form-group">
@@ -154,20 +163,20 @@
                         <input type="radio" id="f48" name="folga" value="48H"><label for="f48">48H</label>
                         <input type="radio" id="f72" name="folga" value="72H"><label for="f72">72H</label>
                         <input type="radio" id="f96" name="folga" value="96H"><label for="f96">96H</label>
-                        <input type="radio" id="fLE" name="folga" value="FOLGA LE"><label for="fLE">FOLGA LE</label>
+                        <input type="radio" id="fLE" name="folga" value="FOLGA LE"><label for="fLE">LE</label>
                         <input type="radio" id="f1" name="folga" value="1ª Folga"><label for="f1">1ª FOLGA</label>
                         <input type="radio" id="f2" name="folga" value="2ª Folga"><label for="f2">2ª FOLGA</label>
-                        <input type="radio" id="fExp" name="folga" value="Expediente"><label for="fExp">EXPEDIENTE</label>
+                        <input type="radio" id="fExp" name="folga" value="Expediente"><label for="fExp">EXP</label>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Data:</label>
                     <input type="date" name="data" id="data" required>
-                    <small id="periodoPermitido" style="display:block; margin-top:5px; color:#666; font-size:11px;"></small>
+                    <small id="periodoLabel" style="display:block; margin-top:5px; color:#777; font-size:11px;"></small>
                 </div>
 
-                <button type="button" class="btn btn-outline">SOLICITAÇÕES FEITAS</button>
+                <button type="button" class="btn btn-outline" id="btnHistory">SOLICITAÇÕES FEITAS</button>
                 <button type="submit" class="btn btn-primary">ENVIAR SOLICITAÇÃO</button>
             </form>
         </div>
@@ -175,9 +184,53 @@
         <div class="footer" id="footerText"></div>
     </div>
 
+    <div id="modalHistory" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0; color:var(--azul-marinho);">Minhas Solicitações</h3>
+            <div id="historyBox" class="history-list">Digite sua matrícula para buscar.</div>
+            <button class="btn btn-primary" onclick="document.getElementById('modalHistory').style.display='none'">Fechar</button>
+        </div>
+    </div>
+
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3FuQoK3JEZJl6zF2H1dTXNI4xAHgTKBk1g5oFhsR0LedGoVJP6xeipdJN2A9TJiv7wA/exec";
         window.employeeList = {};
+
+        function applyInstitutionalTheme() {
+            const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
+            const instDiv = document.getElementById("instMessage");
+            const aplicar = (msg) => instDiv.innerHTML = msg;
+
+            const temas = {
+                "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história, bravura e compromisso.`),
+                "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
+                "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
+                "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear() - 1889} anos de Proclamação.`),
+                "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
+                "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição e compromisso.`)
+            };
+
+            const chave = `${mes+1}-${dia}`;
+            if (temas[chave]) {
+                temas[chave]();
+            } else {
+                const mensais = {
+                    0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos."),
+                    1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
+                    2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda."),
+                    3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
+                    4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão."),
+                    5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade."),
+                    6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
+                    7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional."),
+                    8: () => aplicar("🇧🇷 Setembro: Renovando nosso juramento de servir e proteger o Brasil."),
+                    9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
+                    10: () => aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade. ${hoje.getFullYear() - 1889}º ano da República.`),
+                    11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. ✨")
+                };
+                if (mensais[mes]) mensais[mes]();
+            }
+        }
 
         document.addEventListener("DOMContentLoaded", async () => {
             try {
@@ -191,24 +244,23 @@
                 document.getElementById("loadingScreen").style.display = "none";
                 document.getElementById("formContent").style.display = "block";
                 
+                applyInstitutionalTheme();
                 startCountdown(config.fechamento);
-                setupForm(config);
+                setupForm();
             } catch (e) {
-                document.getElementById("loadingScreen").innerHTML = "<p style='color:red'>Erro ao carregar dados.</p>";
+                document.getElementById("loadingScreen").innerHTML = "<p style='color:red'>Erro de conexão.</p>";
             }
         });
 
         function startCountdown(endTime) {
             const display = document.getElementById("timerDisplay");
             const end = new Date(endTime).getTime();
-
             setInterval(() => {
                 const now = new Date().getTime();
                 const diff = end - now;
                 if (diff <= 0) {
                     display.innerHTML = "⛔ FORMULÁRIO ENCERRADO";
                     document.getElementById("dersoForm").style.opacity = "0.5";
-                    document.getElementById("dersoForm").style.pointerEvents = "none";
                     return;
                 }
                 const d = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -219,7 +271,7 @@
             }, 1000);
         }
 
-        function setupForm(config) {
+        function setupForm() {
             const matIn = document.getElementById("matricula");
             matIn.addEventListener("blur", () => {
                 let val = matIn.value.replace(/\D/g,'');
@@ -229,16 +281,28 @@
                 document.getElementById("nome").value = window.employeeList[std] || "NÃO ENCONTRADO";
             });
 
-            // Configura período permitido no campo data
-            const hoje = new Date();
-            const mesSeguinte = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
-            const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
-            
-            document.getElementById("periodoPermitido").innerText = 
-                `Período permitido: ${mesSeguinte.toLocaleDateString('pt-BR')} a ${ultimoDia.toLocaleDateString('pt-BR')}.`;
+            // Lógica do Histórico
+            document.getElementById("btnHistory").onclick = async () => {
+                const matricula = matIn.value;
+                if(!matricula) return alert("Digite a matrícula primeiro.");
+                
+                document.getElementById("modalHistory").style.display = "flex";
+                document.getElementById("historyBox").innerHTML = "Buscando...";
+                
+                const resp = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
+                const data = await resp.json();
+                
+                if(data.length === 0) {
+                    document.getElementById("historyBox").innerHTML = "Nenhuma solicitação encontrada.";
+                } else {
+                    document.getElementById("historyBox").innerHTML = data.map(i => 
+                        `<div style="padding:8px; border-bottom:1px solid #eee;">📅 ${i.data} - <strong>${i.folga}</strong></div>`
+                    ).join('');
+                }
+            };
 
-            const footer = document.getElementById("footerText");
-            footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
+            const hoje = new Date();
+            document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
         }
     </script>
 </body>
