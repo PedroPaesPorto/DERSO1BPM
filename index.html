@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitação de Folga - DERSO</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* 1. PALETA DE CORES INSTITUCIONAL */
         :root {
             --azul-marinho: #0C3667; 
-            --dourado-amarelo: #FFD700; 
+            --dourado-amarelo: #C5A059; /* Tom Ouro Velho/Latão solicitado */
             --azul-claro-hover: #1a5ca7; 
             --erro: #b00020; 
             --sucesso: #388e3c; 
@@ -20,13 +18,11 @@
             --borda-campo: #aaa;
         }
 
-        /* 2. TIPOGRAFIA E FUNDO */
         body {
             background-color: var(--cinza-fundo);
             font-family: 'Roboto', Arial, sans-serif;
             color: var(--cinza-texto);
             margin: 0;
-            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -41,10 +37,9 @@
             padding: 30px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             border: 1px solid #ccc;
-            box-sizing: border-box;
+            position: relative;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
         #progressBarContainer {
@@ -68,334 +63,167 @@
         .logos {
             display: flex;
             justify-content: center;
-            align-items: center;
             gap: 15px;
             margin-bottom: 15px;
         }
 
-        .logos img {
-            height: 70px;
-            object-fit: contain;
-        }
+        .logos img { height: 70px; object-fit: contain; }
 
         h2 {
             font-family: 'Merriweather', serif;
             text-align: center;
             color: var(--azul-marinho);
             font-size: 28px;
-            font-weight: 700;
             margin-bottom: 10px;
-            line-height: 1.2;
-            letter-spacing: -0.5px;
             border-bottom: 2px solid var(--dourado-amarelo);
             padding-bottom: 5px;
         }
 
-        .subtitle {
-            text-align: center;
-            color: var(--cinza-texto);
-            font-size: 16px;
-            margin-bottom: 25px;
-        }
+        .subtitle { text-align: center; font-size: 14px; margin-bottom: 20px; line-height: 1.4; }
 
-        .form-group, fieldset {
-            margin-bottom: 20px;
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 700; color: var(--azul-marinho); }
+
+        input:not([type="radio"]), select {
             width: 100%;
-            border: none;
-            padding: 0;
-        }
-
-        label, legend {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--cinza-texto);
-            font-weight: 500;
-            font-size: 15px;
-        }
-
-        .form-group input:not([type="radio"]),
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            font-size: 15px;
+            padding: 12px;
             border: 1px solid var(--borda-campo);
-            border-radius: 4px; 
+            border-radius: 4px;
             box-sizing: border-box;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .form-group input:not([type="radio"]):focus,
-        .form-group select:focus {
-            border-color: var(--azul-claro-hover);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(12, 54, 103, 0.2);
-        }
-
-        input[readonly] {
-            background-color: #e9ecef;
-            cursor: not-allowed;
-        }
-
-        .radio-group-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px; 
-            margin-top: 10px;
-        }
-
-        .radio-group-buttons input[type="radio"] {
-            display: none;
-        }
-
+        /* ESTILO MILITAR NOS BOTÕES */
+        .radio-group-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+        .radio-group-buttons input { display: none; }
         .radio-group-buttons label {
-            padding: 8px 10px; 
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 13px; 
-            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-            user-select: none;
+            font-size: 12px;
+            font-weight: 800;
+            flex: 1 1 calc(33% - 10px);
+            text-align: center;
+            background-color: #eee;
+            color: #666;
             text-transform: uppercase;
-            font-weight: 500;
         }
 
-        .radio-group-buttons input[type="radio"]:checked + label {
+        .radio-group-buttons input:checked + label {
             background-color: var(--azul-marinho);
-            color: var(--dourado-amarelo);
+            color: var(--dourado-amarelo); /* Letra Ouro Velho */
             border-color: var(--azul-marinho);
-            font-weight: 700;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .radio-group-buttons label:hover {
-            background-color: #e0e0e0;
-            border-color: var(--azul-claro-hover);
         }
 
         .button {
-            background-color: var(--azul-claro-hover);
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            padding: 14px 20px;
-            font-size: 16px;
-            font-weight: 700;
-            border-radius: 4px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            display: block;
             width: 100%;
-            box-sizing: border-box;
+            padding: 15px;
+            background-color: var(--azul-marinho);
+            color: var(--dourado-amarelo);
+            border: none;
+            border-radius: 4px;
+            font-weight: 800;
+            cursor: pointer;
             text-transform: uppercase;
+            margin-top: 10px;
         }
 
         .button.secondary {
-            background-color: #fff;
+            background-color: transparent;
             color: var(--azul-marinho);
             border: 1px solid var(--azul-marinho);
-            margin-bottom: 10px;
-        }
-
-        .button:hover {
-            background-color: var(--azul-marinho); 
-            transform: translateY(-1px);
-        }
-        
-        .button.secondary:hover {
-            background-color: #f0f0f0;
-            color: var(--azul-marinho);
-        }
-
-        .error {
-            color: var(--erro);
-            margin-top: 5px;
-            font-size: 13px;
-            font-weight: 600; 
-            padding-left: 5px;
+            margin-bottom: 5px;
         }
 
         .info-message {
             text-align: center;
+            padding: 12px;
+            margin-bottom: 20px;
             border-radius: 4px;
-            font-size: 15px;
-            font-weight: 600;
-            line-height: 1.4;
-            display: none;
-            margin-bottom: 25px;
-            padding: 12px 15px;
-            border-left: 5px solid; 
-        }
-
-        .info-message.success {
-            background-color: #e8f5e9; 
+            font-weight: bold;
+            display: none; /* Mostra via JS */
+            border-left: 5px solid var(--sucesso);
+            background: #e8f5e9;
             color: var(--sucesso);
-            border-left-color: var(--sucesso);
         }
 
-        .info-message.error {
-            background-color: #fce4ec; 
-            color: var(--erro);
-            border-left-color: var(--erro);
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 25px;
-            font-size: 12px;
-            color: #777;
-        }
-
-        /* ESTILOS DO MODAL DE HISTÓRICO */
-        .modal-base {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        .modal-content {
-            background: #fff;
-            padding: 25px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 450px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .history-list {
-            list-style: none;
-            padding: 0;
-            margin: 15px 0;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .history-list li {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-        }
-
-        #loadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9); 
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-size: 18px;
-            color: var(--azul-marinho);
-            flex-direction: column;
-            text-align: center;
-        }
+        .footer { text-align: center; margin-top: 20px; font-size: 11px; color: #777; }
 
         .spinner {
-            border: 4px solid rgba(12, 54, 103, 0.2);
-            border-top: 4px solid var(--azul-claro-hover); 
+            border: 4px solid rgba(0,0,0,0.1);
+            border-top: 4px solid var(--azul-marinho);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 30px; height: 30px;
             animation: spin 1s linear infinite;
-            margin-top: 15px;
+            margin: 20px auto;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div id="loadingOverlay">
-        <p>Aguarde...</p>
-        <div class="spinner"></div>
-    </div>
-
-    <div class="container" id="formulario">
+    <div class="container">
         <div id="progressBarContainer"><div id="progressBar"></div></div>
         
+        <div id="prazoMessage" class="info-message">Calculando prazo...</div>
+
         <div class="logos">
             <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
             <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1º BPM">
         </div>
 
         <h2>DERSO 1º BPM</h2>
-        <p class="subtitle">Formulário de Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO </p>
+        <p class="subtitle">Formulário de Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO</p>
 
-        <div id="prazoMessage" class="info-message success" style="margin-bottom: 25px;"></div>
-
-        <div id="initialLoading" style="text-align: center; padding: 50px; color: var(--azul-marinho);">
-            <p>Carregando dados do sistema...</p>
+        <div id="initialLoading">
+            <p style="text-align:center">Carregando dados do sistema...</p>
             <div class="spinner"></div>
         </div>
 
         <form id="dersoForm" style="display: none;">
             <div class="form-group">
-                <label for="email">E-mail:</label>
-                <input type="email" id="email" name="email" list="emailProviders" required>
-                <datalist id="emailProviders"></datalist>
+                <label>E-MAIL PARA CONFIRMAÇÃO:</label>
+                <input type="email" id="email" name="email" required>
             </div>
 
             <div class="form-group">
-                <label for="matricula">Matrícula:</label>
-                <input type="text" id="matricula" name="matricula" required placeholder="Ex: 12345 ou 100012345">
-                <div id="matriculaError" class="error"></div>
+                <label>MATRÍCULA:</label>
+                <input type="text" id="matricula" name="matricula" required placeholder="Ex: 1000xxxxx">
             </div>
 
             <div class="form-group">
-                <label for="nome">Nome:</label>
-                <input type="text" id="nome" name="nome" readonly required>
+                <label>NOME COMPLETO:</label>
+                <input type="text" id="nome" name="nome" readonly style="background:#eee;">
             </div>
 
-            <fieldset>
-                <legend>Tipo de Folga:</legend>
+            <div class="form-group">
+                <label>TIPO DE FOLGA:</label>
                 <div class="radio-group-buttons">
-                    <input type="radio" id="folga24H" name="folga" value="24H" required><label for="folga24H">24H</label>
-                    <input type="radio" id="folga48H" name="folga" value="48H"><label for="folga48H">48H</label>
-                    <input type="radio" id="folga72H" name="folga" value="72H"><label for="folga72H">72H</label>
-                    <input type="radio" id="folga96H" name="folga" value="96H"><label for="folga96H">96H</label>
-                    <input type="radio" id="folgaLE" name="folga" value="FOLGA LE"><label for="folgaLE">FOLGA LE</label>
-                    <input type="radio" id="folga1" name="folga" value="1ª Folga"><label for="folga1">1ª FOLGA</label>
-                    <input type="radio" id="folga2" name="folga" value="2ª Folga"><label for="folga2">2ª FOLGA</label>
-                    <input type="radio" id="folgaExp" name="folga" value="Expediente"><label for="folgaExp">EXPEDIENTE</label>
+                    <input type="radio" id="f24" name="folga" value="24H" required><label for="f24">24H</label>
+                    <input type="radio" id="f48" name="folga" value="48H"><label for="f48">48H</label>
+                    <input type="radio" id="fLE" name="folga" value="FOLGA LE"><label for="fLE">LE</label>
+                    <input type="radio" id="fExp" name="folga" value="Expediente"><label for="fExp">EXP</label>
                 </div>
-                <div id="duplicateError" class="error"></div>
-            </fieldset>
-
-            <div class="form-group">
-                <label for="data">Data:</label>
-                <input type="date" id="data" name="data" required>
-                <div id="dateLimitMessage" class="subtitle" style="margin-top: 5px; margin-bottom: 0; font-size: 13px; text-align: left;"></div>
             </div>
 
-            <button type="button" class="button secondary" id="btnHistory">SOLICITAÇÕES FEITAS</button>
+            <div class="form-group">
+                <label>DATA DO DERSO:</label>
+                <input type="date" id="data" name="data" required>
+            </div>
+
+            <button type="button" class="button secondary">SOLICITAÇÕES FEITAS</button>
             <button type="submit" class="button">Enviar Solicitação</button>
         </form>
-        
-        <div id="statusMessage" class="info-message"></div>
-        <div class="footer" id="footerText"></div>
-    </div>
 
-    <div id="historyModal" class="modal-base">
-        <div class="modal-content">
-            <h3 style="color:var(--azul-marinho);margin-top:0">Meu Histórico</h3>
-            <div id="historyBox" class="history-list">Carregando...</div>
-            <button type="button" class="button" id="closeHistory">Fechar</button>
-        </div>
+        <div class="footer" id="footerText"></div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3FuQoK3JEZJl6zF2H1dTXNI4xAHgTKBk1g5oFhsR0LedGoVJP6xeipdJN2A9TJiv7wA/exec";
         window.employeeList = {};
 
-        // SIMULAÇÃO DE CARREGAMENTO PARA MOSTRAR A TELA
         document.addEventListener("DOMContentLoaded", async () => {
             try {
-                // Busca os dados simultaneamente
                 const [dResp, lResp] = await Promise.all([
                     fetch(`${SCRIPT_URL}?action=datas`),
                     fetch(`${SCRIPT_URL}?action=lista`)
@@ -404,36 +232,43 @@
                 const config = await dResp.json();
                 window.employeeList = await lResp.json();
 
-                // Após carregar, esconde o loading e mostra o form
+                // CORREÇÃO: Exibe o cronômetro e o formulário
                 document.getElementById("initialLoading").style.display = "none";
-                document.getElementById("formWrapper").style.display = "block";
+                document.getElementById("prazoMessage").style.display = "block";
+                document.getElementById("dersoForm").style.display = "block";
                 document.getElementById("progressBar").style.width = "100%";
                 
                 startCountdown(config.fechamento);
                 setupLogic();
             } catch (e) {
-                document.getElementById("initialLoading").innerHTML = "<p style='color:red'>Erro ao conectar com o servidor.</p>";
+                document.getElementById("initialLoading").innerHTML = "<p style='color:red'>Erro de conexão.</p>";
             }
         });
 
         function startCountdown(endTime) {
-            const timer = document.getElementById("prazoCountdown");
+            const timerDisplay = document.getElementById("prazoMessage");
             const end = new Date(endTime).getTime();
 
-            setInterval(() => {
+            const interval = setInterval(() => {
                 const now = new Date().getTime();
                 const diff = end - now;
+
                 if (diff < 0) {
-                    timer.innerHTML = "⛔ PRAZO ENCERRADO";
+                    clearInterval(interval);
+                    timerDisplay.innerHTML = "⛔ PRAZO ENCERRADO";
+                    timerDisplay.style.background = "#ffebee";
+                    timerDisplay.style.color = "#c62828";
                     document.getElementById("dersoForm").style.opacity = "0.5";
                     document.getElementById("dersoForm").style.pointerEvents = "none";
                     return;
                 }
+
                 const d = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const s = Math.floor((diff % (1000 * 60)) / 1000);
-                timer.innerHTML = `⏳ FECHA EM: ${d}d ${h}h ${m}m ${s}s`;
+
+                timerDisplay.innerHTML = `⏳ FECHA EM: ${d}d ${h}h ${m}m ${s}s`;
             }, 1000);
         }
 
@@ -444,10 +279,10 @@
                 if(!val) return;
                 const std = val.startsWith("1000") ? val : "1000" + val;
                 matIn.value = std;
-                document.getElementById("nome").value = window.employeeList[std] || "POLICIAL NÃO ENCONTRADO";
+                document.getElementById("nome").value = window.employeeList[std] || "NÃO ENCONTRADO";
             });
 
-             // Atualiza o rodapé com mês/ano atual
+            const footer = document.getElementById("footerText");
             const now = new Date();
             footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
         }
