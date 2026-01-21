@@ -314,6 +314,26 @@
             const dataIn = document.getElementById("data");
             const nomeIn = document.getElementById("nome");
 
+            // --- LÓGICA DE CALENDÁRIO: SOMENTE MÊS POSTERIOR ---
+            const hoje = new Date();
+            // Primeiro dia do mês que vem
+            const inicioProxMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+            // Último dia do mês que vem (dia 0 do mês seguinte ao próximo)
+            const fimProxMes = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
+
+            const formatarParaInput = (d) => d.toISOString().split('T')[0];
+
+            dataIn.min = formatarParaInput(inicioProxMes);
+            dataIn.max = formatarParaInput(fimProxMes);
+
+            // Atualiza o texto de instrução abaixo da data
+            const labelPeriodo = document.getElementById("periodoLabel");
+            if(labelPeriodo) {
+                labelPeriodo.innerText = `Calendário restrito a: ${inicioProxMes.toLocaleDateString('pt-BR')} até ${fimProxMes.toLocaleDateString('pt-BR')}`;
+            }
+            console.log(`[LOG] Datas permitidas: ${dataIn.min} até ${dataIn.max}`);
+            // --- FIM DA LÓGICA DE CALENDÁRIO ---
+
             // ADICIONADO: Evento para E-mail
             emailIn.addEventListener("input", () => {
                 if(emailIn.value.includes('@')) {
@@ -390,7 +410,6 @@
                 }
             };
 
-            const hoje = new Date();
             document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
         }
     </script>
