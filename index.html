@@ -133,6 +133,41 @@
             animation: spin 1s linear infinite; margin: 15px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Melhora os ícones do topo */
+.header-icons i, .header-icons img {
+    width: 55px !important; /* Ajuste o seletor conforme seu HTML */
+    height: auto;
+    margin: 10px;
+}
+
+/* Mensagem Institucional menos tímida */
+#instMessage {
+    font-size: 1.1rem;
+    font-style: italic;
+    font-weight: 500;
+    color: #1a237e;
+    background: rgba(212, 175, 55, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #D4AF37;
+    margin: 20px 0;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Ajuste para inputs no Mobile (evita zoom indesejado no iPhone) */
+input, select, textarea {
+    font-size: 16px !important;
+}
+
+/* Botão de envio maior para o polegar no celular */
+#btnEnviar {
+    padding: 15px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+        
     </style>
 </head>
 <body>
@@ -255,7 +290,21 @@
             ];
             const concluidos = campos.filter(Boolean).length;
             const porcentagem = (concluidos / campos.length) * 100;
-            document.getElementById('barraProgresso').style.width = porcentagem + "%";
+            
+            const barra = document.getElementById('barraProgresso');
+            barra.style.width = porcentagem + "%";
+
+            // Lógica de Cores: Dourado enquanto preenche, Verde quando termina
+            if (porcentagem < 100) {
+                barra.style.backgroundColor = "#D4AF37"; // Dourado Institucional
+                barra.style.boxShadow = "none";
+            } else {
+                barra.style.backgroundColor = "#2e7d32"; // Verde "Vencedor"
+                barra.style.boxShadow = "0 0 10px rgba(46, 125, 50, 0.5)"; // Glow de sucesso
+                
+                // Efeito de vibração ao completar 100% (se o celular suportar)
+                if (navigator.vibrate) navigator.vibrate(50);
+            }
         }
 
         function applyInstitutionalTheme() {
@@ -314,24 +363,40 @@
             }
         });
 
-        function startCountdown(endTime) {
-            const display = document.getElementById("timerDisplay");
+       function startCountdown(endTime) {
+            const display = document.getElementById("timerDisplay"); // Certifique-se que o ID do container é este
             const end = new Date(endTime).getTime();
+            
             const interval = setInterval(() => {
                 const now = new Date().getTime();
                 const diff = end - now;
+                
                 if (diff <= 0) {
-                    display.innerHTML = "⛔ FORMULÁRIO ENCERRADO";
+                    display.innerHTML = "<b>⛔ FORMULÁRIO ENCERRADO</b>";
+                    display.parentElement.style.backgroundColor = "#ffebee";
                     document.getElementById("dersoForm").style.opacity = "0.5";
                     document.getElementById("dersoForm").style.pointerEvents = "none";
                     clearInterval(interval);
                     return;
                 }
+
                 const d = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const s = Math.floor((diff % (1000 * 60)) / 1000);
-                display.innerHTML = `🚨 **FORMULÁRIO ABERTO!**<br>Encerra em: **${d}d ${h}h ${m}m ${s}s**`;
+
+                // Aplicação de Urgência Visual
+                const container = display.parentElement;
+                if (diff < 1000 * 60 * 60) { // Menos de 1 hora: Vermelho e Alerta Máximo
+                    container.style.backgroundColor = "#ffcdd2";
+                    container.style.borderLeft = "5px solid #d32f2f";
+                    if (s % 2 === 0) display.style.color = "#d32f2f"; else display.style.color = "black";
+                } else if (diff < 1000 * 60 * 60 * 24) { // Menos de 24 horas: Alerta Laranja
+                    container.style.backgroundColor = "#fff9c4";
+                    container.style.borderLeft = "5px solid #fbc02d";
+                }
+
+                display.innerHTML = `🚨 <b>FORMULÁRIO ABERTO!</b><br>Encerra em: <b>${d}d ${h}h ${m}m ${s}s</b>`;
             }, 1000);
         }
 
@@ -357,20 +422,31 @@
                 atualizarProgresso();
             });
 
-            matIn.addEventListener("blur", () => {
+           matIn.addEventListener("blur", () => {
                 let val = matIn.value.replace(/\D/g,'');
                 if(!val) return;
+                
+                // Mantém sua padronização de matrícula 1000...
                 const std = val.startsWith("1000") ? val : "1000" + val;
                 matIn.value = std;
+                
                 const policialNome = window.employeeList[std];
+                
                 if (policialNome) {
                     nomeIn.value = policialNome;
                     matIn.classList.add('campo-validado');
                     nomeIn.classList.add('campo-validado');
+                    
+                    // Efeito de vibração curta ao encontrar o policial (sucesso)
+                    if (navigator.vibrate) navigator.vibrate(40); 
+                    
                 } else {
                     nomeIn.value = "NÃO ENCONTRADO";
                     matIn.classList.remove('campo-validado');
                     nomeIn.classList.remove('campo-validado');
+                    
+                    // Vibração dupla rápida indicando erro (opcional)
+                    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
                 }
                 atualizarProgresso();
             });
