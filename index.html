@@ -15,6 +15,7 @@
             --cinza-fundo: #F0F2F5;
             --borda: #ccc;
             --sombra-validacao: 0 0 10px rgba(76, 175, 80, 0.5);
+            --alerta-vermelho: #d32f2f;
         }
 
         body {
@@ -39,8 +40,15 @@
 
         #barraProgresso {
             position: absolute; top: 0; left: 0; width: 0%; height: 4px;
-            background: var(--sucesso-border); border-radius: 4px 4px 0 0;
-            transition: width 0.4s ease; z-index: 3;
+            background: var(--ouro-velho); /* Começa dourada conforme solicitado */
+            border-radius: 4px 4px 0 0;
+            transition: width 0.4s ease, background-color 0.3s ease; z-index: 3;
+        }
+
+        /* Classe para ativar o verde "vencedor" no final via JS */
+        .barra-completa {
+            background-color: var(--sucesso-border) !important;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
         }
 
         .campo-validado {
@@ -50,35 +58,63 @@
 
         .header { text-align: center; margin-bottom: 20px; }
         .logos { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        .logos img { height: 65px; }
+        
+        /* Ícones maiores para facilitar a leitura e o toque */
+        .logos img { 
+            height: 75px; 
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
 
         h2 { color: #1A3C6E; font-size: 26px; margin: 0; }
         .divisor { width: 100%; height: 1px; background: #FFD700; margin: 15px 0; }
         .subtitle { font-size: 14px; color: #333; line-height: 1.4; margin-bottom: 25px; text-align: center; }
 
+        /* Timer com suporte a animação de urgência */
         #prazoBox {
             background: var(--sucesso-bg);
             border-left: 5px solid var(--sucesso-border);
             padding: 15px; text-align: center;
-            border-radius: 4px; margin-bottom: 10px;
+            border-radius: 4px; margin-bottom: 15px;
+            transition: all 0.3s ease;
         }
 
-        #instContainer {
-            border: 1px solid #ddd;
-            background-color: #fcfcfc;
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 25px;
-            text-align: center;
+        /* Classe de cintilação para urgência máxima */
+        .timer-urgente {
+            animation: cintilar 0.8s infinite alternate;
+            border-left-color: var(--alerta-vermelho) !important;
+            background-color: #fff1f0 !important;
         }
-        #instMessage { font-size: 13px; color: #555; font-weight: 500; }
+
+        @keyframes cintilar {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0.8; transform: scale(0.98); color: var(--alerta-vermelho); }
+        }
+
+        /* Mensagem Institucional limpa (sem quadro cinza externo) */
+        #instContainer { border: none; background: none; margin-bottom: 5px; padding: 0; }
+        
+        #instMessage {
+            font-size: 1rem;
+            font-style: italic;
+            font-weight: 500;
+            color: #1a237e;
+            background: rgba(197, 160, 89, 0.1); /* Fundo ouro sutil */
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--ouro-velho);
+            margin: 10px auto 25px auto;
+            text-align: center;
+            line-height: 1.4;
+            max-width: 95%;
+        }
 
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 14px; }
         
+        /* Prevenção de zoom automático no iPhone (font-size: 16px) */
         input:not([type="radio"]) {
             width: 100%; padding: 12px; border: 1px solid var(--borda);
-            border-radius: 4px; box-sizing: border-box; font-size: 15px;
+            border-radius: 4px; box-sizing: border-box; font-size: 16px;
             transition: all 0.3s ease;
         }
 
@@ -86,9 +122,9 @@
         .radio-group input { display: none; }
         .radio-group label {
             flex: 1 1 calc(25% - 8px); min-width: 65px;
-            padding: 10px 2px; border: 1px solid var(--borda);
+            padding: 12px 2px; border: 1px solid var(--borda);
             text-align: center; cursor: pointer; border-radius: 4px;
-            font-size: 11px; font-weight: bold; background: #fff;
+            font-size: 12px; font-weight: bold; background: #fff;
             transition: all 0.2s;
         }
         .radio-group input:checked + label {
@@ -97,12 +133,12 @@
         }
 
         .btn {
-            width: 100%; padding: 14px; border-radius: 4px; border: none;
+            width: 100%; padding: 16px; border-radius: 4px; border: none;
             font-weight: bold; cursor: pointer; text-transform: uppercase;
-            font-size: 14px; margin-top: 10px;
+            font-size: 15px; margin-top: 10px;
         }
         .btn-outline { background: #fff; color: var(--azul-marinho); border: 2px solid var(--azul-marinho); }
-        .btn-primary { background: var(--azul-marinho); color: #fff; }
+        .btn-primary { background: var(--azul-marinho); color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
         /* MODAIS */
         .modal {
@@ -133,42 +169,8 @@
             animation: spin 1s linear infinite; margin: 15px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Melhora os ícones do topo */
-.header-icons i, .header-icons img {
-    width: 55px !important; /* Ajuste o seletor conforme seu HTML */
-    height: auto;
-    margin: 10px;
-}
-
-/* Mensagem Institucional menos tímida */
-#instMessage {
-    font-size: 1.1rem;
-    font-style: italic;
-    font-weight: 500;
-    color: #1a237e;
-    background: rgba(212, 175, 55, 0.1);
-    padding: 15px;
-    border-radius: 8px;
-    border-left: 4px solid #D4AF37;
-    margin: 20px 0;
-    text-align: center;
-    line-height: 1.4;
-}
-
-/* Ajuste para inputs no Mobile (evita zoom indesejado no iPhone) */
-input, select, textarea {
-    font-size: 16px !important;
-}
-
-/* Botão de envio maior para o polegar no celular */
-#btnEnviar {
-    padding: 15px;
-    font-weight: bold;
-    letter-spacing: 1px;
-}
-        
-    </style>
+</style>
+    
 </head>
 <body>
 
@@ -281,29 +283,27 @@ input, select, textarea {
             if (e.key === "Escape") fecharModais();
         });
 
-        function atualizarProgresso() {
-            const campos = [
-                document.getElementById('email').value.includes('@'),
-                document.getElementById('nome').value !== "" && document.getElementById('nome').value !== "NÃO ENCONTRADO",
-                document.querySelector('input[name="folga"]:checked') !== null,
-                document.getElementById('data').value !== ""
-            ];
+       function atualizarProgresso() {
+            const emailVal = document.getElementById('email').value.includes('@');
+            const nomeVal = document.getElementById('nome').value !== "" && document.getElementById('nome').value !== "NÃO ENCONTRADO";
+            const folgaVal = document.querySelector('input[name="folga"]:checked') !== null;
+            const dataVal = document.getElementById('data').value !== "";
+
+            const campos = [emailVal, nomeVal, folgaVal, dataVal];
             const concluidos = campos.filter(Boolean).length;
             const porcentagem = (concluidos / campos.length) * 100;
             
             const barra = document.getElementById('barraProgresso');
             barra.style.width = porcentagem + "%";
 
-            // Lógica de Cores: Dourado enquanto preenche, Verde quando termina
             if (porcentagem < 100) {
-                barra.style.backgroundColor = "#D4AF37"; // Dourado Institucional
+                barra.style.backgroundColor = "#D4AF37"; // Dourado
+                barra.classList.remove('barra-completa');
                 barra.style.boxShadow = "none";
             } else {
-                barra.style.backgroundColor = "#2e7d32"; // Verde "Vencedor"
-                barra.style.boxShadow = "0 0 10px rgba(46, 125, 50, 0.5)"; // Glow de sucesso
-                
-                // Efeito de vibração ao completar 100% (se o celular suportar)
-                if (navigator.vibrate) navigator.vibrate(50);
+                barra.style.backgroundColor = "#2e7d32"; // Verde
+                barra.classList.add('barra-completa');
+                if (navigator.vibrate) navigator.vibrate(50); // Vibra ao completar
             }
         }
 
@@ -387,14 +387,14 @@ input, select, textarea {
 
                 // Aplicação de Urgência Visual
                 const container = display.parentElement;
-                if (diff < 1000 * 60 * 60) { // Menos de 1 hora: Vermelho e Alerta Máximo
-                    container.style.backgroundColor = "#ffcdd2";
-                    container.style.borderLeft = "5px solid #d32f2f";
-                    if (s % 2 === 0) display.style.color = "#d32f2f"; else display.style.color = "black";
-                } else if (diff < 1000 * 60 * 60 * 24) { // Menos de 24 horas: Alerta Laranja
-                    container.style.backgroundColor = "#fff9c4";
-                    container.style.borderLeft = "5px solid #fbc02d";
-                }
+if (diff < 1000 * 60 * 60) { // Menos de 1 hora
+    container.classList.add('timer-urgente'); // Isso ativa a cintilação do CSS
+    if (s % 2 === 0) display.style.color = "#d32f2f"; else display.style.color = "black";
+} else if (diff < 1000 * 60 * 60 * 24) { // Menos de 24 horas
+    container.style.backgroundColor = "#fff9c4";
+    container.style.borderLeft = "5px solid #fbc02d";
+    container.classList.remove('timer-urgente');
+}
 
                 display.innerHTML = `🚨 <b>FORMULÁRIO ABERTO!</b><br>Encerra em: <b>${d}d ${h}h ${m}m ${s}s</b>`;
             }, 1000);
