@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitação de Folga - DERSO</title>
+    <title>Solicitação de Folga - DERSO 1º BPM</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --azul-marinho: #2E5894;
-            --ouro-velho: #C5A059; 
+            --azul-marinho: #1A3C6E;
+            --ouro-brilhante: #FFD700; /* Unificado conforme solicitado */
             --sucesso-bg: #E8F5E9;
-            --sucesso-border: #4CAF50;
+            --sucesso-border: #2E7D32;
             --cinza-fundo: #F0F2F5;
             --borda: #ccc;
-            --sombra-validacao: 0 0 10px rgba(76, 175, 80, 0.5);
-            --alerta-vermelho: #d32f2f;
+            --alerta-vermelho: #D32F2F;
+            --raio-padrao: 8px; /* Padronizado */
         }
 
         body {
@@ -27,205 +27,163 @@
 
         .container {
             width: 100%; max-width: 500px;
-            background: #fff; border-radius: 4px;
+            background: #fff; border-radius: var(--raio-padrao);
             padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            position: relative;
+            position: relative; overflow: hidden;
         }
 
-        .top-bar {
-            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: #FFD700; border-radius: 4px 4px 0 0;
-            z-index: 2;
-        }
-
+        /* Barra de Progresso Unificada */
         #barraProgresso {
-            position: absolute; top: 0; left: 0; width: 0%; height: 4px;
-            background: var(--ouro-velho); 
-            border-radius: 4px 4px 0 0;
+            position: absolute; top: 0; left: 0; width: 0%; height: 6px;
+            background: var(--ouro-brilhante); 
             transition: width 0.4s ease, background-color 0.3s ease; z-index: 3;
         }
 
-        .barra-completa {
-            background-color: var(--sucesso-border) !important;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-        }
-
-        .campo-validado {
-            border-color: var(--sucesso-border) !important;
-            box-shadow: var(--sombra-validacao) !important;
-        }
+        .barra-completa { background-color: var(--sucesso-border) !important; }
 
         .header { text-align: center; margin-bottom: 20px; }
-        .logos { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        
-        .logos img { 
-            height: 75px; 
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-        }
+        .logos { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
+        .logos img { height: 75px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
 
-        h2 { color: #1A3C6E; font-size: 26px; margin: 0; }
-        .divisor { width: 100%; height: 1px; background: #FFD700; margin: 15px 0; }
-        .subtitle { font-size: 14px; color: #333; line-height: 1.4; margin-bottom: 25px; text-align: center; }
+        h2 { color: var(--azul-marinho); font-size: 24px; margin: 0; text-transform: uppercase; }
+        .divisor { width: 100%; height: 2px; background: var(--ouro-brilhante); margin: 15px 0; }
+        
+        .subtitle { font-size: 14px; color: #444; line-height: 1.4; margin-bottom: 20px; font-weight: 500; }
 
         #prazoBox {
-            background: var(--sucesso-bg);
-            border-left: 5px solid var(--sucesso-border);
-            padding: 15px; text-align: center;
-            border-radius: 4px; margin-bottom: 15px;
-            transition: all 0.3s ease;
+            background: var(--sucesso-bg); border-left: 5px solid var(--sucesso-border);
+            padding: 12px; text-align: center; border-radius: 4px; margin-bottom: 15px;
         }
 
+        /* Animação de urgência controlada para performance */
         .timer-urgente {
-            animation: cintilar 0.8s infinite alternate;
-            border-left-color: var(--alerta-vermelho) !important;
-            background-color: #fff1f0 !important;
+            animation: pulse-red 1s infinite alternate;
+            border-left-color: var(--alerta-vermelho);
         }
+        @keyframes pulse-red { from { background-color: #fff; } to { background-color: #ffebee; } }
 
-        @keyframes cintilar {
-            from { opacity: 1; transform: scale(1); }
-            to { opacity: 0.8; transform: scale(0.98); color: var(--alerta-vermelho); }
-        }
-
-        #instContainer { border: none; background: none; margin-bottom: 5px; padding: 0; }
-        
         #instMessage {
-            font-size: 1rem;
-            font-style: italic;
-            font-weight: 500;
-            color: #1a237e;
-            background: rgba(197, 160, 89, 0.1);
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid var(--ouro-velho);
-            margin: 10px auto 25px auto;
-            text-align: center;
-            line-height: 1.4;
-            max-width: 95%;
+            font-size: 0.95rem; font-style: italic; color: var(--azul-marinho);
+            background: rgba(255, 215, 0, 0.1); padding: 12px;
+            border-radius: var(--raio-padrao); border-left: 4px solid var(--ouro-brilhante);
+            margin-bottom: 20px; text-align: center;
         }
 
-        .form-group { margin-bottom: 20px; }
+        .form-group { margin-bottom: 18px; position: relative; }
         label { display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 14px; }
-        
+        .required::after { content: " *"; color: var(--alerta-vermelho); }
+
         input:not([type="radio"]) {
-            width: 100%; padding: 12px; border: 1px solid var(--borda);
-            border-radius: 4px; box-sizing: border-box; font-size: 16px;
-            transition: all 0.3s ease;
+            width: 100%; padding: 12px; border: 2px solid #eee;
+            border-radius: var(--raio-padrao); box-sizing: border-box; font-size: 16px;
+            transition: border-color 0.3s;
         }
 
-        /* Estilo para o erro da matrícula */
-        #erroMatricula {
-            color: var(--alerta-vermelho);
-            font-size: 11px;
-            font-weight: bold;
-            margin-top: 5px;
-            display: none;
-        }
+        input:focus { border-color: var(--ouro-brilhante); outline: none; }
+
+        .campo-erro { border-color: var(--alerta-vermelho) !important; }
+        .msg-erro { color: var(--alerta-vermelho); font-size: 12px; font-weight: bold; margin-top: 5px; display: none; }
 
         .radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
         .radio-group input { display: none; }
         .radio-group label {
-            flex: 1 1 calc(25% - 8px); min-width: 65px;
-            padding: 12px 2px; border: 1px solid var(--borda);
-            text-align: center; cursor: pointer; border-radius: 4px;
-            font-size: 12px; font-weight: bold; background: #fff;
-            transition: all 0.2s;
+            flex: 1 1 calc(25% - 8px); min-width: 70px; padding: 14px 2px;
+            border: 2px solid #eee; text-align: center; cursor: pointer;
+            border-radius: var(--raio-padrao); font-size: 12px; font-weight: bold;
+            transition: 0.2s; background: #fafafa;
         }
         .radio-group input:checked + label {
-            background: var(--azul-marinho); color: var(--ouro-velho);
-            border-color: var(--azul-marinho);
+            background: var(--azul-marinho); color: var(--ouro-brilhante); border-color: var(--azul-marinho);
         }
 
+        /* Botões */
         .btn {
-            width: 100%; padding: 16px; border-radius: 4px; border: none;
+            width: 100%; padding: 16px; border-radius: var(--raio-padrao); border: none;
             font-weight: bold; cursor: pointer; text-transform: uppercase;
-            font-size: 15px; margin-top: 10px;
-            transition: 0.3s;
+            font-size: 14px; margin-top: 10px; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .btn:disabled { background: #ccc !important; cursor: not-allowed; }
         .btn-outline { background: #fff; color: var(--azul-marinho); border: 2px solid var(--azul-marinho); }
-        .btn-primary { background: var(--azul-marinho); color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-primary:hover { background: #1a3c6e; transform: translateY(-1px); }
+        .btn-primary { background: var(--azul-marinho); color: #fff; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn:disabled { background: #ccc !important; cursor: not-allowed; transform: none; }
 
+        /* Modais */
         .modal {
             display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 10000;
-            backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
+            z-index: 10000; backdrop-filter: blur(4px);
         }
         .modal-content {
             background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative;
-        }
-        .history-list { max-height: 250px; overflow-y: auto; margin: 15px 0; font-size: 14px; }
-
-        .barra-dourada {
-            height: 4px;
-            background: linear-gradient(90deg, #b8860b, #e6b422, #b8860b);
-            margin: 10px 0 15px 0; border-radius: 2px;
+            text-align: center; position: relative;
         }
 
-        .success-content { text-align: center; animation: surgindo 0.3s ease-out; }
-        @keyframes surgindo { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #888; }
-        #loadingScreen { text-align: center; padding: 50px 0; }
-        .spinner {
-            border: 4px solid #f3f3f3; border-top: 4px solid var(--azul-marinho);
-            border-radius: 50%; width: 35px; height: 35px;
-            animation: spin 1s linear infinite; margin: 15px auto;
+        .footer { text-align: center; margin-top: 25px; font-size: 11px; color: #888; }
+        
+        /* Spinner */
+        .spinner-inline {
+            width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%; border-top-color: #fff; animation: spin 0.8s linear infinite;
+            display: none;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div id="barraProgresso"></div>
-        <div class="top-bar"></div>
+    <div class="container" role="main">
+        <div id="barraProgresso" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
         
-        <div class="header">
+        <header class="header">
             <div class="logos">
-                <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="PMRO">
-                <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="1BPM">
+                <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="Brasão PMRO" loading="lazy">
+                <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="Logotipo 1º BPM" loading="lazy">
             </div>
             <h2>DERSO 1º BPM</h2>
             <div class="divisor"></div>
-            <p class="subtitle">Formulário de Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO</p>
-        </div>
+            <p class="subtitle">Solicitação de Diária Especial de Reforço do Serviço Operacional</p>
+        </header>
 
-        <div id="loadingScreen">
-            <p>Carregando dados do sistema...</p>
-            <div class="spinner"></div>
+        <div id="loadingScreen" aria-busy="true">
+            <div id="loadingContent">
+                <p>Sincronizando com o servidor...</p>
+                <div class="spinner-inline" style="display:block; border-top-color: var(--azul-marinho); margin: 10px auto;"></div>
+            </div>
+            <div id="retryBtn" style="display:none">
+                <p style="color:var(--alerta-vermelho)">Falha na conexão.</p>
+                <button class="btn btn-outline" onclick="window.location.reload()">TENTAR NOVAMENTE</button>
+            </div>
         </div>
 
         <div id="formContent" style="display: none;">
-            <div id="prazoBox">
+            <section id="prazoBox" aria-live="polite">
                 <strong id="timerDisplay">⌛ CALCULANDO PRAZO...</strong>
-            </div>
+            </section>
 
-            <div id="instContainer">
-                <div id="instMessage">Aguarde...</div>
-            </div>
+            <div id="instMessage" role="note">Aguarde...</div>
 
-            <form id="dersoForm">
+            <form id="dersoForm" novalidate>
                 <div class="form-group">
-                    <label>E-mail:</label>
-                    <input type="email" name="email" id="email" required>
+                    <label for="email" class="required">E-mail Institucional ou Pessoal:</label>
+                    <input type="email" id="email" name="email" placeholder="exemplo@pm.ro.gov.br" required>
+                    <span id="erroEmail" class="msg-erro" role="alert">E-mail inválido</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Matrícula:</label>
-                    <input type="text" name="matricula" id="matricula" placeholder="Ex: 1000xxxxx ou 12345" required>
-                    <small id="erroMatricula">⚠️ MATRÍCULA NÃO ENCONTRADA!</small>
+                    <label for="matricula" class="required">Matrícula (apenas números):</label>
+                    <input type="text" id="matricula" name="matricula" placeholder="Ex: 1000xxxxx" required maxlength="15">
+                    <span id="erroMatricula" class="msg-erro" role="alert">⚠️ MATRÍCULA NÃO LOCALIZADA</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Nome:</label>
-                    <input type="text" id="nome" name="nome" readonly style="background: #f9f9f9;" placeholder="Nome de Guerra">
+                    <label for="nome">Nome Completo:</label>
+                    <input type="text" id="nome" name="nome" readonly style="background: #fdfdfd; color: #555;" placeholder="Identificação automática">
                 </div>
 
                 <div class="form-group">
-                    <label>Tipo de Folga:</label>
-                    <div class="radio-group" id="radioFolgaGroup">
+                    <label class="required">Tipo de Folga:</label>
+                    <div class="radio-group" id="radioFolgaGroup" role="radiogroup">
                         <input type="radio" id="f24" name="folga" value="24H" required><label for="f24">24H</label>
                         <input type="radio" id="f48" name="folga" value="48H"><label for="f48">48H</label>
                         <input type="radio" id="f72" name="folga" value="72H"><label for="f72">72H</label>
@@ -235,333 +193,320 @@
                         <input type="radio" id="f2" name="folga" value="2ª Folga"><label for="f2">2ª FOLGA</label>
                         <input type="radio" id="fExp" name="folga" value="Expediente"><label for="fExp">EXPEDIENTE</label>
                     </div>
+                    <span id="erroFolga" class="msg-erro" role="alert">Selecione o tipo de folga</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Data:</label>
-                    <input type="date" name="data" id="data" required>
-                    <small id="periodoLabel" style="display:block; margin-top:5px; color:#777; font-size:11px;"></small>
+                    <label for="data" class="required">Data do Serviço:</label>
+                    <input type="date" id="data" name="data" required>
+                    <small id="periodoLabel" style="display:block; margin-top:5px; color:#666; font-size:11px;"></small>
+                    <span id="erroData" class="msg-erro" role="alert">Data já solicitada ou inválida</span>
                 </div>
 
-                <button type="button" class="btn btn-outline" id="btnHistory">SOLICITAÇÕES FEITAS</button>
-                <button type="submit" class="btn btn-primary" id="btnEnviar">ENVIAR SOLICITAÇÃO</button>
+                <button type="button" class="btn btn-outline" id="btnHistory">
+                    📂 VER MINHAS SOLICITAÇÕES
+                </button>
+                <button type="submit" class="btn btn-primary" id="btnEnviar">
+                    <span class="spinner-inline" id="spinEnviar"></span>
+                    <span id="txtEnviar">ENVIAR SOLICITAÇÃO</span>
+                </button>
             </form>
-        </div>
+        </div >
 
-        <div class="footer" id="footerText"></div>
+        <footer class="footer" id="footerText"></footer>
     </div>
 
-    <div id="modalHistory" class="modal" onclick="fecharModaisFora(event)">
+    <div id="modalMsg" class="modal" onclick="closeModal(event)">
         <div class="modal-content">
-            <div id="historyHeader">
-                <h3 style="margin:0; color:var(--azul-marinho);">Minhas Solicitações</h3>
-            </div>
-            <div id="historyBox" class="history-list">Digite sua matrícula para buscar.</div>
-            <button class="btn btn-primary" onclick="fecharModais()">Fechar</button>
+            <div id="modalIcon" style="font-size: 50px; margin-bottom: 10px;"></div>
+            <h3 id="modalTitle" style="margin:0; color: var(--azul-marinho);"></h3>
+            <p id="modalText" style="color: #666; margin: 15px 0;"></p>
+            <div id="historyContent" class="history-list" style="display:none; text-align: left;"></div>
+            <button class="btn btn-primary" onclick="closeModal()">FECHAR</button>
         </div>
     </div>
 
-    <div id="modalSuccess" class="modal" onclick="fecharModaisFora(event)">
-        <div class="modal-content success-content">
-            <div style="font-size: 50px; color: #28a745; margin-bottom: 10px;">✔</div>
-            <h2 style="margin: 0; color: #333;">SOLICITAÇÃO ENVIADA!</h2>
-            <p style="color: #666; margin: 15px 0;">Sua solicitação foi registrada com sucesso.</p>
-            <button class="btn btn-primary" onclick="fecharModais()">FECHAR</button>
-        </div>
-    </div>
+    <script>
+        /**
+         * CONFIGURAÇÕES E CONSTANTES
+         */
+        const CONFIG = {
+            URL: "https://script.google.com/macros/s/AKfycbz-11arycDKX6Vwo26KmTeIqfjMMuIiPUpf5SjKd3PyIVqqttbRWTmNoMP8Y4iAXweUMQ/exec",
+            PREFIX: "[DERSO-LOG]",
+            CORES: { OURO: "#FFD700", VERDE: "#2E7D32", ERRO: "#D32F2F" },
+            REGEX_EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        };
 
-   <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-11arycDKX6Vwo26KmTeIqfjMMuIiPUpf5SjKd3PyIVqqttbRWTmNoMP8Y4iAXweUMQ/exec";
-        window.employeeList = {};
-        window.userSolicitations = []; // Cache local para evitar duplicidade na mesma sessão
+        const STATE = {
+            employeeList: {},
+            userSolicitations: [],
+            isSubmitting: false
+        };
 
-        function fecharModais() {
-            document.getElementById("modalHistory").style.display = "none";
-            document.getElementById("modalSuccess").style.display = "none";
-        }
+        // UI Elements
+        const $ = (id) => document.getElementById(id);
 
-        function fecharModaisFora(event) {
-            if (event.target.classList.contains('modal')) fecharModais();
-        }
-
-        window.addEventListener('keydown', (e) => {
-            if (e.key === "Escape") fecharModais();
-        });
-
-        function atualizarProgresso() {
-            const emailVal = document.getElementById('email').value.includes('@');
-            const nomeVal = document.getElementById('nome').value !== "" && document.getElementById('nome').value !== "NÃO ENCONTRADO";
-            const folgaVal = document.querySelector('input[name="folga"]:checked') !== null;
-            const dataVal = document.getElementById('data').value !== "";
-
-            const campos = [emailVal, nomeVal, folgaVal, dataVal];
-            const concluidos = campos.filter(Boolean).length;
-            const porcentagem = (concluidos / campos.length) * 100;
-            
-            const barra = document.getElementById('barraProgresso');
-            barra.style.width = porcentagem + "%";
-
-            if (porcentagem < 100) {
-                barra.style.backgroundColor = "#D4AF37"; 
-                barra.classList.remove('barra-completa');
-                barra.style.boxShadow = "none";
-            } else {
-                barra.style.backgroundColor = "#2e7d32"; 
-                barra.classList.add('barra-completa');
-                if (navigator.vibrate) navigator.vibrate(50);
-            }
-        }
-
-        function applyInstitutionalTheme() {
-            const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
-            const instDiv = document.getElementById("instMessage");
-            const aplicar = (msg) => instDiv.innerHTML = msg;
-
-            const temas = {
-                "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história, bravura e compromisso.`),
-                "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
-                "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
-                "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear() - 1889} anos de Proclamação.`),
-                "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
-                "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição e compromisso.`)
-            };
-
-            const chave = `${mes+1}-${dia}`;
-            if (temas[chave]) {
-                temas[chave]();
-            } else {
-                const mensais = {
-                    0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos."),
-                    1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
-                    2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda."),
-                    3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
-                    4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão."),
-                    5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade."),
-                    6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
-                    7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional."),
-                    8: () => aplicar("🇧🇷 Setembro: Renovando nosso juramento de servir e proteger o Brasil."),
-                    9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
-                    10: () => aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade. ${hoje.getFullYear() - 1889}º ano da República.`),
-                    11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. ✨")
-                };
-                if (mensais[mes]) mensais[mes]();
-            }
-        }
-
+        /**
+         * INICIALIZAÇÃO
+         */
         document.addEventListener("DOMContentLoaded", async () => {
-            console.log("🚀 Sistema Iniciando...");
+            console.log(`${CONFIG.PREFIX} Iniciando sistema...`);
             try {
                 const [dResp, lResp] = await Promise.all([
-                    fetch(`${SCRIPT_URL}?action=datas`),
-                    fetch(`${SCRIPT_URL}?action=lista`)
+                    fetch(`${CONFIG.URL}?action=datas`).then(r => r.json()),
+                    fetch(`${CONFIG.URL}?action=lista`).then(r => r.json())
                 ]);
-                const config = await dResp.json();
-                window.employeeList = await lResp.json();
                 
-                console.log("✅ Lista de Funcionários carregada.");
-
-                document.getElementById("loadingScreen").style.display = "none";
-                document.getElementById("formContent").style.display = "block";
+                STATE.employeeList = lResp;
+                $('loadingScreen').style.display = "none";
+                $('formContent').style.display = "block";
                 
                 applyInstitutionalTheme();
-                startCountdown(config.fechamento);
-                setupForm();
+                startCountdown(dResp.fechamento);
+                setupFormListeners();
             } catch (e) {
-                console.error("🔥 Erro no carregamento inicial:", e);
-                document.getElementById("loadingScreen").innerHTML = "<p style='color:red'>Erro de conexão com o servidor. Tente atualizar a página.</p>";
+                console.error(`${CONFIG.PREFIX} Erro de carga:`, e);
+                $('loadingContent').style.display = "none";
+                $('retryBtn').style.display = "block";
             }
         });
 
-       function startCountdown(endTime) {
-            const display = document.getElementById("timerDisplay");
+        function setupFormListeners() {
+            const form = $('dersoForm');
+            const hoje = new Date();
+
+            // Configurar Calendário (Próximo mês)
+            const inicio = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+            const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
+            const iso = (d) => d.toISOString().split('T')[0];
+            
+            $('data').min = iso(inicio);
+            $('data').max = iso(fim);
+            $('periodoLabel').innerText = `Permitido: ${inicio.toLocaleDateString('pt-BR')} a ${fim.toLocaleDateString('pt-BR')}`;
+
+            // Validação Matrícula
+            $('matricula').addEventListener("blur", handleMatricula);
+            
+            // Progresso e Validação em tempo real
+            form.addEventListener("input", updateProgress);
+            
+            // Botão Histórico
+            $('btnHistory').onclick = fetchHistory;
+
+            // Envio do Formulário
+            form.onsubmit = handleSubmit;
+
+            $('footerText').textContent = `1ª Cia / 1º BPM - PVSA Pedro Porto - ${hoje.getFullYear()}`;
+        }
+
+        /**
+         * LÓGICA DE NEGÓCIO E VALIDAÇÃO
+         */
+        function handleMatricula() {
+            let val = $('matricula').value.replace(/\D/g,'');
+            if(!val) return;
+            
+            const std = val.startsWith("1000") ? val : "1000" + val;
+            $('matricula').value = std;
+            
+            const nome = STATE.employeeList[std];
+            if (nome) {
+                $('nome').value = nome;
+                $('erroMatricula').style.display = "none";
+                $('matricula').classList.remove('campo-erro');
+            } else {
+                $('nome').value = "";
+                $('erroMatricula').style.display = "block";
+                $('matricula').classList.add('campo-erro');
+                if (navigator.vibrate) navigator.vibrate([50, 50]);
+            }
+            updateProgress();
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            if (STATE.isSubmitting) return;
+
+            const isValido = validateAll();
+            if (!isValido) return;
+
+            setLoading(true);
+            const formData = new FormData($('dersoForm'));
+            
+            try {
+                console.log(`${CONFIG.PREFIX} Enviando POST...`);
+                const resp = await fetch(CONFIG.URL, { method: 'POST', body: new URLSearchParams(formData) });
+                const res = await resp.json();
+
+                if (res.success) {
+                    showModal("SUCESSO!", "Sua solicitação foi gravada.", "✔", CONFIG.CORES.VERDE);
+                    // Atualiza trava local
+                    const dataBr = $('data').value.split('-').reverse().join('/');
+                    STATE.userSolicitations.push({ data: dataBr });
+                    $('data').value = "";
+                } else {
+                    showModal("OPS!", res.message || "Erro no servidor.", "⚠️", CONFIG.CORES.ERRO);
+                }
+            } catch (err) {
+                showModal("ERRO DE REDE", "Não foi possível conectar ao servidor. Tente novamente.", "❌", CONFIG.CORES.ERRO);
+            } finally {
+                setLoading(false);
+                updateProgress();
+            }
+        }
+
+        function validateAll() {
+            let firstError = null;
+            const email = $('email').value;
+            const mat = $('nome').value;
+            const data = $('data').value;
+            const folga = document.querySelector('input[name="folga"]:checked');
+
+            // Reset erros
+            document.querySelectorAll('.msg-erro').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('input').forEach(i => i.classList.remove('campo-erro'));
+
+            if (!CONFIG.REGEX_EMAIL.test(email)) {
+                showFieldError('email', 'erroEmail');
+                firstError = firstError || $('email');
+            }
+            if (!mat) {
+                showFieldError('matricula', 'erroMatricula');
+                firstError = firstError || $('matricula');
+            }
+            if (!folga) {
+                $('erroFolga').style.display = 'block';
+                firstError = firstError || $('radioFolgaGroup');
+            }
+            
+            const dataBr = data ? data.split('-').reverse().join('/') : "";
+            if (!data || STATE.userSolicitations.some(s => s.data === dataBr)) {
+                showFieldError('data', 'erroData');
+                firstError = firstError || $('data');
+            }
+
+            if (firstError) {
+                firstError.focus();
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * UI HELPERS
+         */
+        function updateProgress() {
+            const emailOk = CONFIG.REGEX_EMAIL.test($('email').value);
+            const matOk = $('nome').value !== "";
+            const folgaOk = !!document.querySelector('input[name="folga"]:checked');
+            const dataOk = $('data').value !== "";
+
+            const total = [emailOk, matOk, folgaOk, dataOk].filter(Boolean).length;
+            const perc = (total / 4) * 100;
+            
+            const barra = $('barraProgresso');
+            barra.style.width = perc + "%";
+            barra.classList.toggle('barra-completa', perc === 100);
+        }
+
+        function showFieldError(fieldId, errorId) {
+            $(fieldId).classList.add('campo-erro');
+            $(errorId).style.display = 'block';
+        }
+
+        function setLoading(active) {
+            STATE.isSubmitting = active;
+            $('btnEnviar').disabled = active;
+            $('spinEnviar').style.display = active ? 'block' : 'none';
+            $('txtEnviar').innerText = active ? 'PROCESSANDO...' : 'ENVIAR SOLICITAÇÃO';
+        }
+
+        function showModal(title, text, icon, color, isHistory = false) {
+            $('modalTitle').innerText = title;
+            $('modalText').innerText = text;
+            $('modalIcon').innerText = icon;
+            $('modalIcon').style.color = color;
+            $('modalMsg').style.display = 'flex';
+            $('historyContent').style.display = isHistory ? 'block' : 'none';
+        }
+
+        function closeModal(e) {
+            if (!e || e.target.id === 'modalMsg' || e.target.tagName === 'BUTTON') {
+                $('modalMsg').style.display = 'none';
+            }
+        }
+
+        async function fetchHistory() {
+            const mat = $('matricula').value;
+            if(!mat || !STATE.employeeList[mat]) {
+                showModal("ATENÇÃO", "Insira uma matrícula válida primeiro.", "🔍", CONFIG.CORES.OURO);
+                return;
+            }
+
+            showModal("BUSCANDO...", "Aguarde um instante.", "📂", CONFIG.CORES.OURO);
+            
+            try {
+                const resp = await fetch(`${CONFIG.URL}?action=historico&matricula=${mat}`).then(r => r.json());
+                STATE.userSolicitations = resp.dados || [];
+                
+                let html = `<div style="border-top: 2px solid #eee; padding-top:10px">`;
+                if(STATE.userSolicitations.length > 0) {
+                    html += STATE.userSolicitations.map(i => 
+                        `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f9f9f9">
+                            <span>📅 <b>${i.data}</b></span> <span>${i.folga}</span>
+                        </div>`
+                    ).join('');
+                } else {
+                    html += "<p>Nenhuma solicitação este mês.</p>";
+                }
+                html += "</div>";
+                
+                $('historyContent').innerHTML = html;
+                showModal(resp.nome, "Solicitações do próximo mês:", "📋", CONFIG.CORES.OURO, true);
+            } catch (e) {
+                showModal("ERRO", "Não foi possível carregar o histórico.", "❌", CONFIG.CORES.ERRO);
+            }
+        }
+
+        function startCountdown(endTime) {
+            const display = $('timerDisplay');
             const end = new Date(endTime).getTime();
             
-            const interval = setInterval(() => {
-                const now = new Date().getTime();
-                const diff = end - now;
-                
+            const timer = setInterval(() => {
+                const diff = end - new Date().getTime();
                 if (diff <= 0) {
                     display.innerHTML = "<b>⛔ FORMULÁRIO ENCERRADO</b>";
-                    display.parentElement.style.backgroundColor = "#ffebee";
-                    document.getElementById("dersoForm").style.opacity = "0.5";
-                    document.getElementById("dersoForm").style.pointerEvents = "none";
-                    clearInterval(interval);
+                    $('dersoForm').style.opacity = "0.4";
+                    $('dersoForm').style.pointerEvents = "none";
+                    clearInterval(timer);
                     return;
                 }
 
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff % 86400000) / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
 
-                const container = display.parentElement;
-                if (diff < 1000 * 60 * 60) {
-                    container.classList.add('timer-urgente');
-                    if (s % 2 === 0) display.style.color = "#d32f2f"; else display.style.color = "black";
-                } else if (diff < 1000 * 60 * 60 * 24) {
-                    container.style.backgroundColor = "#fff9c4";
-                    container.style.borderLeft = "5px solid #fbc02d";
-                }
-
-                display.innerHTML = `🚨 <b>FORMULÁRIO ABERTO!</b><br>Encerra em: <b>${d}d ${h}h ${m}m ${s}s</b>`;
+                if (diff < 3600000) $('prazoBox').classList.add('timer-urgente');
+                display.innerHTML = `🚨 <b>DERSO ABERTO!</b> Encerra em: <b>${d}d ${h}h ${m}m ${s}s</b>`;
             }, 1000);
         }
 
-        function setupForm() {
-            const matIn = document.getElementById("matricula");
-            const emailIn = document.getElementById("email");
-            const dataIn = document.getElementById("data");
-            const nomeIn = document.getElementById("nome");
-            const erroMat = document.getElementById("erroMatricula");
-            const form = document.getElementById("dersoForm");
+        function applyInstitutionalTheme() {
             const hoje = new Date();
+            const mes = hoje.getMonth();
+            const dia = hoje.getDate();
+            const inst = $('instMessage');
 
-            // Configuração do Calendário
-            const inicioProxMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
-            const fimProxMes = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
-            const formatarParaInput = (d) => d.toISOString().split('T')[0];
-            dataIn.min = formatarParaInput(inicioProxMes);
-            dataIn.max = formatarParaInput(fimProxMes);
-            document.getElementById("periodoLabel").innerText = `Calendário restrito a: ${inicioProxMes.toLocaleDateString('pt-BR')} até ${fimProxMes.toLocaleDateString('pt-BR')}`;
-
-            // Validações Visuais
-            emailIn.addEventListener("input", () => {
-                emailIn.classList.toggle('campo-validado', emailIn.value.includes('@'));
-                atualizarProgresso();
-            });
-
-           matIn.addEventListener("blur", () => {
-                let val = matIn.value.replace(/\D/g,'');
-                if(!val) return;
-                
-                const std = val.startsWith("1000") ? val : "1000" + val;
-                matIn.value = std;
-                
-                const policialNome = window.employeeList[std];
-                console.log(`🔍 Verificando matrícula: ${std}`);
-                
-                if (policialNome) {
-                    nomeIn.value = policialNome;
-                    erroMat.style.display = "none";
-                    matIn.classList.add('campo-validado');
-                    nomeIn.classList.add('campo-validado');
-                    if (navigator.vibrate) navigator.vibrate(40); 
-                } else {
-                    console.warn("⚠️ Policial não encontrado na lista.");
-                    nomeIn.value = ""; 
-                    erroMat.style.display = "block";
-                    matIn.classList.remove('campo-validado');
-                    nomeIn.classList.remove('campo-validado');
-                    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-                }
-                atualizarProgresso();
-            });
-
-            document.getElementById('radioFolgaGroup').addEventListener('change', atualizarProgresso);
-            
-            dataIn.addEventListener("change", () => {
-                dataIn.classList.toggle('campo-validado', !!dataIn.value);
-                atualizarProgresso();
-                
-                // Sugestão: Checagem de duplicidade local imediata
-                const dataFormatada = dataIn.value.split('-').reverse().join('/');
-                const jaExiste = window.userSolicitations.some(s => s.data === dataFormatada);
-                if(jaExiste) {
-                    alert("⚠️ Você já selecionou esta data nesta sessão!");
-                    dataIn.value = "";
-                    dataIn.classList.remove('campo-validado');
-                }
-            });
-
-            // Histórico
-            document.getElementById("btnHistory").onclick = async () => {
-                const matricula = matIn.value;
-                if(!matricula) return alert("Digite a matrícula primeiro.");
-                
-                console.log(`📂 Buscando histórico para ${matricula}...`);
-                document.getElementById("modalHistory").style.display = "flex";
-                const historyBox = document.getElementById("historyBox");
-                historyBox.innerHTML = "Buscando...";
-                
-                try {
-                    const resp = await fetch(`${SCRIPT_URL}?action=historico&matricula=${matricula}`);
-                    const result = await resp.json();
-                    
-                    let html = `<h3 style="margin-bottom:5px; color:#0d47a1;">${result.nome}</h3>`;
-                    html += `<div class="barra-dourada"></div>`;
-
-                    if(result.dados && result.dados.length > 0) {
-                        window.userSolicitations = result.dados; // Salva no cache local para travar duplicidade
-                        html += result.dados.map(i => 
-                            `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee; font-size:14px;">
-                                <span>📅 <b>${i.data}</b></span>
-                                <span style="color:#555;">${i.folga}</span>
-                            </div>`
-                        ).join('');
-                    } else {
-                        html += "<p style='color:#888; padding:20px;'>Nenhuma solicitação encontrada para o próximo mês.</p>";
-                    }
-                    historyBox.innerHTML = html;
-                } catch (e) {
-                    console.error("🔥 Erro ao buscar histórico:", e);
-                    historyBox.innerHTML = "Erro ao carregar histórico.";
-                }
+            const mensagens = {
+                "12-7": "🛡️ 1º BPM: O Sentinela da Capital. 42 anos de compromisso.",
+                "1-4": "🌳 Rondônia: Terra de bravos e de pioneiros.",
+                "default": "A segurança pública é um dever do Estado, direito e responsabilidade de todos."
             };
 
-            // Envio
-            form.onsubmit = async (e) => {
-                e.preventDefault();
-                const btn = document.getElementById("btnEnviar");
-                
-                if (!nomeIn.value) {
-                    alert("Por favor, insira uma matrícula válida.");
-                    return;
-                }
-
-                console.log("📤 Iniciando envio dos dados...");
-                btn.disabled = true;
-                btn.innerText = "VERIFICANDO...";
-
-                const formData = new FormData(form);
-                const params = new URLSearchParams(formData);
-
-                try {
-                    const resp = await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        body: params
-                    });
-
-                    const res = await resp.json();
-                    console.log("📡 Resposta do servidor:", res);
-
-                    if (res.success) {
-                        console.log("✅ Solicitação salva!");
-                        document.getElementById("modalSuccess").style.display = "flex";
-                        
-                        // Adiciona ao cache local para bloquear duplicata imediata
-                        const dataInput = document.getElementById("data").value.split('-').reverse().join('/');
-                        window.userSolicitations.push({ data: dataInput });
-
-                        document.getElementById("data").value = "";
-                        document.getElementById("data").classList.remove('campo-validado');
-                        const radios = document.getElementsByName("folga");
-                        radios.forEach(r => r.checked = false);
-                    } else {
-                        console.warn("❌ Falha no envio:", res.message);
-                        alert(res.message || "Erro ao processar solicitação.");
-                    }
-
-                } catch (err) {
-                    console.error("🚑 Erro crítico no envio:", err);
-                    alert("Erro de conexão. Verifique sua internet.");
-                } finally {
-                    btn.disabled = false;
-                    btn.innerText = "ENVIAR SOLICITAÇÃO";
-                    atualizarProgresso();
-                }
-            };
-
-            document.getElementById("footerText").textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
+            const chave = `${mes+1}-${dia}`;
+            inst.innerText = mensagens[chave] || mensagens["default"];
         }
     </script>
 </body>
