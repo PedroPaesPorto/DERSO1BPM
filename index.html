@@ -9,13 +9,13 @@
     <style>
         :root {
             --azul-marinho: #1A3C6E;
-            --ouro-brilhante: #FFD700; /* Unificado conforme solicitado */
+            --ouro-brilhante: #FFD700;
             --sucesso-bg: #E8F5E9;
             --sucesso-border: #2E7D32;
             --cinza-fundo: #F0F2F5;
             --borda: #ccc;
             --alerta-vermelho: #D32F2F;
-            --raio-padrao: 8px; /* Padronizado */
+            --raio-padrao: 8px;
         }
 
         body {
@@ -32,11 +32,10 @@
             position: relative; overflow: hidden;
         }
 
-        /* Barra de Progresso Unificada */
         #barraProgresso {
             position: absolute; top: 0; left: 0; width: 0%; height: 6px;
             background: var(--ouro-brilhante); 
-            transition: width 0.4s ease, background-color 0.3s ease; z-index: 3;
+            transition: width 0.4s ease; z-index: 3;
         }
 
         .barra-completa { background-color: var(--sucesso-border) !important; }
@@ -55,11 +54,7 @@
             padding: 12px; text-align: center; border-radius: 4px; margin-bottom: 15px;
         }
 
-        /* Animação de urgência controlada para performance */
-        .timer-urgente {
-            animation: pulse-red 1s infinite alternate;
-            border-left-color: var(--alerta-vermelho);
-        }
+        .timer-urgente { animation: pulse-red 1s infinite alternate; border-left-color: var(--alerta-vermelho); }
         @keyframes pulse-red { from { background-color: #fff; } to { background-color: #ffebee; } }
 
         #instMessage {
@@ -80,7 +75,6 @@
         }
 
         input:focus { border-color: var(--ouro-brilhante); outline: none; }
-
         .campo-erro { border-color: var(--alerta-vermelho) !important; }
         .msg-erro { color: var(--alerta-vermelho); font-size: 12px; font-weight: bold; margin-top: 5px; display: none; }
 
@@ -96,7 +90,6 @@
             background: var(--azul-marinho); color: var(--ouro-brilhante); border-color: var(--azul-marinho);
         }
 
-        /* Botões */
         .btn {
             width: 100%; padding: 16px; border-radius: var(--raio-padrao); border: none;
             font-weight: bold; cursor: pointer; text-transform: uppercase;
@@ -106,9 +99,8 @@
         .btn-outline { background: #fff; color: var(--azul-marinho); border: 2px solid var(--azul-marinho); }
         .btn-primary { background: var(--azul-marinho); color: #fff; }
         .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn:disabled { background: #ccc !important; cursor: not-allowed; transform: none; }
+        .btn:disabled { background: #ccc !important; cursor: not-allowed; }
 
-        /* Modais */
         .modal {
             display: none; position: fixed; inset: 0;
             background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
@@ -116,12 +108,11 @@
         }
         .modal-content {
             background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px;
-            text-align: center; position: relative;
+            text-align: center;
         }
 
         .footer { text-align: center; margin-top: 25px; font-size: 11px; color: #888; }
         
-        /* Spinner */
         .spinner-inline {
             width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%; border-top-color: #fff; animation: spin 0.8s linear infinite;
@@ -137,21 +128,21 @@
         
         <header class="header">
             <div class="logos">
-                <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="Brasão PMRO" loading="lazy">
-                <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="Logotipo 1º BPM" loading="lazy">
+                <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="Brasão PMRO">
+                <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="Logotipo 1º BPM">
             </div>
             <h2>DERSO 1º BPM</h2>
             <div class="divisor"></div>
             <p class="subtitle">Solicitação de Diária Especial de Reforço do Serviço Operacional</p>
         </header>
 
-        <div id="loadingScreen" aria-busy="true">
-            <div id="loadingContent">
-                <p>Sincronizando com o servidor...</p>
+        <div id="loadingScreen">
+            <div id="loadingContent" style="text-align: center;">
+                <p>Sincronizando dados...</p>
                 <div class="spinner-inline" style="display:block; border-top-color: var(--azul-marinho); margin: 10px auto;"></div>
             </div>
-            <div id="retryBtn" style="display:none">
-                <p style="color:var(--alerta-vermelho)">Falha na conexão.</p>
+            <div id="retryBtn" style="display:none; text-align: center;">
+                <p style="color:var(--alerta-vermelho)">Erro de conexão com o servidor.</p>
                 <button class="btn btn-outline" onclick="window.location.reload()">TENTAR NOVAMENTE</button>
             </div>
         </div>
@@ -161,7 +152,7 @@
                 <strong id="timerDisplay">⌛ CALCULANDO PRAZO...</strong>
             </section>
 
-            <div id="instMessage" role="note">Aguarde...</div>
+            <div id="instMessage" role="note">Carregando tema...</div>
 
             <form id="dersoForm" novalidate>
                 <div class="form-group">
@@ -203,15 +194,13 @@
                     <span id="erroData" class="msg-erro" role="alert">Data já solicitada ou inválida</span>
                 </div>
 
-                <button type="button" class="btn btn-outline" id="btnHistory">
-                    📂 VER MINHAS SOLICITAÇÕES
-                </button>
+                <button type="button" class="btn btn-outline" id="btnHistory">📂 VER MINHAS SOLICITAÇÕES</button>
                 <button type="submit" class="btn btn-primary" id="btnEnviar">
                     <span class="spinner-inline" id="spinEnviar"></span>
                     <span id="txtEnviar">ENVIAR SOLICITAÇÃO</span>
                 </button>
             </form>
-        </div >
+        </div>
 
         <footer class="footer" id="footerText"></footer>
     </div>
@@ -219,38 +208,23 @@
     <div id="modalMsg" class="modal" onclick="closeModal(event)">
         <div class="modal-content">
             <div id="modalIcon" style="font-size: 50px; margin-bottom: 10px;"></div>
-            <h3 id="modalTitle" style="margin:0; color: var(--azul-marinho);"></h3>
+            <h3 id="modalTitle"></h3>
             <p id="modalText" style="color: #666; margin: 15px 0;"></p>
-            <div id="historyContent" class="history-list" style="display:none; text-align: left;"></div>
+            <div id="historyContent" style="display:none; text-align: left; max-height: 200px; overflow-y: auto;"></div>
             <button class="btn btn-primary" onclick="closeModal()">FECHAR</button>
         </div>
     </div>
 
     <script>
-        /**
-         * CONFIGURAÇÕES E CONSTANTES
-         */
         const CONFIG = {
             URL: "https://script.google.com/macros/s/AKfycbz-11arycDKX6Vwo26KmTeIqfjMMuIiPUpf5SjKd3PyIVqqttbRWTmNoMP8Y4iAXweUMQ/exec",
-            PREFIX: "[DERSO-LOG]",
-            CORES: { OURO: "#FFD700", VERDE: "#2E7D32", ERRO: "#D32F2F" },
             REGEX_EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         };
 
-        const STATE = {
-            employeeList: {},
-            userSolicitations: [],
-            isSubmitting: false
-        };
-
-        // UI Elements
+        const STATE = { employeeList: {}, userSolicitations: [], isSubmitting: false };
         const $ = (id) => document.getElementById(id);
 
-        /**
-         * INICIALIZAÇÃO
-         */
         document.addEventListener("DOMContentLoaded", async () => {
-            console.log(`${CONFIG.PREFIX} Iniciando sistema...`);
             try {
                 const [dResp, lResp] = await Promise.all([
                     fetch(`${CONFIG.URL}?action=datas`).then(r => r.json()),
@@ -265,90 +239,90 @@
                 startCountdown(dResp.fechamento);
                 setupFormListeners();
             } catch (e) {
-                console.error(`${CONFIG.PREFIX} Erro de carga:`, e);
                 $('loadingContent').style.display = "none";
                 $('retryBtn').style.display = "block";
             }
         });
 
-        function setupFormListeners() {
-            const form = $('dersoForm');
-            const hoje = new Date();
+        function applyInstitutionalTheme() {
+            const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
+            const instDiv = document.getElementById("instMessage");
+            const aplicar = (msg) => instDiv.innerHTML = msg;
 
-            // Configurar Calendário (Próximo mês)
-            const inicio = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
-            const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
-            const iso = (d) => d.toISOString().split('T')[0];
-            
-            $('data').min = iso(inicio);
-            $('data').max = iso(fim);
-            $('periodoLabel').innerText = `Permitido: ${inicio.toLocaleDateString('pt-BR')} a ${fim.toLocaleDateString('pt-BR')}`;
+            const temas = {
+                "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história, bravura e compromisso.`),
+                "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
+                "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
+                "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear() - 1889} anos de Proclamação.`),
+                "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
+                "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição e compromisso.`)
+            };
 
-            // Validação Matrícula
-            $('matricula').addEventListener("blur", handleMatricula);
-            
-            // Progresso e Validação em tempo real
-            form.addEventListener("input", updateProgress);
-            
-            // Botão Histórico
-            $('btnHistory').onclick = fetchHistory;
-
-            // Envio do Formulário
-            form.onsubmit = handleSubmit;
-
-            $('footerText').textContent = `1ª Cia / 1º BPM - PVSA Pedro Porto - ${hoje.getFullYear()}`;
+            const chave = `${mes+1}-${dia}`;
+            if (temas[chave]) {
+                temas[chave]();
+            } else {
+                const mensais = {
+                    0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos."),
+                    1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
+                    2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda."),
+                    3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
+                    4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão."),
+                    5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade."),
+                    6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
+                    7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional."),
+                    8: () => aplicar("🇧🇷 Setembro: Renovando nosso juramento de servir e proteger o Brasil."),
+                    9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
+                    10: () => aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade. ${hoje.getFullYear() - 1889}º ano da República.`),
+                    11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. ✨")
+                };
+                if (mensais[mes]) mensais[mes]();
+            }
         }
 
-        /**
-         * LÓGICA DE NEGÓCIO E VALIDAÇÃO
-         */
-        function handleMatricula() {
-            let val = $('matricula').value.replace(/\D/g,'');
-            if(!val) return;
+        function setupFormListeners() {
+            const hoje = new Date();
+            const inicio = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+            const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
             
-            const std = val.startsWith("1000") ? val : "1000" + val;
-            $('matricula').value = std;
-            
-            const nome = STATE.employeeList[std];
-            if (nome) {
-                $('nome').value = nome;
-                $('erroMatricula').style.display = "none";
-                $('matricula').classList.remove('campo-erro');
-            } else {
-                $('nome').value = "";
-                $('erroMatricula').style.display = "block";
-                $('matricula').classList.add('campo-erro');
-                if (navigator.vibrate) navigator.vibrate([50, 50]);
-            }
-            updateProgress();
+            $('data').min = inicio.toISOString().split('T')[0];
+            $('data').max = fim.toISOString().split('T')[0];
+            $('periodoLabel').innerText = `Referência: ${inicio.toLocaleDateString('pt-BR')} a ${fim.toLocaleDateString('pt-BR')}`;
+
+            $('matricula').addEventListener("blur", () => {
+                let val = $('matricula').value.replace(/\D/g,'');
+                if(!val) return;
+                const std = val.startsWith("1000") ? val : "1000" + val;
+                $('matricula').value = std;
+                const nome = STATE.employeeList[std];
+                $('nome').value = nome || "";
+                $('erroMatricula').style.display = nome ? "none" : "block";
+                updateProgress();
+            });
+
+            $('dersoForm').addEventListener("input", updateProgress);
+            $('btnHistory').onclick = fetchHistory;
+            $('dersoForm').onsubmit = handleSubmit;
+            $('footerText').textContent = `1ª Cia / 1º BPM - PVSA Pedro Porto - ${hoje.getFullYear()}`;
         }
 
         async function handleSubmit(e) {
             e.preventDefault();
-            if (STATE.isSubmitting) return;
-
-            const isValido = validateAll();
-            if (!isValido) return;
+            if (STATE.isSubmitting || !validateAll()) return;
 
             setLoading(true);
-            const formData = new FormData($('dersoForm'));
-            
             try {
-                console.log(`${CONFIG.PREFIX} Enviando POST...`);
-                const resp = await fetch(CONFIG.URL, { method: 'POST', body: new URLSearchParams(formData) });
+                const resp = await fetch(CONFIG.URL, { method: 'POST', body: new URLSearchParams(new FormData($('dersoForm'))) });
                 const res = await resp.json();
-
                 if (res.success) {
-                    showModal("SUCESSO!", "Sua solicitação foi gravada.", "✔", CONFIG.CORES.VERDE);
-                    // Atualiza trava local
-                    const dataBr = $('data').value.split('-').reverse().join('/');
-                    STATE.userSolicitations.push({ data: dataBr });
+                    showModal("SUCESSO!", "Solicitação gravada.", "✔", "#2E7D32");
+                    STATE.userSolicitations.push({ data: $('data').value.split('-').reverse().join('/') });
                     $('data').value = "";
                 } else {
-                    showModal("OPS!", res.message || "Erro no servidor.", "⚠️", CONFIG.CORES.ERRO);
+                    showModal("ERRO", res.message, "⚠️", "#D32F2F");
                 }
             } catch (err) {
-                showModal("ERRO DE REDE", "Não foi possível conectar ao servidor. Tente novamente.", "❌", CONFIG.CORES.ERRO);
+                showModal("ERRO", "Falha de comunicação.", "❌", "#D32F2F");
             } finally {
                 setLoading(false);
                 updateProgress();
@@ -356,70 +330,39 @@
         }
 
         function validateAll() {
-            let firstError = null;
-            const email = $('email').value;
-            const mat = $('nome').value;
-            const data = $('data').value;
-            const folga = document.querySelector('input[name="folga"]:checked');
-
-            // Reset erros
-            document.querySelectorAll('.msg-erro').forEach(s => s.style.display = 'none');
-            document.querySelectorAll('input').forEach(i => i.classList.remove('campo-erro'));
-
-            if (!CONFIG.REGEX_EMAIL.test(email)) {
-                showFieldError('email', 'erroEmail');
-                firstError = firstError || $('email');
-            }
-            if (!mat) {
-                showFieldError('matricula', 'erroMatricula');
-                firstError = firstError || $('matricula');
-            }
-            if (!folga) {
-                $('erroFolga').style.display = 'block';
-                firstError = firstError || $('radioFolgaGroup');
-            }
+            let errorField = null;
+            const dataBr = $('data').value.split('-').reverse().join('/');
             
-            const dataBr = data ? data.split('-').reverse().join('/') : "";
-            if (!data || STATE.userSolicitations.some(s => s.data === dataBr)) {
-                showFieldError('data', 'erroData');
-                firstError = firstError || $('data');
-            }
+            if (!CONFIG.REGEX_EMAIL.test($('email').value)) errorField = $('email');
+            else if (!$('nome').value) errorField = $('matricula');
+            else if (!document.querySelector('input[name="folga"]:checked')) errorField = $('radioFolgaGroup');
+            else if (!$('data').value || STATE.userSolicitations.some(s => s.data === dataBr)) errorField = $('data');
 
-            if (firstError) {
-                firstError.focus();
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (errorField) {
+                errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                errorField.focus();
                 return false;
             }
             return true;
         }
 
-        /**
-         * UI HELPERS
-         */
         function updateProgress() {
-            const emailOk = CONFIG.REGEX_EMAIL.test($('email').value);
-            const matOk = $('nome').value !== "";
-            const folgaOk = !!document.querySelector('input[name="folga"]:checked');
-            const dataOk = $('data').value !== "";
-
-            const total = [emailOk, matOk, folgaOk, dataOk].filter(Boolean).length;
-            const perc = (total / 4) * 100;
-            
-            const barra = $('barraProgresso');
-            barra.style.width = perc + "%";
-            barra.classList.toggle('barra-completa', perc === 100);
-        }
-
-        function showFieldError(fieldId, errorId) {
-            $(fieldId).classList.add('campo-erro');
-            $(errorId).style.display = 'block';
+            const fields = [
+                CONFIG.REGEX_EMAIL.test($('email').value),
+                $('nome').value !== "",
+                !!document.querySelector('input[name="folga"]:checked'),
+                $('data').value !== ""
+            ];
+            const perc = (fields.filter(Boolean).length / 4) * 100;
+            $('barraProgresso').style.width = perc + "%";
+            $('barraProgresso').classList.toggle('barra-completa', perc === 100);
         }
 
         function setLoading(active) {
             STATE.isSubmitting = active;
             $('btnEnviar').disabled = active;
             $('spinEnviar').style.display = active ? 'block' : 'none';
-            $('txtEnviar').innerText = active ? 'PROCESSANDO...' : 'ENVIAR SOLICITAÇÃO';
+            $('txtEnviar').innerText = active ? 'ENVIANDO...' : 'ENVIAR SOLICITAÇÃO';
         }
 
         function showModal(title, text, icon, color, isHistory = false) {
@@ -431,82 +374,37 @@
             $('historyContent').style.display = isHistory ? 'block' : 'none';
         }
 
-        function closeModal(e) {
-            if (!e || e.target.id === 'modalMsg' || e.target.tagName === 'BUTTON') {
-                $('modalMsg').style.display = 'none';
-            }
-        }
+        function closeModal() { $('modalMsg').style.display = 'none'; }
 
         async function fetchHistory() {
             const mat = $('matricula').value;
-            if(!mat || !STATE.employeeList[mat]) {
-                showModal("ATENÇÃO", "Insira uma matrícula válida primeiro.", "🔍", CONFIG.CORES.OURO);
-                return;
-            }
-
-            showModal("BUSCANDO...", "Aguarde um instante.", "📂", CONFIG.CORES.OURO);
+            if(!mat || !STATE.employeeList[mat]) return showModal("AVISO", "Digite sua matrícula.", "🔍", "#FFD700");
             
+            showModal("BUSCANDO...", "Aguarde...", "📂", "#FFD700");
             try {
                 const resp = await fetch(`${CONFIG.URL}?action=historico&matricula=${mat}`).then(r => r.json());
                 STATE.userSolicitations = resp.dados || [];
-                
-                let html = `<div style="border-top: 2px solid #eee; padding-top:10px">`;
-                if(STATE.userSolicitations.length > 0) {
-                    html += STATE.userSolicitations.map(i => 
-                        `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f9f9f9">
-                            <span>📅 <b>${i.data}</b></span> <span>${i.folga}</span>
-                        </div>`
-                    ).join('');
-                } else {
-                    html += "<p>Nenhuma solicitação este mês.</p>";
-                }
-                html += "</div>";
-                
+                let html = STATE.userSolicitations.map(i => `<div style="padding:5px; border-bottom:1px solid #eee">📅 ${i.data} - ${i.folga}</div>`).join('') || "Sem registros.";
                 $('historyContent').innerHTML = html;
-                showModal(resp.nome, "Solicitações do próximo mês:", "📋", CONFIG.CORES.OURO, true);
-            } catch (e) {
-                showModal("ERRO", "Não foi possível carregar o histórico.", "❌", CONFIG.CORES.ERRO);
-            }
+                showModal(resp.nome, "Suas solicitações:", "📋", "#FFD700", true);
+            } catch (e) { showModal("ERRO", "Falha ao carregar.", "❌", "#D32F2F"); }
         }
 
         function startCountdown(endTime) {
-            const display = $('timerDisplay');
             const end = new Date(endTime).getTime();
-            
             const timer = setInterval(() => {
                 const diff = end - new Date().getTime();
                 if (diff <= 0) {
-                    display.innerHTML = "<b>⛔ FORMULÁRIO ENCERRADO</b>";
-                    $('dersoForm').style.opacity = "0.4";
+                    $('timerDisplay').innerHTML = "<b>⛔ PRAZO ENCERRADO</b>";
+                    $('dersoForm').style.opacity = "0.5";
                     $('dersoForm').style.pointerEvents = "none";
-                    clearInterval(timer);
-                    return;
+                    return clearInterval(timer);
                 }
-
-                const d = Math.floor(diff / 86400000);
-                const h = Math.floor((diff % 86400000) / 3600000);
-                const m = Math.floor((diff % 3600000) / 60000);
-                const s = Math.floor((diff % 60000) / 1000);
-
+                const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
+                      m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
                 if (diff < 3600000) $('prazoBox').classList.add('timer-urgente');
-                display.innerHTML = `🚨 <b>DERSO ABERTO!</b> Encerra em: <b>${d}d ${h}h ${m}m ${s}s</b>`;
+                $('timerDisplay').innerHTML = `🚨 Encerra em: <b>${d}d ${h}h ${m}m ${s}s</b>`;
             }, 1000);
-        }
-
-        function applyInstitutionalTheme() {
-            const hoje = new Date();
-            const mes = hoje.getMonth();
-            const dia = hoje.getDate();
-            const inst = $('instMessage');
-
-            const mensagens = {
-                "12-7": "🛡️ 1º BPM: O Sentinela da Capital. 42 anos de compromisso.",
-                "1-4": "🌳 Rondônia: Terra de bravos e de pioneiros.",
-                "default": "A segurança pública é um dever do Estado, direito e responsabilidade de todos."
-            };
-
-            const chave = `${mes+1}-${dia}`;
-            inst.innerText = mensagens[chave] || mensagens["default"];
         }
     </script>
 </body>
