@@ -163,7 +163,7 @@
 
                 <div class="form-group">
                     <label for="matricula" class="required">Matrícula (apenas números):</label>
-                    <input type="text" id="matricula" name="matricula" placeholder="Ex: 1000xxxxx" required maxlength="15">
+                    <input type="text" id="matricula" name="matricula" placeholder="Ex: 12345 ou 100012345" required maxlength="15">
                     <span id="erroMatricula" class="msg-erro" role="alert">⚠️ MATRÍCULA NÃO LOCALIZADA</span>
                 </div>
 
@@ -188,7 +188,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="data" class="required">Data do Serviço:</label>
+                    <label for="data" class="required">Data:</label>
                     <input type="date" id="data" name="data" required>
                     <small id="periodoLabel" style="display:block; margin-top:5px; color:#666; font-size:11px;"></small>
                     <span id="erroData" class="msg-erro" role="alert">Data já solicitada ou inválida</span>
@@ -287,7 +287,7 @@
             
             $('data').min = inicio.toISOString().split('T')[0];
             $('data').max = fim.toISOString().split('T')[0];
-            $('periodoLabel').innerText = `Referência: ${inicio.toLocaleDateString('pt-BR')} a ${fim.toLocaleDateString('pt-BR')}`;
+            $('periodoLabel').innerText = `Período permitido: ${inicio.toLocaleDateString('pt-BR')} a ${fim.toLocaleDateString('pt-BR')}`;
 
             $('matricula').addEventListener("blur", () => {
                 let val = $('matricula').value.replace(/\D/g,'');
@@ -303,7 +303,7 @@
             $('dersoForm').addEventListener("input", updateProgress);
             $('btnHistory').onclick = fetchHistory;
             $('dersoForm').onsubmit = handleSubmit;
-            $('footerText').textContent = `1ª Cia / 1º BPM - PVSA Pedro Porto - ${hoje.getFullYear()}`;
+            $('footerText').textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
         }
 
         async function handleSubmit(e) {
