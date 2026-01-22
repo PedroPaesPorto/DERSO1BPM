@@ -40,12 +40,11 @@
 
         #barraProgresso {
             position: absolute; top: 0; left: 0; width: 0%; height: 4px;
-            background: var(--ouro-velho); /* Começa dourada conforme solicitado */
+            background: var(--ouro-velho); 
             border-radius: 4px 4px 0 0;
             transition: width 0.4s ease, background-color 0.3s ease; z-index: 3;
         }
 
-        /* Classe para ativar o verde "vencedor" no final via JS */
         .barra-completa {
             background-color: var(--sucesso-border) !important;
             box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
@@ -59,7 +58,6 @@
         .header { text-align: center; margin-bottom: 20px; }
         .logos { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
         
-        /* Ícones maiores para facilitar a leitura e o toque */
         .logos img { 
             height: 75px; 
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
@@ -69,7 +67,6 @@
         .divisor { width: 100%; height: 1px; background: #FFD700; margin: 15px 0; }
         .subtitle { font-size: 14px; color: #333; line-height: 1.4; margin-bottom: 25px; text-align: center; }
 
-        /* Timer com suporte a animação de urgência */
         #prazoBox {
             background: var(--sucesso-bg);
             border-left: 5px solid var(--sucesso-border);
@@ -78,7 +75,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Classe de cintilação para urgência máxima */
         .timer-urgente {
             animation: cintilar 0.8s infinite alternate;
             border-left-color: var(--alerta-vermelho) !important;
@@ -90,7 +86,6 @@
             to { opacity: 0.8; transform: scale(0.98); color: var(--alerta-vermelho); }
         }
 
-        /* Mensagem Institucional limpa (sem quadro cinza externo) */
         #instContainer { border: none; background: none; margin-bottom: 5px; padding: 0; }
         
         #instMessage {
@@ -98,7 +93,7 @@
             font-style: italic;
             font-weight: 500;
             color: #1a237e;
-            background: rgba(197, 160, 89, 0.1); /* Fundo ouro sutil */
+            background: rgba(197, 160, 89, 0.1);
             padding: 15px;
             border-radius: 8px;
             border-left: 4px solid var(--ouro-velho);
@@ -111,11 +106,19 @@
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 14px; }
         
-        /* Prevenção de zoom automático no iPhone (font-size: 16px) */
         input:not([type="radio"]) {
             width: 100%; padding: 12px; border: 1px solid var(--borda);
             border-radius: 4px; box-sizing: border-box; font-size: 16px;
             transition: all 0.3s ease;
+        }
+
+        /* Estilo para o erro da matrícula */
+        #erroMatricula {
+            color: var(--alerta-vermelho);
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 5px;
+            display: none;
         }
 
         .radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -136,11 +139,13 @@
             width: 100%; padding: 16px; border-radius: 4px; border: none;
             font-weight: bold; cursor: pointer; text-transform: uppercase;
             font-size: 15px; margin-top: 10px;
+            transition: 0.3s;
         }
+        .btn:disabled { background: #ccc !important; cursor: not-allowed; }
         .btn-outline { background: #fff; color: var(--azul-marinho); border: 2px solid var(--azul-marinho); }
         .btn-primary { background: var(--azul-marinho); color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-primary:hover { background: #1a3c6e; transform: translateY(-1px); }
 
-        /* MODAIS */
         .modal {
             display: none; position: fixed; inset: 0;
             background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 10000;
@@ -169,8 +174,7 @@
             animation: spin 1s linear infinite; margin: 15px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-</style>
-    
+    </style>
 </head>
 <body>
 
@@ -211,11 +215,12 @@
                 <div class="form-group">
                     <label>Matrícula:</label>
                     <input type="text" name="matricula" id="matricula" placeholder="Ex: 1000xxxxx" required>
+                    <small id="erroMatricula">⚠️ MATRÍCULA NÃO ENCONTRADA NO EFETIVO</small>
                 </div>
 
                 <div class="form-group">
                     <label>Nome:</label>
-                    <input type="text" id="nome" name="nome" readonly style="background: #f9f9f9;">
+                    <input type="text" id="nome" name="nome" readonly style="background: #f9f9f9;" placeholder="Preenchimento automático">
                 </div>
 
                 <div class="form-group">
@@ -268,8 +273,8 @@
    <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-11arycDKX6Vwo26KmTeIqfjMMuIiPUpf5SjKd3PyIVqqttbRWTmNoMP8Y4iAXweUMQ/exec";
         window.employeeList = {};
+        window.userSolicitations = []; // Cache local para evitar duplicidade na mesma sessão
 
-        // --- GESTÃO DE MODAIS E FECHAMENTO ---
         function fecharModais() {
             document.getElementById("modalHistory").style.display = "none";
             document.getElementById("modalSuccess").style.display = "none";
@@ -283,7 +288,7 @@
             if (e.key === "Escape") fecharModais();
         });
 
-       function atualizarProgresso() {
+        function atualizarProgresso() {
             const emailVal = document.getElementById('email').value.includes('@');
             const nomeVal = document.getElementById('nome').value !== "" && document.getElementById('nome').value !== "NÃO ENCONTRADO";
             const folgaVal = document.querySelector('input[name="folga"]:checked') !== null;
@@ -297,13 +302,13 @@
             barra.style.width = porcentagem + "%";
 
             if (porcentagem < 100) {
-                barra.style.backgroundColor = "#D4AF37"; // Dourado
+                barra.style.backgroundColor = "#D4AF37"; 
                 barra.classList.remove('barra-completa');
                 barra.style.boxShadow = "none";
             } else {
-                barra.style.backgroundColor = "#2e7d32"; // Verde
+                barra.style.backgroundColor = "#2e7d32"; 
                 barra.classList.add('barra-completa');
-                if (navigator.vibrate) navigator.vibrate(50); // Vibra ao completar
+                if (navigator.vibrate) navigator.vibrate(50);
             }
         }
 
@@ -344,6 +349,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", async () => {
+            console.log("🚀 Sistema Iniciando...");
             try {
                 const [dResp, lResp] = await Promise.all([
                     fetch(`${SCRIPT_URL}?action=datas`),
@@ -351,6 +357,8 @@
                 ]);
                 const config = await dResp.json();
                 window.employeeList = await lResp.json();
+                
+                console.log("✅ Lista de Funcionários carregada.");
 
                 document.getElementById("loadingScreen").style.display = "none";
                 document.getElementById("formContent").style.display = "block";
@@ -359,12 +367,13 @@
                 startCountdown(config.fechamento);
                 setupForm();
             } catch (e) {
-                document.getElementById("loadingScreen").innerHTML = "<p style='color:red'>Erro de conexão com o servidor.</p>";
+                console.error("🔥 Erro no carregamento inicial:", e);
+                document.getElementById("loadingScreen").innerHTML = "<p style='color:red'>Erro de conexão com o servidor. Tente atualizar a página.</p>";
             }
         });
 
        function startCountdown(endTime) {
-            const display = document.getElementById("timerDisplay"); // Certifique-se que o ID do container é este
+            const display = document.getElementById("timerDisplay");
             const end = new Date(endTime).getTime();
             
             const interval = setInterval(() => {
@@ -385,16 +394,14 @@
                 const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-                // Aplicação de Urgência Visual
                 const container = display.parentElement;
-if (diff < 1000 * 60 * 60) { // Menos de 1 hora
-    container.classList.add('timer-urgente'); // Isso ativa a cintilação do CSS
-    if (s % 2 === 0) display.style.color = "#d32f2f"; else display.style.color = "black";
-} else if (diff < 1000 * 60 * 60 * 24) { // Menos de 24 horas
-    container.style.backgroundColor = "#fff9c4";
-    container.style.borderLeft = "5px solid #fbc02d";
-    container.classList.remove('timer-urgente');
-}
+                if (diff < 1000 * 60 * 60) {
+                    container.classList.add('timer-urgente');
+                    if (s % 2 === 0) display.style.color = "#d32f2f"; else display.style.color = "black";
+                } else if (diff < 1000 * 60 * 60 * 24) {
+                    container.style.backgroundColor = "#fff9c4";
+                    container.style.borderLeft = "5px solid #fbc02d";
+                }
 
                 display.innerHTML = `🚨 <b>FORMULÁRIO ABERTO!</b><br>Encerra em: <b>${d}d ${h}h ${m}m ${s}s</b>`;
             }, 1000);
@@ -405,6 +412,7 @@ if (diff < 1000 * 60 * 60) { // Menos de 1 hora
             const emailIn = document.getElementById("email");
             const dataIn = document.getElementById("data");
             const nomeIn = document.getElementById("nome");
+            const erroMat = document.getElementById("erroMatricula");
             const form = document.getElementById("dersoForm");
             const hoje = new Date();
 
@@ -426,42 +434,51 @@ if (diff < 1000 * 60 * 60) { // Menos de 1 hora
                 let val = matIn.value.replace(/\D/g,'');
                 if(!val) return;
                 
-                // Mantém sua padronização de matrícula 1000...
                 const std = val.startsWith("1000") ? val : "1000" + val;
                 matIn.value = std;
                 
                 const policialNome = window.employeeList[std];
+                console.log(`🔍 Verificando matrícula: ${std}`);
                 
                 if (policialNome) {
                     nomeIn.value = policialNome;
+                    erroMat.style.display = "none";
                     matIn.classList.add('campo-validado');
                     nomeIn.classList.add('campo-validado');
-                    
-                    // Efeito de vibração curta ao encontrar o policial (sucesso)
                     if (navigator.vibrate) navigator.vibrate(40); 
-                    
                 } else {
-                    nomeIn.value = "NÃO ENCONTRADO";
+                    console.warn("⚠️ Policial não encontrado na lista.");
+                    nomeIn.value = ""; 
+                    erroMat.style.display = "block";
                     matIn.classList.remove('campo-validado');
                     nomeIn.classList.remove('campo-validado');
-                    
-                    // Vibração dupla rápida indicando erro (opcional)
                     if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
                 }
                 atualizarProgresso();
             });
 
             document.getElementById('radioFolgaGroup').addEventListener('change', atualizarProgresso);
+            
             dataIn.addEventListener("change", () => {
                 dataIn.classList.toggle('campo-validado', !!dataIn.value);
                 atualizarProgresso();
+                
+                // Sugestão: Checagem de duplicidade local imediata
+                const dataFormatada = dataIn.value.split('-').reverse().join('/');
+                const jaExiste = window.userSolicitations.some(s => s.data === dataFormatada);
+                if(jaExiste) {
+                    alert("⚠️ Você já selecionou esta data nesta sessão!");
+                    dataIn.value = "";
+                    dataIn.classList.remove('campo-validado');
+                }
             });
 
-            // Lógica do Histórico
+            // Histórico
             document.getElementById("btnHistory").onclick = async () => {
                 const matricula = matIn.value;
                 if(!matricula) return alert("Digite a matrícula primeiro.");
                 
+                console.log(`📂 Buscando histórico para ${matricula}...`);
                 document.getElementById("modalHistory").style.display = "flex";
                 const historyBox = document.getElementById("historyBox");
                 historyBox.innerHTML = "Buscando...";
@@ -474,6 +491,7 @@ if (diff < 1000 * 60 * 60) { // Menos de 1 hora
                     html += `<div class="barra-dourada"></div>`;
 
                     if(result.dados && result.dados.length > 0) {
+                        window.userSolicitations = result.dados; // Salva no cache local para travar duplicidade
                         html += result.dados.map(i => 
                             `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee; font-size:14px;">
                                 <span>📅 <b>${i.data}</b></span>
@@ -485,20 +503,22 @@ if (diff < 1000 * 60 * 60) { // Menos de 1 hora
                     }
                     historyBox.innerHTML = html;
                 } catch (e) {
+                    console.error("🔥 Erro ao buscar histórico:", e);
                     historyBox.innerHTML = "Erro ao carregar histórico.";
                 }
             };
 
-            // Lógica de Envio (POST)
+            // Envio
             form.onsubmit = async (e) => {
                 e.preventDefault();
                 const btn = document.getElementById("btnEnviar");
                 
-                if (nomeIn.value === "NÃO ENCONTRADO" || !nomeIn.value) {
+                if (!nomeIn.value) {
                     alert("Por favor, insira uma matrícula válida.");
                     return;
                 }
 
+                console.log("📤 Iniciando envio dos dados...");
                 btn.disabled = true;
                 btn.innerText = "VERIFICANDO...";
 
@@ -512,20 +532,28 @@ if (diff < 1000 * 60 * 60) { // Menos de 1 hora
                     });
 
                     const res = await resp.json();
+                    console.log("📡 Resposta do servidor:", res);
 
                     if (res.success) {
+                        console.log("✅ Solicitação salva!");
                         document.getElementById("modalSuccess").style.display = "flex";
+                        
+                        // Adiciona ao cache local para bloquear duplicata imediata
+                        const dataInput = document.getElementById("data").value.split('-').reverse().join('/');
+                        window.userSolicitations.push({ data: dataInput });
+
                         document.getElementById("data").value = "";
                         document.getElementById("data").classList.remove('campo-validado');
                         const radios = document.getElementsByName("folga");
                         radios.forEach(r => r.checked = false);
                     } else {
+                        console.warn("❌ Falha no envio:", res.message);
                         alert(res.message || "Erro ao processar solicitação.");
                     }
 
                 } catch (err) {
-                    console.error("Erro no fetch:", err);
-                    alert("⚠️ Já existe solicitação para esta data/folga.");
+                    console.error("🚑 Erro crítico no envio:", err);
+                    alert("Erro de conexão. Verifique sua internet.");
                 } finally {
                     btn.disabled = false;
                     btn.innerText = "ENVIAR SOLICITAÇÃO";
