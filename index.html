@@ -106,9 +106,30 @@
             background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
             z-index: 10000; backdrop-filter: blur(4px);
         }
+        
         .modal-content {
-            background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px;
-            text-align: center;
+            background: #fff; padding: 25px; border-radius: 12px; 
+            width: 95%; max-width: 400px;
+            max-height: 90vh;
+            display: flex; flex-direction: column; text-align: center;
+            overflow: hidden;
+        }
+
+        #historyContent {
+            display: none; text-align: left; 
+            max-height: 380px; /* GARANTE QUE A LISTA SEJA LONGA NO CELULAR */
+            overflow-y: auto; margin: 15px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .historico-item {
+            padding: 10px 5px; 
+            border-bottom: 1px solid #f9f9f9;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .footer { text-align: center; margin-top: 25px; font-size: 11px; color: #888; }
@@ -158,13 +179,13 @@
                 <div class="form-group">
                     <label for="email" class="required">E-mail Institucional ou Pessoal:</label>
                     <input type="email" id="email" name="email" placeholder="exemplo@pm.ro.gov.br" required>
-                    <span id="erroEmail" class="msg-erro" role="alert">E-mail inválido</span>
+                    <span id="erroEmail" class="msg-erro" role="alert">E-mail inválido ou em branco</span>
                 </div>
 
                 <div class="form-group">
                     <label for="matricula" class="required">Matrícula (apenas números):</label>
                     <input type="text" id="matricula" name="matricula" placeholder="Ex: 12345 ou 100012345" required maxlength="15">
-                    <span id="erroMatricula" class="msg-erro" role="alert">⚠️ MATRÍCULA NÃO LOCALIZADA</span>
+                    <span id="erroMatricula" class="msg-erro" role="alert">⚠️ MATRÍCULA NÃO LOCALIZADA OU EM BRANCO</span>
                 </div>
 
                 <div class="form-group">
@@ -191,7 +212,7 @@
                     <label for="data" class="required">Data:</label>
                     <input type="date" id="data" name="data" required>
                     <small id="periodoLabel" style="display:block; margin-top:5px; color:#666; font-size:11px;"></small>
-                    <span id="erroData" class="msg-erro" role="alert">Data já solicitada ou inválida</span>
+                    <span id="erroData" class="msg-erro" role="alert">Data já solicitada ou em branco</span>
                 </div>
 
                 <button type="button" class="btn btn-outline" id="btnHistory">📂 VER MINHAS SOLICITAÇÕES</button>
@@ -210,7 +231,7 @@
             <div id="modalIcon" style="font-size: 50px; margin-bottom: 10px;"></div>
             <h3 id="modalTitle"></h3>
             <p id="modalText" style="color: #666; margin: 15px 0;"></p>
-            <div id="historyContent" style="display:none; text-align: left; max-height: 200px; overflow-y: auto;"></div>
+            <div id="historyContent"></div> 
             <button class="btn btn-primary" onclick="closeModal()">FECHAR</button>
         </div>
     </div>
@@ -225,6 +246,7 @@
         const $ = (id) => document.getElementById(id);
 
         document.addEventListener("DOMContentLoaded", async () => {
+            console.log("[DERSO] Sistema iniciado.");
             try {
                 const [dResp, lResp] = await Promise.all([
                     fetch(`${CONFIG.URL}?action=datas`).then(r => r.json()),
@@ -238,7 +260,9 @@
                 applyInstitutionalTheme();
                 startCountdown(dResp.fechamento);
                 setupFormListeners();
+                console.log("[DERSO] Dados sincronizados com sucesso.");
             } catch (e) {
+                console.error("[DERSO] Erro na carga inicial:", e);
                 $('loadingContent').style.display = "none";
                 $('retryBtn').style.display = "block";
             }
@@ -303,6 +327,8 @@
             $('dersoForm').addEventListener("input", updateProgress);
             $('btnHistory').onclick = fetchHistory;
             $('dersoForm').onsubmit = handleSubmit;
+            
+            const now = new Date();
             $('footerText').textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
         }
 
@@ -315,14 +341,15 @@
                 const resp = await fetch(CONFIG.URL, { method: 'POST', body: new URLSearchParams(new FormData($('dersoForm'))) });
                 const res = await resp.json();
                 if (res.success) {
-                    showModal("SUCESSO!", "Solicitação gravada.", "✔", "#2E7D32");
-                    STATE.userSolicitations.push({ data: $('data').value.split('-').reverse().join('/') });
+                    showModal("SUCESSO!", "Solicitação gravada com sucesso.", "✔", "#2E7D32");
+                    // Limpa apenas os campos de data e folga
                     $('data').value = "";
+                    document.querySelectorAll('input[name="folga"]').forEach(r => r.checked = false);
                 } else {
                     showModal("ERRO", res.message, "⚠️", "#D32F2F");
                 }
             } catch (err) {
-                showModal("ERRO", "Falha de comunicação.", "❌", "#D32F2F");
+                showModal("ERRO", "Falha de comunicação com o servidor.", "❌", "#D32F2F");
             } finally {
                 setLoading(false);
                 updateProgress();
@@ -331,16 +358,37 @@
 
         function validateAll() {
             let errorField = null;
-            const dataBr = $('data').value.split('-').reverse().join('/');
+            const dataVal = $('data').value;
+            const dataBr = dataVal ? dataVal.split('-').reverse().join('/') : "";
             
-            if (!CONFIG.REGEX_EMAIL.test($('email').value)) errorField = $('email');
-            else if (!$('nome').value) errorField = $('matricula');
-            else if (!document.querySelector('input[name="folga"]:checked')) errorField = $('radioFolgaGroup');
-            else if (!$('data').value || STATE.userSolicitations.some(s => s.data === dataBr)) errorField = $('data');
+            document.querySelectorAll('.msg-erro').forEach(m => m.style.display = 'none');
+            document.querySelectorAll('input').forEach(i => i.classList.remove('campo-erro'));
+
+            if (!CONFIG.REGEX_EMAIL.test($('email').value)) {
+                $('erroEmail').style.display = 'block';
+                $('email').classList.add('campo-erro');
+                errorField = errorField || $('email');
+            }
+
+            if (!$('nome').value) {
+                $('erroMatricula').style.display = 'block';
+                $('matricula').classList.add('campo-erro');
+                errorField = errorField || $('matricula');
+            }
+
+            if (!document.querySelector('input[name="folga"]:checked')) {
+                $('erroFolga').style.display = 'block';
+                errorField = errorField || $('radioFolgaGroup');
+            }
+
+            if (!dataVal) {
+                $('erroData').style.display = 'block';
+                $('data').classList.add('campo-erro');
+                errorField = errorField || $('data');
+            }
 
             if (errorField) {
                 errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                errorField.focus();
                 return false;
             }
             return true;
@@ -374,20 +422,33 @@
             $('historyContent').style.display = isHistory ? 'block' : 'none';
         }
 
-        function closeModal() { $('modalMsg').style.display = 'none'; }
+        function closeModal(e) { 
+            if(!e || e.target.id === 'modalMsg' || e.type === 'click') {
+                $('modalMsg').style.display = 'none'; 
+            }
+        }
 
         async function fetchHistory() {
             const mat = $('matricula').value;
-            if(!mat || !STATE.employeeList[mat]) return showModal("AVISO", "Digite sua matrícula.", "🔍", "#FFD700");
+            if(!mat || !STATE.employeeList[mat]) return showModal("AVISO", "Digite sua matrícula para consultar.", "🔍", "#FFD700");
             
             showModal("BUSCANDO...", "Aguarde...", "📂", "#FFD700");
             try {
                 const resp = await fetch(`${CONFIG.URL}?action=historico&matricula=${mat}`).then(r => r.json());
                 STATE.userSolicitations = resp.dados || [];
-                let html = STATE.userSolicitations.map(i => `<div style="padding:5px; border-bottom:1px solid #eee">📅 ${i.data} - ${i.folga}</div>`).join('') || "Sem registros.";
+                
+                let html = STATE.userSolicitations.map(i => `
+                    <div class="historico-item">
+                        <span>📅 <b>${i.data}</b></span>
+                        <span style="color: var(--azul-marinho)">${i.folga}</span>
+                    </div>
+                `).join('') || "<div style='text-align:center;padding:20px'>Nenhum registro encontrado.</div>";
+                
                 $('historyContent').innerHTML = html;
-                showModal(resp.nome, "Suas solicitações:", "📋", "#FFD700", true);
-            } catch (e) { showModal("ERRO", "Falha ao carregar.", "❌", "#D32F2F"); }
+                showModal(resp.nome, "Suas solicitações atuais:", "📋", "#FFD700", true);
+            } catch (e) { 
+                showModal("ERRO", "Falha ao carregar histórico.", "❌", "#D32F2F"); 
+            }
         }
 
         function startCountdown(endTime) {
