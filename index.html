@@ -95,47 +95,50 @@
             font-weight: 500;
         }
 
-        /* BOX DINÂMICO DE PRAZO */
-        #prazoBox {
-            padding: 15px;
-            text-align: center;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-left: 5px solid transparent;
-        }
+       /* --- 1. ADAPTAÇÃO PARA MODO NOTURNO (Automático) --- */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --cinza-fundo: #121212;
+    }
+    body { background-color: var(--cinza-fundo); color: #e0e0e0; }
+    .container { background: #1e1e1e; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    input:not([type="radio"]) { background: #2d2d2d; border-color: #404040; color: #fff; }
+    label { color: #ccc; }
+    .radio-group label { background: #2d2d2d; border-color: #404040; color: #fff; }
+    .subtitle { color: #999; }
+    #instMessage { background: rgba(255, 215, 0, 0.05); }
+}
 
-        .estado-sucesso {
-            background: #E8F5E9 !important;
-            border: 2px solid #2E7D32 !important;
-            color: #2E7D32 !important;
-        }
+/* --- 2. AJUSTES NO PRAZOBOX E NOVOS ESTADOS --- */
+#prazoBox {
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px; /* Ficou um pouco mais arredondado para ser "bonito" */
+    margin-bottom: 15px;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid transparent; /* Borda completa para a "caixa bonita" */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
 
-        .estado-inspecao {
-            background: #f8f9fa !important;
-            border: 2px dashed #1A3C6E !important;
-            color: #1A3C6E !important;
-        }
+.estado-verde { 
+    background: #E8F5E9; border-color: #2E7D32; color: #1B5E20; 
+}
 
-        .estado-alerta {
-            background: #fff3e0;
-            border-color: var(--alerta-laranja);
-            color: #e65100;
-        }
+/* Estado intermediário de urgência (Laranja) */
+.estado-urgente { 
+    background: #FFF3E0; border-color: #EF6C00; color: #E65100;
+    transform: scale(1.01);
+}
 
-        .estado-critico {
-            background: #ffebee;
-            border-color: var(--critico-vermelho);
-            color: var(--critico-vermelho);
-            animation: pulse-glow 1.2s infinite;
-            transform: scale(1.02);
-        }
-
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
-            70% { box-shadow: 0 0 20px 10px rgba(211, 47, 47, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
-        }
+/* Mantendo seus estados originais */
+.estado-sucesso { background: #E8F5E9 !important; border: 2px solid #2E7D32 !important; color: #2E7D32 !important; }
+.estado-inspecao { background: #f8f9fa !important; border: 2px dashed #1A3C6E !important; color: #1A3C6E !important; }
+.estado-alerta { background: #fff3e0; border-color: var(--alerta-laranja); color: #e65100; }
+.estado-critico { 
+    background: #ffebee; border-color: var(--critico-vermelho); color: var(--critico-vermelho);
+    animation: pulse-glow 1.2s infinite; transform: scale(1.04);
+    font-weight: bold;
+}
 
         #instMessage {
             font-size: 0.95rem;
@@ -440,82 +443,87 @@
         DOM.footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - versão ${CONFIG.VERSAO} - em ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
     }
 
-    function monitorarPrazos(dataAbertura, dataFechamento) {
-        const abertura = new Date(dataAbertura).getTime();
-        const fechamento = new Date(dataFechamento).getTime();
-        const hoje = new Date();
+   function monitorarPrazos(dataAbertura, dataFechamento) {
+    const abertura = new Date(dataAbertura).getTime();
+    const fechamento = new Date(dataFechamento).getTime();
+    const hoje = new Date();
+    
+    const dataRef = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+    const nomeMesRef = dataRef.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
+    const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59).getTime();
+
+    setInterval(() => {
+        const agora = new Date().getTime();
+        const instDiv = document.getElementById("instMessage");
         
-        const dataRef = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
-        const nomeMesRef = dataRef.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
-        const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59).getTime();
+        // Limpeza de classes mantendo a compatibilidade com os novos estados
+        DOM.prazoBox.classList.remove('estado-verde', 'estado-alerta', 'estado-urgente', 'estado-critico', 'estado-sucesso', 'estado-inspecao');
 
-        setInterval(() => {
-            const agora = new Date().getTime();
-            const instDiv = document.getElementById("instMessage");
+        if (agora < abertura) {
+            STATE.isClosed = true;
+            DOM.form.style.display = "none";
+            instDiv.style.display = "none";
+            DOM.prazoBox.classList.add('estado-inspecao');
             
-            DOM.prazoBox.classList.remove('estado-verde', 'estado-alerta', 'estado-critico', 'estado-sucesso', 'estado-inspecao');
-
-            if (agora < abertura) {
-                STATE.isClosed = true;
-                DOM.form.style.display = "none";
-                instDiv.style.display = "none";
-                DOM.prazoBox.classList.add('estado-inspecao');
-                
-                const diff = abertura - agora;
-                const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
-                      m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
-                
+            const diff = abertura - agora;
+            const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
+                  m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+            
+            DOM.timerDisplay.innerHTML = `
+                <b style="color:#1A3C6E">ESTAMOS PASSANDO EM INSPEÇÃO AO CÓDIGO.</b><br>
+                <p style="margin: 10px 0;">Voltamos em: <br>
+                <span style="font-size:1.1rem; font-weight:bold;">${d}d ${h}h ${m}m ${s}s</span></p>
+                <span style="font-size:24px;">🫡👮‍♂️</span>`;
+        } 
+        else if (agora > fechamento) {
+            STATE.isClosed = true;
+            DOM.form.style.display = "none";
+            instDiv.style.display = "none";
+            
+            if (agora <= ultimoDiaMes) {
+                DOM.consultaFechada.style.display = "block";
+                DOM.btnHistoryFechado.style.display = "block";
+                DOM.prazoBox.classList.add('estado-sucesso');
                 DOM.timerDisplay.innerHTML = `
-                    <b style="color:#1A3C6E">ESTAMOS PASSANDO EM INSPEÇÃO AO CÓDIGO.</b><br>
-                    <p style="margin: 10px 0;">Voltamos em: <br>
-                    <span style="font-size:1.1rem; font-weight:bold;">${d}d ${h}h ${m}m ${s}s</span></p>
-                    <span style="font-size:24px;">🫡👮‍♂️</span>`;
-            } 
-            else if (agora > fechamento) {
-                STATE.isClosed = true;
-                DOM.form.style.display = "none";
-                instDiv.style.display = "none";
-                
-                if (agora <= ultimoDiaMes) {
-                    DOM.consultaFechada.style.display = "block";
-                    DOM.btnHistoryFechado.style.display = "block";
-                    DOM.prazoBox.classList.add('estado-sucesso');
-                    DOM.timerDisplay.innerHTML = `
-                        <div style="padding:10px;">
-                            <b style="color:#2E7D32">MISSÃO CUMPRIDA!</b><br>
-                            <p style="font-size:14px; margin: 10px 0; line-height:1.4;">
-                                AS SOLICITAÇÕES DE DERSO PARA O MÊS DE <b>${nomeMesRef}</b> <br>
-                                FORAM ENCERRADAS EM <b>${new Date(fechamento).toLocaleString("pt-BR")}</b>.
-                            </p>
-                            <p style="font-size:13px; color:#555;">Você ainda pode consultar suas solicitações abaixo: 👮‍♂️</p>
-                        </div>`;
-                } else {
-                    DOM.consultaFechada.style.display = "none";
-                    DOM.timerDisplay.innerHTML = "⌛ Aguardando novo cronograma de escalas...";
-                }
-            } 
-            else {
-                STATE.isClosed = false;
-                DOM.form.style.display = "block";
-                instDiv.style.display = "block";
-                
-                const diff = fechamento - agora;
-                const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
-                      m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
-
-                if (diff < 21600000) { 
-                    DOM.prazoBox.classList.add('estado-critico');
-                    DOM.timerDisplay.innerHTML = `🔥 <b>EMERGÊNCIA: TEMPO ACABANDO!</b><br>Fecha em: <b>${h}h ${m}m ${s}s</b>`;
-                } else if (diff < 86400000) {
-                    DOM.prazoBox.classList.add('estado-alerta');
-                    DOM.timerDisplay.innerHTML = `⚠️ <b>SISTEMA FECHA EM BREVE</b><br>Tempo restante: ${h}h ${m}m ${s}s`;
-                } else {
-                    DOM.prazoBox.classList.add('estado-verde');
-                    DOM.timerDisplay.innerHTML = `⚡ <b>OPERACIONAL ATIVO</b><br><small>Encerra em: ${d}d ${h}h ${m}m ${s}s</small>`;
-                }
+                    <div style="padding:10px;">
+                        <b style="color:#2E7D32">MISSÃO CUMPRIDA!</b><br>
+                        <p style="font-size:14px; margin: 10px 0; line-height:1.4;">
+                            AS SOLICITAÇÕES DE DERSO PARA O MÊS DE <b>${nomeMesRef}</b> <br>
+                            FORAM ENCERRADAS EM <b>${new Date(fechamento).toLocaleString("pt-BR")}</b>.
+                        </p>
+                        <p style="font-size:13px; color:#555;">Você ainda pode consultar suas solicitações abaixo: 👮‍♂️</p>
+                    </div>`;
+            } else {
+                DOM.consultaFechada.style.display = "none";
+                DOM.timerDisplay.innerHTML = "⌛ Aguardando novo cronograma de escalas...";
             }
-        }, 1000);
-    }
+        } 
+        else {
+            STATE.isClosed = false;
+            DOM.form.style.display = "block";
+            instDiv.style.display = "block";
+            
+            const diff = fechamento - agora;
+            const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
+                  m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+
+            // LOGICA DE URGÊNCIA PROGRESSIVA
+            if (diff < 7200000) { // Menos de 2 horas (CRÍTICO)
+                DOM.prazoBox.classList.add('estado-critico');
+                DOM.timerDisplay.innerHTML = `🔥 <b>EMERGÊNCIA: TEMPO ACABANDO!</b><br>Fecha em: <b>${h}h ${m}m ${s}s</b>`;
+            } else if (diff < 21600000) { // Menos de 6 horas (URGENTE)
+                DOM.prazoBox.classList.add('estado-urgente');
+                DOM.timerDisplay.innerHTML = `⚠️ <b>RÁPIDO! O TEMPO ESTÁ ACABANDO</b><br>Resta apenas: <b>${h}h ${m}m ${s}s</b>`;
+            } else if (diff < 86400000) { // Menos de 24 horas (ALERTA)
+                DOM.prazoBox.classList.add('estado-alerta');
+                DOM.timerDisplay.innerHTML = `⏳ <b>SISTEMA FECHA EM BREVE</b><br>Tempo restante: ${h}h ${m}m ${s}s`;
+            } else { // MAIS DE 24 HORAS (OPERACIONAL ATIVO)
+                DOM.prazoBox.classList.add('estado-verde');
+                DOM.timerDisplay.innerHTML = `⚡ <b>OPERACIONAL ATIVO</b><br><small>Encerra em: ${d}d ${h}h ${m}m ${s}s</small>`;
+            }
+        }
+    }, 1000);
+}
 
     function applyInstitutionalTheme() {
         const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
