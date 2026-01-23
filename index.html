@@ -59,7 +59,7 @@
 
         @keyframes pulse-red {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); }
-            70% { transform: scale(1.03); box-shadow: 0 0 15px 10px rgba(211, 47, 47, 0); }
+            70% { transform: scale(1.02); box-shadow: 0 0 15px 10px rgba(211, 47, 47, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
         }
 
@@ -69,6 +69,7 @@
             border: 2px solid #d32f2f !important;
             color: #d32f2f !important;
         }
+        .urgencia-critica b { font-weight: 900; font-size: 1.4rem; }
 
         .urgencia-alerta {
             background: #fff3e0 !important;
@@ -108,6 +109,8 @@
         .radio-group input:checked + label {
             background: var(--azul-marinho); color: var(--ouro-brilhante); border-color: var(--azul-marinho);
         }
+        /* Melhoria de acessibilidade para navegação via teclado */
+        .radio-group input:focus + label { outline: 2px solid var(--ouro-brilhante); }
 
         .btn {
             width: 100%; min-height: 48px; padding: 12px; border-radius: var(--raio-padrao); border: none;
@@ -115,7 +118,8 @@
             font-size: 14px; margin-top: 10px; transition: 0.2s;
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .btn-outline { background: #fff; color: var(--azul-marinho); border: 2px solid var(--azul-marinho); }
+        .btn-outline { background: #fff; color: #777; border: 1.5px solid #ccc; font-size: 12px; }
+        .btn-outline:hover { border-color: var(--azul-marinho); color: var(--azul-marinho); }
         .btn-primary { background: var(--azul-marinho); color: #fff; }
         .btn:disabled { background: #ccc !important; cursor: not-allowed; opacity: 0.7; }
 
@@ -212,7 +216,7 @@
                     <label for="data" class="required">Data da Folga:</label>
                     <input type="date" id="data" name="data" required>
                     <small id="periodoLabel" style="display:block; margin-top:5px; color:#666; font-size:11px;"></small>
-                    <span id="erroData" class="msg-erro">Data inválida</span>
+                    <span id="erroData" class="msg-erro">Selecione uma data dentro do período permitido</span>
                 </div>
 
                 <button type="button" class="btn btn-outline" id="btnHistory">📂 VER MINHAS SOLICITAÇÕES</button>
@@ -242,7 +246,7 @@
         TIMEOUT: 15000,
         REGEX_EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         EMAIL_PROVIDERS: ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"],
-        VERSAO: "3.4"
+        VERSAO: "3.5"
     };
 
     const STATE = { employeeList: {}, isSubmitting: false, isClosed: false };
@@ -281,7 +285,11 @@
             monitorarPrazos(dResp.abertura, dResp.fechamento);
             setupApp();
         } catch (e) {
-            DOM.loading.innerHTML = `<p style="color:red; text-align:center">Erro de Conexão. <br><button onclick="location.reload()" class="btn btn-outline">Tentar Novamente</button></p>`;
+            DOM.loading.innerHTML = `
+                <div style="text-align:center; padding: 20px;">
+                    <p style="color:red; font-weight:bold;">Falha na conexão com o servidor.</p>
+                    <button onclick="location.reload()" class="btn btn-primary">🔄 RECARREGAR PÁGINA</button>
+                </div>`;
         }
     });
 
@@ -362,19 +370,26 @@
         const now = new Date();
         DOM.footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${CONFIG.VERSAO} [${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}]`;
         
-        // Formatação automática do input de consulta
-        DOM.matriculaConsulta.oninput = e => {
-            e.target.value = e.target.value.replace(/\D/g, "");
-            if(e.target.value.length > 4 && !e.target.value.startsWith("1000")) {
-                e.target.value = "1000" + e.target.value;
-            }
-        };
+        // Melhoria: Popula datalist de emails
+        const dl = document.getElementById('emailProviders');
+        CONFIG.EMAIL_PROVIDERS.forEach(provider => {
+            const opt = document.createElement('option');
+            opt.value = provider;
+            dl.appendChild(opt);
+        });
 
         const inicio = new Date(now.getFullYear(), now.getMonth() + 1, 1);
         const fim = new Date(now.getFullYear(), now.getMonth() + 2, 0);
         DOM.data.min = inicio.toISOString().split('T')[0];
         DOM.data.max = fim.toISOString().split('T')[0];
         document.getElementById('periodoLabel').textContent = `Período: ${inicio.toLocaleDateString('pt-BR')} a ${fim.toLocaleDateString('pt-BR')}`;
+
+        DOM.matriculaConsulta.oninput = e => {
+            e.target.value = e.target.value.replace(/\D/g, "");
+            if(e.target.value.length > 4 && !e.target.value.startsWith("1000")) {
+                e.target.value = "1000" + e.target.value;
+            }
+        };
 
         DOM.matricula.oninput = e => e.target.value = e.target.value.replace(/\D/g, "");
         DOM.matricula.onblur = handleMatricula;
@@ -386,11 +401,16 @@
     }
 
     function handleMatricula() {
-        let val = DOM.matricula.value;
+        let val = DOM.matricula.value.trim();
         if(!val) return;
-        const std = val.startsWith("1000") ? val : "1000" + val;
-        DOM.matricula.value = std;
-        const militar = STATE.employeeList[std];
+        
+        // Correção de Loop: Só adiciona 1000 se já não estiver lá
+        if (val.length >= 1 && val.length <= 6 && !val.startsWith("1000")) {
+            val = "1000" + val;
+        }
+        DOM.matricula.value = val;
+
+        const militar = STATE.employeeList[val];
         if(militar) {
             DOM.nome.value = militar;
             document.getElementById('erroMatricula').style.display = "none";
@@ -409,14 +429,14 @@
             const formData = new URLSearchParams(new FormData(DOM.form));
             const res = await fetchWithTimeout(CONFIG.API_URL, { method: 'POST', body: formData });
             if (res.success) {
-                showModal("SUCESSO", "Solicitação gravada.", "✔", "#2E7D32");
+                showModal("SUCESSO", "Solicitação gravada com sucesso.", "✔", "#2E7D32");
                 DOM.data.value = "";
                 document.querySelectorAll('input[name="folga"]').forEach(r => r.checked = false);
             } else {
                 showModal("AVISO", res.message, "⚠️", "#D32F2F");
             }
         } catch (err) {
-            showModal("ERRO", "Falha na conexão.", "❌", "#D32F2F");
+            showModal("ERRO", "Falha na conexão. Tente novamente em instantes.", "❌", "#D32F2F");
         } finally {
             setLoading(false);
             updateProgress();
@@ -426,36 +446,65 @@
     function validate() {
         let field = null;
         document.querySelectorAll('.msg-erro').forEach(m => m.style.display = 'none');
-        if (!CONFIG.REGEX_EMAIL.test(DOM.email.value)) { document.getElementById('erroEmail').style.display = 'block'; field = DOM.email; }
-        if (DOM.nome.value === "") { document.getElementById('erroMatricula').style.display = 'block'; field = field || DOM.matricula; }
-        if (!document.querySelector('input[name="folga"]:checked')) { document.getElementById('erroFolga').style.display = 'block'; field = field || document.getElementById('radioFolgaGroup'); }
-        if (DOM.data.value === "") { document.getElementById('erroData').style.display = 'block'; field = field || DOM.data; }
+        
+        // Validação de E-mail
+        if (!CONFIG.REGEX_EMAIL.test(DOM.email.value)) { 
+            document.getElementById('erroEmail').style.display = 'block'; 
+            field = DOM.email; 
+        }
+        // Validação de Matrícula/Nome
+        if (DOM.nome.value === "") { 
+            document.getElementById('erroMatricula').style.display = 'block'; 
+            field = field || DOM.matricula; 
+        }
+        // Validação de Rádio
+        if (!document.querySelector('input[name="folga"]:checked')) { 
+            document.getElementById('erroFolga').style.display = 'block'; 
+            field = field || document.getElementById('radioFolgaGroup'); 
+        }
+        // Validação de Data (Manual e Range)
+        const selectedDate = DOM.data.value;
+        if (selectedDate === "" || selectedDate < DOM.data.min || selectedDate > DOM.data.max) { 
+            document.getElementById('erroData').style.display = 'block'; 
+            field = field || DOM.data; 
+        }
+
         if (field) field.focus();
         return !field;
     }
 
     async function fetchHistory(isClosedMode) {
         const mat = isClosedMode ? DOM.matriculaConsulta.value : DOM.matricula.value;
-        
         if(!mat || mat.length < 5) {
-            return showModal("AVISO", "Digite uma matrícula válida.", "🔍", "#FFD700");
+            return showModal("AVISO", "Digite uma matrícula válida para consultar.", "🔍", "#FFD700");
         }
         
-        const matFull = mat.startsWith("1000") ? mat : "1000" + mat;
+        let matFull = mat.trim();
+        if(!matFull.startsWith("1000")) matFull = "1000" + matFull;
         
-        showModal("BUSCANDO", "Aguarde...", "📂", "#FFD700");
+        showModal("BUSCANDO", "Aguarde a resposta do sistema...", "📂", "#FFD700");
         try {
             const resp = await fetchWithTimeout(`${CONFIG.API_URL}?action=historico&matricula=${matFull}`);
-            const html = resp.dados.map(i => `<div class="historico-item"><span>📅 <b>${i.data}</b></span><span style="color:var(--azul-marinho); font-weight:bold;">${i.folga}</span></div>`).join('') || "<p style='text-align:center'>Nenhuma solicitação encontrada para esta matrícula.</p>";
+            const html = resp.dados.map(i => `
+                <div class="historico-item">
+                    <span>📅 <b>${i.data}</b></span>
+                    <span style="color:var(--azul-marinho); font-weight:bold;">${i.folga}</span>
+                </div>`).join('') || "<p style='text-align:center'>Nenhuma solicitação encontrada.</p>";
+            
             DOM.historyContent.innerHTML = html;
-            showModal(resp.nome || "Consulta", "Registros encontrados:", "📋", "#FFD700", true);
+            showModal(resp.nome || "Consulta", "Registros do mês corrente:", "📋", "#FFD700", true);
         } catch (e) { 
-            showModal("ERRO", "Falha ao ler histórico.", "❌", "#D32F2F"); 
+            showModal("ERRO", "Não foi possível recuperar o histórico.", "❌", "#D32F2F"); 
         }
     }
 
     function updateProgress() {
-        const fields = [CONFIG.REGEX_EMAIL.test(DOM.email.value), DOM.nome.value !== "", !!document.querySelector('input[name="folga"]:checked'), DOM.data.value !== ""];
+        const fields = [
+            CONFIG.REGEX_EMAIL.test(DOM.email.value), 
+            DOM.nome.value !== "", 
+            !!document.querySelector('input[name="folga"]:checked'), 
+            (DOM.data.value !== "" && DOM.data.value >= DOM.data.min && DOM.data.value <= DOM.data.max)
+        ];
         const perc = (fields.filter(Boolean).length / 4) * 100;
         DOM.barra.style.width = perc + "%";
         DOM.barra.classList.toggle('barra-completa', perc === 100);
@@ -465,7 +514,7 @@
         STATE.isSubmitting = active;
         DOM.btnEnviar.disabled = active;
         document.getElementById('spinEnviar').style.display = active ? 'block' : 'none';
-        document.getElementById('txtEnviar').textContent = active ? 'ENVIANDO...' : 'ENVIAR SOLICITAÇÃO';
+        document.getElementById('txtEnviar').textContent = active ? 'PROCESSANDO...' : 'ENVIAR SOLICITAÇÃO';
     }
 
     function showModal(title, text, icon, color, isHistory = false) {
@@ -477,12 +526,41 @@
         DOM.modal.style.display = 'flex';
     }
 
-    function applyInstitutionalTheme() {
-        const mes = new Date().getMonth();
-        const instDiv = document.getElementById("instMessage");
-        const mensais = { 0: "🎭 Janeiro...", 1: "🎊 Fevereiro...", 8: "🇧🇷 Setembro...", 11: "🎄 Dezembro..." }; // Abreviei aqui p/ espaço, mas no seu código está completo.
-        if (mensais[mes]) instDiv.innerHTML = mensais[mes];
-    }
+            function applyInstitutionalTheme() {
+            const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
+            const instDiv = document.getElementById("instMessage");
+            const aplicar = (msg) => instDiv.innerHTML = msg;
+
+            const temas = {
+                "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história, bravura e compromisso.`),
+                "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
+                "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
+                "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear() - 1889} anos de Proclamação.`),
+                "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
+                "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição e compromisso.`)
+            };
+
+            const chave = `${mes+1}-${dia}`;
+            if (temas[chave]) {
+                temas[chave]();
+            } else {
+                const mensais = {
+                    0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos."),
+                    1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
+                    2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda."),
+                    3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
+                    4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão."),
+                    5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade."),
+                    6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
+                    7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional."),
+                    8: () => aplicar("🇧🇷 Setembro: Renovando nosso juramento de servir e proteger o Brasil."),
+                    9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
+                    10: () => aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade. ${hoje.getFullYear() - 1889}º ano da República.`),
+                    11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. ✨")
+                };
+                if (mensais[mes]) mensais[mes]();
+            }
+        }
 </script>
 </body>
 </html>
