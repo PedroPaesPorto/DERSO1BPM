@@ -91,26 +91,26 @@
         input:not([type="radio"]) {
             width: 100%; padding: 14px; border: 2px solid #eee;
             border-radius: var(--raio-padrao); font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
 
-        input:focus-visible { border-color: var(--azul-marinho); outline: 2px solid var(--ouro-brilhante); }
-        input[readonly] { background-color: #f9f9f9; color: #666; cursor: not-allowed; }
+        input:focus { border-color: var(--azul-marinho); outline: none; box-shadow: 0 0 0 3px rgba(26, 60, 110, 0.1); }
+        input.input-erro { border-color: var(--alerta-vermelho); background-color: #fff8f8; }
+        input[readonly] { background-color: #f9f9f9; color: #666; cursor: not-allowed; border-color: #eee; }
         
         .msg-erro { color: var(--alerta-vermelho); font-size: 12px; font-weight: bold; margin-top: 5px; display: none; }
 
         .radio-group { display: flex; flex-wrap: wrap; gap: 8px; border: none; }
         .radio-group input { position: absolute; opacity: 0; }
         .radio-group label {
-            flex: 1 1 calc(25% - 8px); min-height: 44px; display: flex; align-items: center; justify-content: center;
+            flex: 1 1 calc(33% - 8px); min-height: 44px; display: flex; align-items: center; justify-content: center;
             border: 2px solid #eee; cursor: pointer; border-radius: var(--raio-padrao);
             font-size: 12px; font-weight: bold; background: #fafafa; margin: 0; transition: 0.2s;
         }
+        .radio-group label:hover { border-color: var(--ouro-brilhante); background: #fff; }
         .radio-group input:checked + label {
             background: var(--azul-marinho); color: var(--ouro-brilhante); border-color: var(--azul-marinho);
         }
-        /* Melhoria de acessibilidade para navegação via teclado */
-        .radio-group input:focus + label { outline: 2px solid var(--ouro-brilhante); }
 
         .btn {
             width: 100%; min-height: 48px; padding: 12px; border-radius: var(--raio-padrao); border: none;
@@ -119,8 +119,9 @@
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .btn-outline { background: #fff; color: #777; border: 1.5px solid #ccc; font-size: 12px; }
-        .btn-outline:hover { border-color: var(--azul-marinho); color: var(--azul-marinho); }
+        .btn-outline:hover { border-color: var(--azul-marinho); color: var(--azul-marinho); background: #f8f9fa; }
         .btn-primary { background: var(--azul-marinho); color: #fff; }
+        .btn-primary:hover { filter: brightness(1.2); }
         .btn:disabled { background: #ccc !important; cursor: not-allowed; opacity: 0.7; }
 
         .modal {
@@ -130,13 +131,25 @@
         }
         .modal-content {
             background: #fff; padding: 25px; border-radius: 12px; 
-            width: 95%; max-width: 400px; max-height: 90vh;
+            width: 95%; max-width: 400px; max-height: 85vh;
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        #historyContent { margin: 15px 0; overflow-y: auto; border-top: 1px solid #eee; }
-        .historico-item { padding: 12px 5px; border-bottom: 1px solid #f9f9f9; font-size: 14px; display: flex; justify-content: space-between; }
-        .footer { text-align: center; margin-top: 25px; font-size: 12px; color: #666; font-weight: 500; }
+        #historyContent { 
+            margin: 15px 0; 
+            overflow-y: auto; 
+            border-top: 1px solid #eee;
+            padding-right: 5px;
+        }
+        .historico-item { 
+            padding: 12px 5px; 
+            border-bottom: 1px solid #f1f1f1; 
+            font-size: 14px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        .footer { text-align: center; margin-top: 25px; font-size: 11px; color: #888; font-weight: 500; }
         
         .spinner-inline {
             width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3);
@@ -144,6 +157,11 @@
             display: none;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Ajustes Mobile */
+        @media (max-width: 400px) {
+            .radio-group label { flex: 1 1 calc(50% - 8px); }
+        }
     </style>
 </head>
 <body>
@@ -162,9 +180,9 @@
         </header>
 
         <div id="loadingScreen">
-            <div style="text-align: center;">
-                <p id="loadingText">Sincronizando dados...</p>
-                <div class="spinner-inline" style="display:block; border-top-color: var(--azul-marinho); margin: 10px auto;"></div>
+            <div style="text-align: center; padding: 40px 0;">
+                <div class="spinner-inline" style="display:block; border-top-color: var(--azul-marinho); margin: 10px auto; width: 30px; height: 30px;"></div>
+                <p id="loadingText" style="color: var(--azul-marinho); font-weight: 500;">Sincronizando dados...</p>
             </div>
         </div>
 
@@ -180,7 +198,7 @@
 
             <div id="instMessage"></div>
 
-            <form id="dersoForm">
+            <form id="dersoForm" novalidate>
                 <div class="form-group">
                     <label for="email" class="required">E-mail Institucional ou Pessoal:</label>
                     <input type="email" id="email" name="email" list="emailProviders" placeholder="exemplo@pm.ro.gov.br" required>
@@ -233,8 +251,8 @@
     <div id="modalMsg" class="modal">
         <div class="modal-content">
             <div id="modalIcon" style="font-size: 50px; margin-bottom: 10px; text-align: center;"></div>
-            <h3 id="modalTitle" style="text-align: center; margin: 0;"></h3>
-            <p id="modalText" style="color: #666; margin: 15px 0; text-align: center;"></p>
+            <h3 id="modalTitle" style="text-align: center; margin: 0; color: var(--azul-marinho);"></h3>
+            <p id="modalText" style="color: #666; margin: 15px 0; text-align: center; font-size: 14px;"></p>
             <div id="historyContent"></div> 
             <button class="btn btn-primary" id="btnCloseModal">FECHAR</button>
         </div>
@@ -246,7 +264,7 @@
         TIMEOUT: 15000,
         REGEX_EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         EMAIL_PROVIDERS: ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"],
-        VERSAO: "3.5"
+        VERSAO: "3.8-PRO"
     };
 
     const STATE = { employeeList: {}, isSubmitting: false, isClosed: false };
@@ -269,7 +287,8 @@
         formContent: document.getElementById('formContent'),
         timerDisplay: document.getElementById('timerDisplay'),
         prazoBox: document.getElementById('prazoBox'),
-        footer: document.getElementById('footerText')
+        footer: document.getElementById('footerText'),
+        emailList: document.getElementById('emailProviders')
     };
 
     window.addEventListener("load", async () => {
@@ -278,6 +297,7 @@
                 fetchWithTimeout(`${CONFIG.API_URL}?action=datas`),
                 fetchWithTimeout(`${CONFIG.API_URL}?action=lista`)
             ]);
+
             STATE.employeeList = lResp;
             DOM.loading.classList.add('is-hidden');
             DOM.formContent.classList.remove('is-hidden');
@@ -296,16 +316,20 @@
     async function fetchWithTimeout(url, options = {}) {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), CONFIG.TIMEOUT);
-        const response = await fetch(url, { ...options, signal: controller.signal });
-        clearTimeout(id);
-        return await response.json();
+        try {
+            const response = await fetch(url, { ...options, signal: controller.signal });
+            return await response.json();
+        } finally {
+            clearTimeout(id);
+        }
     }
 
-    function monitorarPrazos(dataAbertura, dataFechamento) {
+   function monitorarPrazos(dataAbertura, dataFechamento) {
         const abertura = new Date(dataAbertura).getTime();
         const fechamento = new Date(dataFechamento).getTime();
         const hoje = new Date();
-        const proxMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1).toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
+        const proxMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+        const nomeMesRef = proxMes.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
         const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59).getTime();
 
         setInterval(() => {
@@ -313,55 +337,55 @@
             const instDiv = document.getElementById("instMessage");
 
             if (agora < abertura) {
-                DOM.prazoBox.classList.remove('urgencia-critica', 'urgencia-alerta');
                 instDiv.style.display = "none";
                 DOM.form.style.display = "none";
-                DOM.consultaFechada.style.display = "none";
+                DOM.btnHistoryFechado.style.display = "none";
                 const diff = abertura - agora;
                 const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
                       m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
-                DOM.timerDisplay.innerHTML = `🔍 <b>EM INSPEÇÃO</b><br>Voltamos em: ${d}d ${h}h ${m}m ${s}s`;
+
+                DOM.timerDisplay.innerHTML = `
+                    <div style="padding:15px; border: 2px dashed #1A3C6E; border-radius: 8px; background: #f8f9fa;">
+                        <span style="font-size:40px;">🔍</span><br>
+                        <b style="color:#1A3C6E">ESTAMOS PASSANDO EM INSPEÇÃO AO CÓDIGO.</b><br>
+                        <p style="margin: 10px 0;">Voltamos em: <br>
+                        <span style="font-size:1.1rem; font-weight:bold;">${d}d ${h}h ${m}m ${s}s</span></p>
+                        <span style="font-size:24px;">🫡👮‍♂️</span>
+                    </div>`;
                 STATE.isClosed = true;
             } 
             else if (agora > fechamento) {
-                DOM.prazoBox.classList.remove('urgencia-critica', 'urgencia-alerta');
                 instDiv.style.display = "none";
                 DOM.form.style.display = "none";
                 STATE.isClosed = true;
 
                 if (agora <= ultimoDiaMes) {
-                    DOM.consultaFechada.style.display = "block";
-                    DOM.timerDisplay.innerHTML = `🛡️ <b>MISSÃO CUMPRIDA!</b><br><small>DERSO ${proxMes} encerrado.</small>`;
+                   DOM.btnHistoryFechado.style.display = "block";
+                   DOM.timerDisplay.innerHTML = `
+                        <div style="padding:15px; border: 2px solid #2E7D32; border-radius: 8px; background: #E8F5E9;">
+                           <span style="font-size:40px;">🛡️</span><br>
+                           <b style="color:#2E7D32">MISSÃO CUMPRIDA!</b><br>
+                            <p style="font-size:14px; margin: 10px 0; line-height:1.4;">
+                                AS SOLICITAÇÕES DE DERSO PARA O MÊS DE <b>${nomeMesRef}</b> <br>
+                                 FORAM ENCERRADAS EM <b>${new Date(fechamento).toLocaleString("pt-BR")}</b>.
+                            </p>
+                           <p style="font-size:13px; color:#555;">Você ainda pode consultar suas solicitações abaixo: 👮‍♂️</p>
+                        </div>`;
                 } else {
-                    DOM.consultaFechada.style.display = "none";
-                    DOM.timerDisplay.innerHTML = "⌛ Aguardando novo cronograma...";
+                    DOM.btnHistoryFechado.style.display = "none";
+                    DOM.timerDisplay.innerHTML = "⌛ Aguardando novo cronograma de escalas...";
                 }
             } 
             else {
                 instDiv.style.display = "block";
                 DOM.form.style.display = "block";
-                DOM.consultaFechada.style.display = "none";
+                DOM.btnHistoryFechado.style.display = "none";
                 STATE.isClosed = false;
-                
+
                 const diff = fechamento - agora;
-                const horasRestantes = diff / 3600000;
                 const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
                       m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
-                
-                let statusTxt = "⚡ OPERACIONAL ATIVO";
-                let alertaTxt = "Fique atento ao prazo!";
-                DOM.prazoBox.classList.remove('urgencia-critica', 'urgencia-alerta');
-
-                if (horasRestantes <= 6) {
-                    DOM.prazoBox.classList.add('urgencia-critica');
-                    statusTxt = "🚨 ÚLTIMA CHAMADA!";
-                    alertaTxt = "Ó, TÁ ACABANDO! CORRE FILHO!!";
-                } else if (horasRestantes <= 24) {
-                    DOM.prazoBox.classList.add('urgencia-alerta');
-                    statusTxt = "⚠️ ÚLTIMAS 24 HORAS!";
-                    alertaTxt = "Corre aí! Não deixa pra última hora!";
-                }
-                DOM.timerDisplay.innerHTML = `<b>${statusTxt}</b><br><span style="font-size:1.3rem;">${d}d ${h}h ${m}m ${s}s</span><br><small>${alertaTxt}</small>`;
+                DOM.timerDisplay.innerHTML = `⚡ <b>OPERACIONAL ATIVO</b><br><small>Encerra em: ${d}d ${h}h ${m}m ${s}s</small>`;
             }
         }, 1000);
     }
@@ -370,19 +394,20 @@
         const now = new Date();
         DOM.footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${CONFIG.VERSAO} [${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}]`;
         
-        // Melhoria: Popula datalist de emails
-        const dl = document.getElementById('emailProviders');
-        CONFIG.EMAIL_PROVIDERS.forEach(provider => {
-            const opt = document.createElement('option');
-            opt.value = provider;
-            dl.appendChild(opt);
-        });
-
-        const inicio = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        const fim = new Date(now.getFullYear(), now.getMonth() + 2, 0);
-        DOM.data.min = inicio.toISOString().split('T')[0];
-        DOM.data.max = fim.toISOString().split('T')[0];
-        document.getElementById('periodoLabel').textContent = `Período: ${inicio.toLocaleDateString('pt-BR')} a ${fim.toLocaleDateString('pt-BR')}`;
+        DOM.email.oninput = (e) => {
+            const val = e.target.value;
+            DOM.emailList.innerHTML = "";
+            if (val.includes("@")) {
+                const prefix = val.split("@")[0];
+                CONFIG.EMAIL_PROVIDERS.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = `${prefix}@${p}`;
+                    DOM.emailList.appendChild(opt);
+                });
+            }
+            e.target.classList.remove('input-erro');
+            updateProgress();
+        };
 
         DOM.matriculaConsulta.oninput = e => {
             e.target.value = e.target.value.replace(/\D/g, "");
@@ -391,8 +416,14 @@
             }
         };
 
-        DOM.matricula.oninput = e => e.target.value = e.target.value.replace(/\D/g, "");
+        DOM.matricula.oninput = e => {
+            e.target.value = e.target.value.replace(/\D/g, "");
+            e.target.classList.remove('input-erro');
+            updateProgress();
+        };
+        
         DOM.matricula.onblur = handleMatricula;
+        DOM.data.oninput = () => { DOM.data.classList.remove('input-erro'); updateProgress(); };
         DOM.form.oninput = updateProgress;
         DOM.btnHistory.onclick = () => fetchHistory(false);
         DOM.btnHistoryFechado.onclick = () => fetchHistory(true);
@@ -403,31 +434,33 @@
     function handleMatricula() {
         let val = DOM.matricula.value.trim();
         if(!val) return;
-        
-        // Correção de Loop: Só adiciona 1000 se já não estiver lá
-        if (val.length >= 1 && val.length <= 6 && !val.startsWith("1000")) {
-            val = "1000" + val;
-        }
+        if (val.length >= 1 && val.length <= 6 && !val.startsWith("1000")) val = "1000" + val;
         DOM.matricula.value = val;
 
         const militar = STATE.employeeList[val];
         if(militar) {
             DOM.nome.value = militar;
             document.getElementById('erroMatricula').style.display = "none";
+            DOM.matricula.classList.remove('input-erro');
         } else {
             DOM.nome.value = "";
             document.getElementById('erroMatricula').style.display = "block";
+            DOM.matricula.classList.add('input-erro');
         }
         updateProgress();
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
-        if (STATE.isSubmitting || !validate()) return;
+        if (STATE.isSubmitting) return;
+
+        if (!validate()) return;
+
         setLoading(true);
         try {
             const formData = new URLSearchParams(new FormData(DOM.form));
             const res = await fetchWithTimeout(CONFIG.API_URL, { method: 'POST', body: formData });
+
             if (res.success) {
                 showModal("SUCESSO", "Solicitação gravada com sucesso.", "✔", "#2E7D32");
                 DOM.data.value = "";
@@ -436,7 +469,7 @@
                 showModal("AVISO", res.message, "⚠️", "#D32F2F");
             }
         } catch (err) {
-            showModal("ERRO", "Falha na conexão. Tente novamente em instantes.", "❌", "#D32F2F");
+            showModal("ERRO", "Falha na conexão. Tente novamente.", "❌", "#D32F2F");
         } finally {
             setLoading(false);
             updateProgress();
@@ -446,26 +479,30 @@
     function validate() {
         let field = null;
         document.querySelectorAll('.msg-erro').forEach(m => m.style.display = 'none');
+        document.querySelectorAll('input').forEach(i => i.classList.remove('input-erro'));
         
-        // Validação de E-mail
-        if (!CONFIG.REGEX_EMAIL.test(DOM.email.value)) { 
+        const isEmailValid = CONFIG.REGEX_EMAIL.test(DOM.email.value);
+        const isMatriculaValid = DOM.nome.value !== "";
+        const isFolgaValid = !!document.querySelector('input[name="folga"]:checked');
+        const isDataValid = (DOM.data.value !== "");
+
+        if (!isEmailValid) { 
             document.getElementById('erroEmail').style.display = 'block'; 
+            DOM.email.classList.add('input-erro');
             field = DOM.email; 
         }
-        // Validação de Matrícula/Nome
-        if (DOM.nome.value === "") { 
+        if (!isMatriculaValid) { 
             document.getElementById('erroMatricula').style.display = 'block'; 
+            DOM.matricula.classList.add('input-erro');
             field = field || DOM.matricula; 
         }
-        // Validação de Rádio
-        if (!document.querySelector('input[name="folga"]:checked')) { 
+        if (!isFolgaValid) { 
             document.getElementById('erroFolga').style.display = 'block'; 
             field = field || document.getElementById('radioFolgaGroup'); 
         }
-        // Validação de Data (Manual e Range)
-        const selectedDate = DOM.data.value;
-        if (selectedDate === "" || selectedDate < DOM.data.min || selectedDate > DOM.data.max) { 
+        if (!isDataValid) { 
             document.getElementById('erroData').style.display = 'block'; 
+            DOM.data.classList.add('input-erro');
             field = field || DOM.data; 
         }
 
@@ -475,21 +512,20 @@
 
     async function fetchHistory(isClosedMode) {
         const mat = isClosedMode ? DOM.matriculaConsulta.value : DOM.matricula.value;
-        if(!mat || mat.length < 5) {
-            return showModal("AVISO", "Digite uma matrícula válida para consultar.", "🔍", "#FFD700");
-        }
+        if(!mat || mat.length < 5) return showModal("AVISO", "Digite uma matrícula válida.", "🔍", "#FFD700");
         
         let matFull = mat.trim();
         if(!matFull.startsWith("1000")) matFull = "1000" + matFull;
         
         showModal("BUSCANDO", "Aguarde a resposta do sistema...", "📂", "#FFD700");
+        
         try {
             const resp = await fetchWithTimeout(`${CONFIG.API_URL}?action=historico&matricula=${matFull}`);
             const html = resp.dados.map(i => `
                 <div class="historico-item">
                     <span>📅 <b>${i.data}</b></span>
                     <span style="color:var(--azul-marinho); font-weight:bold;">${i.folga}</span>
-                </div>`).join('') || "<p style='text-align:center'>Nenhuma solicitação encontrada.</p>";
+                </div>`).join('') || "<p style='text-align:center; padding: 20px;'>Nenhuma solicitação encontrada.</p>";
             
             DOM.historyContent.innerHTML = html;
             showModal(resp.nome || "Consulta", "Registros do mês corrente:", "📋", "#FFD700", true);
@@ -503,7 +539,7 @@
             CONFIG.REGEX_EMAIL.test(DOM.email.value), 
             DOM.nome.value !== "", 
             !!document.querySelector('input[name="folga"]:checked'), 
-            (DOM.data.value !== "" && DOM.data.value >= DOM.data.min && DOM.data.value <= DOM.data.max)
+            (DOM.data.value !== "")
         ];
         const perc = (fields.filter(Boolean).length / 4) * 100;
         DOM.barra.style.width = perc + "%";
@@ -526,41 +562,41 @@
         DOM.modal.style.display = 'flex';
     }
 
-            function applyInstitutionalTheme() {
-            const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
-            const instDiv = document.getElementById("instMessage");
-            const aplicar = (msg) => instDiv.innerHTML = msg;
+    function applyInstitutionalTheme() {
+        const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
+        const instDiv = document.getElementById("instMessage");
+        const aplicar = (msg) => instDiv.innerHTML = msg;
 
-            const temas = {
-                "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história, bravura e compromisso.`),
-                "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
-                "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
-                "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear() - 1889} anos de Proclamação.`),
-                "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
-                "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição e compromisso.`)
+        const temas = {
+            "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história, bravura e compromisso.`),
+            "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
+            "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
+            "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear() - 1889} anos de Proclamação.`),
+            "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
+            "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição e compromisso.`)
+        };
+
+        const chave = `${mes+1}-${dia}`;
+        if (temas[chave]) {
+            temas[chave]();
+        } else {
+            const mensais = {
+                0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos."),
+                1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
+                2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda."),
+                3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
+                4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão."),
+                5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade."),
+                6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
+                7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional."),
+                8: () => aplicar("🇧🇷 Setembro: Renovando nosso juramento de servir e proteger o Brasil."),
+                9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
+                10: () => aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade. ${hoje.getFullYear() - 1889}º ano da República.`),
+                11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. ✨")
             };
-
-            const chave = `${mes+1}-${dia}`;
-            if (temas[chave]) {
-                temas[chave]();
-            } else {
-                const mensais = {
-                    0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos."),
-                    1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
-                    2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda."),
-                    3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
-                    4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão."),
-                    5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade."),
-                    6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
-                    7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional."),
-                    8: () => aplicar("🇧🇷 Setembro: Renovando nosso juramento de servir e proteger o Brasil."),
-                    9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
-                    10: () => aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade. ${hoje.getFullYear() - 1889}º ano da República.`),
-                    11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. ✨")
-                };
-                if (mensais[mes]) mensais[mes]();
-            }
+            if (mensais[mes]) mensais[mes]();
         }
+    }
 </script>
 </body>
 </html>
