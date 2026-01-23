@@ -484,13 +484,38 @@
     }
 
     function monitorarPrazos(dataAbertura, dataFechamento) {
-        const abertura = new Date(dataAbertura).getTime();
-        const fechamento = new Date(dataFechamento).getTime();
-        const hoje = new Date();
-        
-        const dataRef = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
-        const nomeMesRef = dataRef.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
-        const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59).getTime();
+    const abertura = new Date(dataAbertura).getTime();
+    const fechamento = new Date(dataFechamento).getTime();
+    const hoje = new Date();
+    
+    // --- LÓGICA DO MÊS SEGUINTE ---
+    const mesSeguinte = hoje.getMonth() + 1;
+    const ano = hoje.getFullYear();
+    const dataMinima = new Date(ano, mesSeguinte, 1);
+    const dataMaxima = new Date(ano, mesSeguinte + 1, 0); // Último dia do mês seguinte
+    
+    // Formatação para o atributo 'min' e 'max' (YYYY-MM-DD)
+    const minStr = dataMinima.toISOString().split('T')[0];
+    const maxStr = dataMaxima.toISOString().split('T')[0];
+    
+    DOM.data.min = minStr;
+    DOM.data.max = maxStr;
+    DOM.data.value = minStr; // Pré-seleciona o dia 1 para ganhar tempo
+
+    // Adiciona o texto informativo abaixo da data
+    let infoData = document.getElementById('infoPeriodo');
+    if (!infoData) {
+        infoData = document.createElement('small');
+        infoData.id = 'infoPeriodo';
+        infoData.style.display = 'block';
+        infoData.style.marginTop = '5px';
+        infoData.style.color = '#666';
+        DOM.data.parentNode.appendChild(infoData);
+    }
+    infoData.innerHTML = `📅 Período permitido: <b>${dataMinima.toLocaleDateString('pt-BR')}</b> a <b>${dataMaxima.toLocaleDateString('pt-BR')}</b>`;
+
+    const nomeMesRef = dataMinima.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
+    const ultimoDiaMes = dataMaxima.getTime();
 
         setInterval(() => {
             const agora = new Date().getTime();
@@ -674,38 +699,47 @@
     }
 
     async function handleSubmit(e) {
-        e.preventDefault();
-        DOM.btnEnviar.disabled = true;
-        DOM.btnEnviar.textContent = "ENVIANDO...";
-        
-        const mLog = DOM.matricula.value;
-        registrarLog("ENVIO", `Iniciando tentativa de envio para matrícula: ${mLog}`);
+    e.preventDefault();
+    DOM.btnEnviar.disabled = true;
+    DOM.btnEnviar.textContent = "ENVIANDO...";
+    
+    const mLog = DOM.matricula.value;
+    registrarLog("ENVIO", `Iniciando tentativa de envio para matrícula: ${mLog}`);
 
-        try {
-            const formData = new URLSearchParams(new FormData(DOM.form));
-            const response = await fetch(CONFIG.API_URL, { method: 'POST', body: formData }).then(r => r.json());
+    try {
+        const formData = new URLSearchParams(new FormData(DOM.form));
+        const response = await fetch(CONFIG.API_URL, { method: 'POST', body: formData }).then(r => r.json());
 
-            if (response.success) {
-                registrarLog("ENVIO", `Solicitação de ${mLog} gravada com sucesso`, "SUCESSO");
-                showModal("SUCESSO!", "Sua solicitação foi registrada no banco de dados.", "✔", "#2E7D32");
-                DOM.form.reset();
+        if (response.success) {
+            registrarLog("ENVIO", `Solicitação de ${mLog} gravada com sucesso`, "SUCESSO");
+            showModal("SUCESSO!", "Sua solicitação foi registrada no banco de dados.", "✔", "#2E7D32");
+            
+            // --- ALTERAÇÃO PARA CELERIDADE: RESET SELETIVO ---
+            DOM.data.value = ""; // Limpa a data
+            document.querySelectorAll('input[name="folga"]').forEach(radio => radio.checked = false); // Desmarca a folga
+            
+            updateProgress();
+        } else {
+            registrarLog("ENVIO_NEGADO", `Servidor recusou: ${response.message}`, "AVISO");
+            if (response.message.includes("duplicada")) {
+                showModal("SOLICITAÇÃO DUPLICADA", "Você já solicitou folga para esta data.", "🚫", "orange");
+                
+                // Limpa apenas a data e folga também em caso de duplicidade para ele tentar outra
+                DOM.data.value = "";
+                document.querySelectorAll('input[name="folga"]').forEach(radio => radio.checked = false);
                 updateProgress();
             } else {
-                registrarLog("ENVIO_NEGADO", `Servidor recusou: ${response.message}`, "AVISO");
-                if (response.message.includes("duplicada")) {
-                    showModal("SOLICITAÇÃO DUPLICADA", "Você já solicitou folga para esta data.", "🚫", "orange");
-                } else {
-                    showModal("AVISO", response.message, "⚠️", "orange");
-                }
+                showModal("AVISO", response.message, "⚠️", "orange");
             }
-        } catch (err) {
-            registrarLog("ENVIO_CRITICO", err.message, "ERRO");
-            showModal("ERRO DE CONEXÃO", "Não foi possível enviar sua solicitação. Verifique sua internet.", "📡", "red");
-        } finally {
-            DOM.btnEnviar.disabled = false;
-            DOM.btnEnviar.textContent = "ENVIAR SOLICITAÇÃO";
         }
+    } catch (err) {
+        registrarLog("ENVIO_CRITICO", err.message, "ERRO");
+        showModal("ERRO DE CONEXÃO", "Não foi possível enviar sua solicitação. Verifique sua internet.", "📡", "red");
+    } finally {
+        DOM.btnEnviar.disabled = false;
+        DOM.btnEnviar.textContent = "ENVIAR SOLICITAÇÃO";
     }
+}
 
     function showModal(title, text, icon, color, showHistory = false) {
         document.getElementById('modalTitle').textContent = title;
