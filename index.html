@@ -192,9 +192,9 @@
                         <input type="radio" id="f24" name="folga" value="24H" required><label for="f24">24H</label>
                         <input type="radio" id="f48" name="folga" value="48H"><label for="f48">48H</label>
                         <input type="radio" id="f72" name="folga" value="72H"><label for="f72">72H</label>
-                        <input type="radio" id="fLE" name="folga" value="FOLGA LE"><label for="fLE">LE</label>
+                        <input type="radio" id="fLE" name="folga" value="FOLGA LE"><label for="fLE">FOLGA LE</label>
                         <input type="radio" id="f1" name="folga" value="1ª Folga"><label for="f1">1ª FOLGA</label>
-                        <input type="radio" id="fExp" name="folga" value="Expediente"><label for="fExp">EXP.</label>
+                        <input type="radio" id="fExp" name="folga" value="Expediente"><label for="fExp">EXPEDIENTE</label>
                     </div>
                     <span id="erroFolga" class="msg-erro" aria-live="assertive">Selecione o tipo de folga</span>
                 </fieldset>
@@ -282,43 +282,83 @@
     }
 
     // NOVA FUNÇÃO: Gerencia os 3 estados de forma didática
-    function monitorarPrazos(dataAbertura, dataFechamento) {
-        const abertura = new Date("2026-01-05T00:00:00").getTime(); 
-const fechamento = new Date("2026-01-21T23:59:59").getTime();
+   function monitorarPrazos(dataAbertura, dataFechamento) {
+    const abertura = new Date(dataAbertura).getTime();
+    const fechamento = new Date(dataFechamento).getTime();
+    const hoje = new Date();
+    
+    // Calcula o último dia do mês atual para o limite do botão de histórico
+    const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59).getTime();
 
-        const intervalo = setInterval(() => {
-            const agora = new Date().getTime();
+    // Obtém o nome do mês da data permitida (ex: Fevereiro)
+    const dataRef = new Date(DOM.data.min); 
+    const nomeMesRef = dataRef.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
 
-            if (agora < abertura) {
-                // CASO 1: AINDA NÃO ABRIU
-                const diff = abertura - agora;
-                const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
-                      m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+    const intervalo = setInterval(() => {
+        const agora = new Date().getTime();
+        const instDiv = document.getElementById("instMessage");
+        const btnHistory = document.getElementById('btnHistory');
 
-                DOM.timerDisplay.innerHTML = `⏳ <b>FORMULÁRIO FECHADO</b><br>Abre em: ${d}d ${h}h ${m}m ${s}s`;
-                DOM.form.style.display = "none";
-                STATE.isClosed = true;
-            } 
-            else if (agora > fechamento) {
-                // CASO 2: PRAZO ENCERRADO
-                DOM.timerDisplay.innerHTML = `⛔ <b>FORMULÁRIO ENCERRADO</b><br>O prazo terminou em ${new Date(fechamento).toLocaleString("pt-BR")}`;
-                DOM.form.style.display = "none";
-                STATE.isClosed = true;
-                clearInterval(intervalo);
-            } 
-            else {
-                // CASO 3: SISTEMA ABERTO
-                DOM.form.style.display = "block";
-                STATE.isClosed = false;
-                
-                const diff = fechamento - agora;
-                const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
-                      m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
-                
-                DOM.timerDisplay.innerHTML = `Encerra em: <b>${d}d ${h}h ${m}m ${s}s</b>`;
+        if (agora < abertura) {
+            // ESTADO 1: INSPEÇÃO AO CÓDIGO (Antes de abrir)
+            instDiv.style.display = "none";
+            DOM.form.style.display = "none";
+            btnHistory.style.display = "none"; 
+            
+            const diff = abertura - agora;
+            const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
+                  m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+
+            DOM.timerDisplay.innerHTML = `
+                <div style="padding:15px; border: 2px dashed var(--azul-marinho); border-radius: 8px; background: #f8f9fa;">
+                    <span style="font-size:40px;">🔍</span><br>
+                    <b style="color:var(--azul-marinho)">ESTAMOS PASSANDO EM INSPEÇÃO AO CÓDIGO.</b><br>
+                    <p style="margin: 10px 0;">Voltamos em: <br>
+                    <span style="font-size:1.1rem; font-weight:bold;">${d}d ${h}h ${m}m ${s}s</span></p>
+                    <span style="font-size:24px;">🫡👮‍♂️</span>
+                </div>`;
+            STATE.isClosed = true;
+        } 
+        else if (agora > fechamento) {
+            // ESTADO 2: MISSÃO CUMPRIDA (Após o prazo, dentro do mês)
+            instDiv.style.display = "none";
+            DOM.form.style.display = "none";
+            STATE.isClosed = true;
+
+            if (agora <= ultimoDiaMes) {
+                btnHistory.style.display = "block";
+                btnHistory.style.margin = "20px auto";
+                DOM.timerDisplay.innerHTML = `
+                    <div style="padding:15px; border: 2px solid var(--sucesso-border); border-radius: 8px; background: var(--sucesso-bg);">
+                        <span style="font-size:40px;">🛡️</span><br>
+                        <b style="color:var(--sucesso-border)">MISSÃO CUMPRIDA!</b><br>
+                        <p style="font-size:14px; margin: 10px 0; line-height:1.4;">
+                            AS SOLICITAÇÕES DE DERSO PARA O MÊS DE <b>${nomeMesRef}</b> <br>
+                            FORAM ENCERRADAS EM <b>${new Date(fechamento).toLocaleString("pt-BR")}</b>.
+                        </p>
+                        <p style="font-size:13px; color:#555;">Você ainda pode consultar suas solicitações abaixo: 👮‍♂️</p>
+                    </div>`;
+            } else {
+                // Virou o mês, remove o histórico e volta para inspeção/espera
+                btnHistory.style.display = "none";
+                DOM.timerDisplay.innerHTML = "⌛ Aguardando novo cronograma de escalas...";
             }
-        }, 1000);
-    }
+        } 
+        else {
+            // ESTADO 3: SISTEMA ABERTO (Operacional)
+            instDiv.style.display = "block";
+            DOM.form.style.display = "block";
+            btnHistory.style.display = "block";
+            STATE.isClosed = false;
+            
+            const diff = fechamento - agora;
+            const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
+                  m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+            
+            DOM.timerDisplay.innerHTML = `⚡ <b>OPERACIONAL ATIVO</b><br><small>Encerra em: ${d}d ${h}h ${m}m ${s}s</small>`;
+        }
+    }, 1000);
+}
 
     function setupApp() {
         const dl = document.getElementById('emailProviders');
