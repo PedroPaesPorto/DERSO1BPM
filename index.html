@@ -39,6 +39,13 @@
         }
 
         /* Cores Dinâmicas */
+        #prazoBox {
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 2px solid transparent; /* Reserva o espaço da borda */
+    transition: all 0.3s ease;
         /* Estado de Missão Cumprida - Verde Sucesso */
 .estado-sucesso { 
     background: #E8F5E9 !important; 
@@ -232,12 +239,11 @@
         DOM.footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - versão ${CONFIG.VERSAO} - em ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
     }
 
-    function monitorarPrazos(dataAbertura, dataFechamento) {
+   function monitorarPrazos(dataAbertura, dataFechamento) {
     const abertura = new Date(dataAbertura).getTime();
     const fechamento = new Date(dataFechamento).getTime();
     const hoje = new Date();
     
-    // Calcula o próximo mês corretamente para a mensagem
     const dataRef = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
     const nomeMesRef = dataRef.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
     const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59).getTime();
@@ -246,15 +252,16 @@
         const agora = new Date().getTime();
         const instDiv = document.getElementById("instMessage");
         
-        // Limpa classes anteriores
+        // Limpa estados visuais
         DOM.prazoBox.classList.remove('estado-verde', 'estado-alerta', 'estado-critico', 'estado-sucesso', 'estado-inspecao');
 
         if (agora < abertura) {
+            // ESTADO: INSPEÇÃO
             STATE.isClosed = true;
             DOM.form.style.display = "none";
-            instDiv.style.display = "none"; // Remove mensagem institucional
-            DOM.prazoBox.classList.add('estado-inspecao');
+            if (instDiv) instDiv.style.display = "none"; // TIRA A MENSAGEM
             
+            DOM.prazoBox.classList.add('estado-inspecao');
             const diff = abertura - agora;
             const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
                   m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
@@ -266,16 +273,17 @@
                 <span style="font-size:24px;">🫡👮‍♂️</span>`;
         } 
         else if (agora > fechamento) {
+            // ESTADO: MISSÃO CUMPRIDA
             STATE.isClosed = true;
             DOM.form.style.display = "none";
-            instDiv.style.display = "none"; // Remove mensagem institucional
+            if (instDiv) instDiv.style.display = "none"; // TIRA A MENSAGEM
             
             if (agora <= ultimoDiaMes) {
                 DOM.consultaFechada.style.display = "block";
                 DOM.btnHistoryFechado.style.display = "block";
                 DOM.prazoBox.classList.add('estado-sucesso');
                 DOM.timerDisplay.innerHTML = `
-                    <div style="padding:10px;">
+                    <div style="padding:5px;">
                         <b style="color:#2E7D32">MISSÃO CUMPRIDA!</b><br>
                         <p style="font-size:14px; margin: 10px 0; line-height:1.4;">
                             AS SOLICITAÇÕES DE DERSO PARA O MÊS DE <b>${nomeMesRef}</b> <br>
@@ -289,10 +297,10 @@
             }
         } 
         else {
-            // SISTEMA ABERTO
+            // ESTADO: OPERACIONAL ATIVO
             STATE.isClosed = false;
             DOM.form.style.display = "block";
-            instDiv.style.display = "block"; // Mostra mensagem institucional
+            if (instDiv) instDiv.style.display = "block"; // MOSTRA A MENSAGEM
             
             const diff = fechamento - agora;
             const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
@@ -311,6 +319,7 @@
         }
     }, 1000);
 }
+    
     function applyInstitutionalTheme() {
         const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
         const instDiv = document.getElementById("instMessage");
