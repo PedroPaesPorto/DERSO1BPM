@@ -51,9 +51,30 @@
         
         .subtitle { font-size: 14px; color: #333; line-height: 1.4; margin-bottom: var(--espacamento-v); font-weight: 500; }
 
+        /* ESTILOS DO CRONÔMETRO DINÂMICO */
         #prazoBox {
             background: var(--sucesso-bg); border-left: 5px solid var(--sucesso-border);
             padding: 12px; text-align: center; border-radius: 4px; margin-bottom: 15px;
+            transition: all 0.5s ease;
+        }
+
+        @keyframes pulse-red {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); }
+            70% { transform: scale(1.03); box-shadow: 0 0 15px 10px rgba(211, 47, 47, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+        }
+
+        .urgencia-critica {
+            animation: pulse-red 1s infinite;
+            background: #ffebee !important;
+            border: 2px solid #d32f2f !important;
+            color: #d32f2f !important;
+        }
+
+        .urgencia-alerta {
+            background: #fff3e0 !important;
+            border: 2px solid #ef6c00 !important;
+            color: #e65100 !important;
         }
 
         #instMessage {
@@ -218,7 +239,7 @@
         TIMEOUT: 15000,
         REGEX_EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         EMAIL_PROVIDERS: ["gmail.com","hotmail.com","outlook.com","yahoo.com","terra.com.br","bol.com.br","pm.ro.gov.br"],
-        VERSAO: "3.2"
+        VERSAO: "3.3"
     };
 
     const STATE = { employeeList: {}, isSubmitting: false, isClosed: false };
@@ -238,10 +259,10 @@
         loading: document.getElementById('loadingScreen'),
         formContent: document.getElementById('formContent'),
         timerDisplay: document.getElementById('timerDisplay'),
+        prazoBox: document.getElementById('prazoBox'),
         footer: document.getElementById('footerText')
     };
 
-    // LOG DE INICIALIZAÇÃO
     console.log(`%c[SISTEMA] DERSO v${CONFIG.VERSAO} inicializado.`, "color: blue; font-weight: bold;");
 
     window.addEventListener("load", async () => {
@@ -252,7 +273,7 @@
                 fetchWithTimeout(`${CONFIG.API_URL}?action=lista`)
             ]);
             
-            console.log("[API] Dados de datas e lista de militares recebidos com sucesso.");
+            console.log("[API] Dados sincronizados com sucesso.");
             STATE.employeeList = lResp;
             DOM.loading.classList.add('is-hidden');
             DOM.formContent.classList.remove('is-hidden');
@@ -261,7 +282,7 @@
             monitorarPrazos(dResp.abertura, dResp.fechamento);
             setupApp();
         } catch (e) {
-            console.error("[ERRO] Falha crítica na conexão inicial:", e);
+            console.error("[ERRO CRÍTICO] Falha na conexão inicial:", e);
             DOM.loading.innerHTML = `<p style="color:red; text-align:center">Erro de Conexão. <br><button onclick="location.reload()" class="btn btn-outline">Tentar Novamente</button></p>`;
         }
     });
@@ -269,7 +290,7 @@
     async function fetchWithTimeout(url, options = {}) {
         const controller = new AbortController();
         const id = setTimeout(() => {
-            console.warn(`[TIMEOUT] A requisição para ${url} demorou mais que ${CONFIG.TIMEOUT/1000}s.`);
+            console.warn(`[TIMEOUT] Requisição lenta detectada: ${url}`);
             controller.abort();
         }, CONFIG.TIMEOUT);
         const response = await fetch(url, { ...options, signal: controller.signal });
@@ -278,12 +299,10 @@
     }
 
     function monitorarPrazos(dataAbertura, dataFechamento) {
-        console.log(`[PRAZOS] Abertura: ${dataAbertura} | Fechamento: ${dataFechamento}`);
         const abertura = new Date(dataAbertura).getTime();
         const fechamento = new Date(dataFechamento).getTime();
         const hoje = new Date();
-        const proxMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
-        const nomeMesRef = proxMes.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
+        const proxMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1).toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
         const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59).getTime();
 
         setInterval(() => {
@@ -291,59 +310,55 @@
             const instDiv = document.getElementById("instMessage");
 
             if (agora < abertura) {
-                if(!STATE.isClosed) console.log("[ESTADO] Sistema em modo INSPEÇÃO.");
+                DOM.prazoBox.classList.remove('urgencia-critica', 'urgencia-alerta');
                 instDiv.style.display = "none";
                 DOM.form.style.display = "none";
-                DOM.btnHistoryFechado.style.display = "none";
-                
                 const diff = abertura - agora;
                 const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
                       m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
 
-                DOM.timerDisplay.innerHTML = `
-                    <div style="padding:15px; border: 2px dashed #1A3C6E; border-radius: 8px; background: #f8f9fa;">
-                        <span style="font-size:40px;">🔍</span><br>
-                        <b style="color:#1A3C6E">ESTAMOS PASSANDO EM INSPEÇÃO AO CÓDIGO.</b><br>
-                        <p style="margin: 10px 0;">Voltamos em: <br>
-                        <span style="font-size:1.1rem; font-weight:bold;">${d}d ${h}h ${m}m ${s}s</span></p>
-                        <span style="font-size:24px;">🫡👮‍♂️</span>
-                    </div>`;
+                DOM.timerDisplay.innerHTML = `🔍 <b>EM INSPEÇÃO</b><br>Voltamos em: ${d}d ${h}h ${m}m ${s}s`;
                 STATE.isClosed = true;
             } 
             else if (agora > fechamento) {
-                if(!STATE.isClosed) console.log("[ESTADO] Sistema em modo MISSÃO CUMPRIDA.");
+                DOM.prazoBox.classList.remove('urgencia-critica', 'urgencia-alerta');
                 instDiv.style.display = "none";
                 DOM.form.style.display = "none";
                 STATE.isClosed = true;
 
                 if (agora <= ultimoDiaMes) {
                     DOM.btnHistoryFechado.style.display = "block";
-                    DOM.timerDisplay.innerHTML = `
-                        <div style="padding:15px; border: 2px solid #2E7D32; border-radius: 8px; background: #E8F5E9;">
-                            <span style="font-size:40px;">🛡️</span><br>
-                            <b style="color:#2E7D32">MISSÃO CUMPRIDA!</b><br>
-                            <p style="font-size:14px; margin: 10px 0; line-height:1.4;">
-                                AS SOLICITAÇÕES DE DERSO PARA O MÊS DE <b>${nomeMesRef}</b> <br>
-                                FORAM ENCERRADAS EM <b>${new Date(fechamento).toLocaleString("pt-BR")}</b>.
-                            </p>
-                            <p style="font-size:13px; color:#555;">Você ainda pode consultar suas solicitações abaixo: 👮‍♂️</p>
-                        </div>`;
+                    DOM.timerDisplay.innerHTML = `🛡️ <b>MISSÃO CUMPRIDA!</b><br><small>DERSO ${proxMes} encerrado.</small>`;
                 } else {
-                    DOM.btnHistoryFechado.style.display = "none";
-                    DOM.timerDisplay.innerHTML = "⌛ Aguardando novo cronograma de escalas...";
+                    DOM.timerDisplay.innerHTML = "⌛ Aguardando novo cronograma...";
                 }
             } 
             else {
-                if(STATE.isClosed || STATE.isClosed === undefined) console.log("[ESTADO] Sistema OPERACIONAL ATIVO.");
                 instDiv.style.display = "block";
                 DOM.form.style.display = "block";
-                DOM.btnHistoryFechado.style.display = "none";
                 STATE.isClosed = false;
                 
                 const diff = fechamento - agora;
+                const horasRestantes = diff / 3600000;
                 const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
                       m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
-                DOM.timerDisplay.innerHTML = `⚡ <b>OPERACIONAL ATIVO</b><br><small>Encerra em: ${d}d ${h}h ${m}m ${s}s</small>`;
+                
+                let statusTxt = "⚡ OPERACIONAL ATIVO";
+                let alertaTxt = "Fique atento ao prazo!";
+                
+                DOM.prazoBox.classList.remove('urgencia-critica', 'urgencia-alerta');
+
+                if (horasRestantes <= 6) {
+                    DOM.prazoBox.classList.add('urgencia-critica');
+                    statusTxt = "🚨 ÚLTIMA CHAMADA! VAI FECHAR!";
+                    alertaTxt = "Ó, TÁ ACABANDO! CORRE FILHO!!";
+                } else if (horasRestantes <= 24) {
+                    DOM.prazoBox.classList.add('urgencia-alerta');
+                    statusTxt = "⚠️ ATENÇÃO: ÚLTIMAS 24 HORAS!";
+                    alertaTxt = "Corre aí! Não deixa pra última hora!";
+                }
+
+                DOM.timerDisplay.innerHTML = `<b>${statusTxt}</b><br><span style="font-size:1.3rem;">${d}d ${h}h ${m}m ${s}s</span><br><small>${alertaTxt}</small>`;
             }
         }, 1000);
     }
@@ -351,20 +366,6 @@
     function setupApp() {
         const now = new Date();
         DOM.footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${CONFIG.VERSAO} [${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}]`;
-
-        DOM.email.addEventListener('input', function(e) {
-            const val = e.target.value;
-            const dl = document.getElementById('emailProviders');
-            dl.innerHTML = '';
-            if (val.includes('@')) {
-                const [user, domain] = val.split('@');
-                CONFIG.EMAIL_PROVIDERS.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = `${user}@${p}`;
-                    dl.appendChild(opt);
-                });
-            }
-        });
 
         const inicio = new Date(now.getFullYear(), now.getMonth() + 1, 1);
         const fim = new Date(now.getFullYear(), now.getMonth() + 2, 0);
@@ -389,11 +390,11 @@
         const militar = STATE.employeeList[std];
         
         if(militar) {
-            console.log(`[VALIDAÇÃO] Matrícula ${std} validada: ${militar}`);
+            console.log(`[LOG] Matrícula validada: ${std} (${militar})`);
             DOM.nome.value = militar;
             document.getElementById('erroMatricula').style.display = "none";
         } else {
-            console.warn(`[VALIDAÇÃO] Matrícula ${std} não encontrada no banco.`);
+            console.warn(`[LOG] Matrícula não localizada: ${std}`);
             DOM.nome.value = "";
             document.getElementById('erroMatricula').style.display = "block";
         }
@@ -402,33 +403,33 @@
 
     async function handleSubmit(e) {
         e.preventDefault();
-        console.log("[ENVIO] Iniciando processo de submissão...");
-
         if (STATE.isSubmitting) return;
+
+        console.log("[LOG] Iniciando validação de submissão...");
         if (!validate()) {
-            console.warn("[ENVIO] Abortado: Falha na validação dos campos.");
+            console.warn("[LOG] Submissão abortada por campos inválidos.");
             return;
         }
 
         setLoading(true);
         try {
             const formData = new URLSearchParams(new FormData(DOM.form));
-            console.log("[API] Enviando dados:", Object.fromEntries(formData));
+            console.log("[LOG] Enviando solicitação para o servidor...");
             
             const res = await fetchWithTimeout(CONFIG.API_URL, { method: 'POST', body: formData });
             
             if (res.success) {
-                console.log("[API] Sucesso: Solicitação gravada no Banco de Dados.");
+                console.log("[LOG] Envio concluído com sucesso!");
                 showModal("SUCESSO", "Solicitação gravada.", "✔", "#2E7D32");
                 DOM.data.value = "";
                 document.querySelectorAll('input[name="folga"]').forEach(r => r.checked = false);
             } else {
-                console.warn("[API] Negado:", res.message);
+                console.warn(`[LOG] Solicitação negada: ${res.message}`);
                 showModal("AVISO", res.message, "⚠️", "#D32F2F");
             }
         } catch (err) {
-            console.error("[API] Erro de conexão/leitura durante o envio:", err);
-            showModal("ERRO", "Tempo esgotado ou erro de rede.", "❌", "#D32F2F");
+            console.error("[LOG] Erro de conexão ou leitura:", err);
+            showModal("ERRO", "Falha na conexão. Verifique sua internet.", "❌", "#D32F2F");
         } finally {
             setLoading(false);
             updateProgress();
@@ -440,32 +441,20 @@
         document.querySelectorAll('.msg-erro').forEach(m => m.style.display = 'none');
         
         const emailOk = CONFIG.REGEX_EMAIL.test(DOM.email.value);
-        console.log(`[CHECK] E-mail: ${emailOk ? 'OK' : 'ERRO'}`);
-        if (!emailOk) {
-            document.getElementById('erroEmail').style.display = 'block';
-            field = DOM.email;
-        }
+        console.log(`[LOG] Validação E-mail: ${emailOk ? 'OK' : 'ERRO'}`);
+        if (!emailOk) { document.getElementById('erroEmail').style.display = 'block'; field = DOM.email; }
 
         const nomeOk = DOM.nome.value !== "";
-        console.log(`[CHECK] Militar: ${nomeOk ? 'OK' : 'ERRO'}`);
-        if (!nomeOk) {
-            document.getElementById('erroMatricula').style.display = 'block';
-            field = field || DOM.matricula;
-        }
+        console.log(`[LOG] Validação Militar: ${nomeOk ? 'OK' : 'ERRO'}`);
+        if (!nomeOk) { document.getElementById('erroMatricula').style.display = 'block'; field = field || DOM.matricula; }
 
         const folga = document.querySelector('input[name="folga"]:checked');
-        console.log(`[CHECK] Tipo de Folga: ${folga ? folga.value : 'NÃO SELECIONADO'}`);
-        if (!folga) {
-            document.getElementById('erroFolga').style.display = 'block';
-            field = field || document.getElementById('radioFolgaGroup');
-        }
+        console.log(`[LOG] Validação Tipo Folga: ${folga ? 'OK ('+folga.value+')' : 'ERRO'}`);
+        if (!folga) { document.getElementById('erroFolga').style.display = 'block'; field = field || document.getElementById('radioFolgaGroup'); }
 
         const dataOk = DOM.data.value !== "";
-        console.log(`[CHECK] Data: ${dataOk ? DOM.data.value : 'ERRO'}`);
-        if (!dataOk) {
-            document.getElementById('erroData').style.display = 'block';
-            field = field || DOM.data;
-        }
+        console.log(`[LOG] Validação Data: ${dataOk ? 'OK ('+DOM.data.value+')' : 'ERRO'}`);
+        if (!dataOk) { document.getElementById('erroData').style.display = 'block'; field = field || DOM.data; }
 
         if (field) field.focus();
         return !field;
@@ -473,39 +462,24 @@
 
     async function fetchHistory() {
         const mat = DOM.matricula.value;
-        if(!DOM.nome.value) {
-            console.warn("[HISTÓRICO] Tentativa de busca sem matrícula válida.");
-            return showModal("AVISO", "Identifique sua matrícula primeiro.", "🔍", "#FFD700");
-        }
+        if(!DOM.nome.value) return showModal("AVISO", "Identifique sua matrícula primeiro.", "🔍", "#FFD700");
         
-        console.log(`[HISTÓRICO] Buscando registros para matrícula ${mat}...`);
+        console.log(`[LOG] Consultando histórico da matrícula ${mat}...`);
         showModal("BUSCANDO", "Aguarde...", "📂", "#FFD700");
         try {
             const resp = await fetchWithTimeout(`${CONFIG.API_URL}?action=historico&matricula=${mat}`);
-            console.log(`[HISTÓRICO] Registros encontrados: ${resp.dados.length}`);
-            
-            const html = resp.dados.map(i => `
-                <div class="historico-item">
-                    <span>📅 <b>${i.data}</b></span>
-                    <span style="color:var(--azul-marinho); font-weight:bold;">${i.folga}</span>
-                </div>
-            `).join('') || "<p style='text-align:center'>Nenhum registro encontrado.</p>";
-            
+            console.log(`[LOG] Histórico recuperado: ${resp.dados.length} registros.`);
+            const html = resp.dados.map(i => `<div class="historico-item"><span>📅 <b>${i.data}</b></span><span style="color:var(--azul-marinho); font-weight:bold;">${i.folga}</span></div>`).join('') || "<p>Nenhum registro.</p>";
             DOM.historyContent.innerHTML = html;
-            showModal(resp.nome || "Histórico", "Registros encontrados:", "📋", "#FFD700", true);
+            showModal(resp.nome || "Histórico", "Registros:", "📋", "#FFD700", true);
         } catch (e) { 
-            console.error("[HISTÓRICO] Erro ao buscar histórico:", e);
-            showModal("ERRO", "Falha ao ler histórico do servidor.", "❌", "#D32F2F"); 
+            console.error("[LOG] Erro ao ler histórico:", e);
+            showModal("ERRO", "Falha ao ler histórico.", "❌", "#D32F2F"); 
         }
     }
 
     function updateProgress() {
-        const fields = [
-            CONFIG.REGEX_EMAIL.test(DOM.email.value),
-            DOM.nome.value !== "",
-            !!document.querySelector('input[name="folga"]:checked'),
-            DOM.data.value !== ""
-        ];
+        const fields = [CONFIG.REGEX_EMAIL.test(DOM.email.value), DOM.nome.value !== "", !!document.querySelector('input[name="folga"]:checked'), DOM.data.value !== ""];
         const perc = (fields.filter(Boolean).length / 4) * 100;
         DOM.barra.style.width = perc + "%";
         DOM.barra.classList.toggle('barra-completa', perc === 100);
@@ -528,7 +502,7 @@
     }
 
     function applyInstitutionalTheme() {
-        const hoje = new Date(), mes = hoje.getMonth();
+        const mes = new Date().getMonth();
         const instDiv = document.getElementById("instMessage");
         const mensais = {
             0: "🎭 Janeiro: Planejamento estratégico para garantir a segurança.",
