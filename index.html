@@ -13,11 +13,14 @@
             --sucesso-bg: #E8F5E9;
             --sucesso-border: #2E7D32;
             --cinza-fundo: #F0F2F5;
-            --borda: #ccc;
             --alerta-vermelho: #D32F2F;
             --raio-padrao: 8px;
+            --espacamento-v: 20px;
         }
 
+        /* Reset e Base */
+        * { box-sizing: border-box; }
+        
         body {
             background-color: var(--cinza-fundo);
             font-family: 'Roboto', sans-serif;
@@ -32,107 +35,95 @@
             position: relative; overflow: hidden;
         }
 
+        /* Classes Utilitárias */
+        .is-hidden { display: none !important; }
+        .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
         #barraProgresso {
             position: absolute; top: 0; left: 0; width: 0%; height: 6px;
-            background: var(--ouro-brilhante); 
-            transition: width 0.4s ease; z-index: 3;
+            background: var(--ouro-brilhante); transition: width 0.4s ease; z-index: 3;
         }
-
         .barra-completa { background-color: var(--sucesso-border) !important; }
 
-        .header { text-align: center; margin-bottom: 20px; }
+        .header { text-align: center; margin-bottom: var(--espacamento-v); }
         .logos { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
         .logos img { height: 75px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
 
         h2 { color: var(--azul-marinho); font-size: 24px; margin: 0; text-transform: uppercase; }
         .divisor { width: 100%; height: 2px; background: var(--ouro-brilhante); margin: 15px 0; }
         
-        .subtitle { font-size: 14px; color: #444; line-height: 1.4; margin-bottom: 20px; font-weight: 500; }
+        .subtitle { font-size: 14px; color: #333; line-height: 1.4; margin-bottom: var(--espacamento-v); font-weight: 500; }
 
         #prazoBox {
             background: var(--sucesso-bg); border-left: 5px solid var(--sucesso-border);
             padding: 12px; text-align: center; border-radius: 4px; margin-bottom: 15px;
         }
 
-        .timer-urgente { animation: pulse-red 1s infinite alternate; border-left-color: var(--alerta-vermelho); }
-        @keyframes pulse-red { from { background-color: #fff; } to { background-color: #ffebee; } }
-
         #instMessage {
             font-size: 0.95rem; font-style: italic; color: var(--azul-marinho);
             background: rgba(255, 215, 0, 0.1); padding: 12px;
             border-radius: var(--raio-padrao); border-left: 4px solid var(--ouro-brilhante);
-            margin-bottom: 20px; text-align: center;
+            margin-bottom: var(--espacamento-v); text-align: center;
         }
 
-        .form-group { margin-bottom: 18px; position: relative; }
-        label { display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 14px; }
+        .form-group { margin-bottom: 18px; border: none; padding: 0; }
+        label, legend { display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 14px; }
         .required::after { content: " *"; color: var(--alerta-vermelho); }
 
         input:not([type="radio"]) {
-            width: 100%; padding: 12px; border: 2px solid #eee;
-            border-radius: var(--raio-padrao); box-sizing: border-box; font-size: 16px;
+            width: 100%; padding: 14px; border: 2px solid #eee;
+            border-radius: var(--raio-padrao); font-size: 16px;
             transition: border-color 0.3s;
         }
 
-        input:focus { border-color: var(--ouro-brilhante); outline: none; }
+        input:focus-visible { border-color: var(--azul-marinho); outline: 2px solid var(--ouro-brilhante); }
+        input[readonly] { background-color: #f9f9f9; color: #666; cursor: not-allowed; }
+        
         .campo-erro { border-color: var(--alerta-vermelho) !important; }
         .msg-erro { color: var(--alerta-vermelho); font-size: 12px; font-weight: bold; margin-top: 5px; display: none; }
 
-        .radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
-        .radio-group input { display: none; }
+        .radio-group { display: flex; flex-wrap: wrap; gap: 8px; border: none; }
+        .radio-group input { position: absolute; opacity: 0; } /* visually hidden para acessibilidade */
         .radio-group label {
-            flex: 1 1 calc(25% - 8px); min-width: 70px; padding: 14px 2px;
-            border: 2px solid #eee; text-align: center; cursor: pointer;
-            border-radius: var(--raio-padrao); font-size: 12px; font-weight: bold;
-            transition: 0.2s; background: #fafafa;
+            flex: 1 1 calc(25% - 8px); min-height: 44px; display: flex; align-items: center; justify-content: center;
+            border: 2px solid #eee; cursor: pointer; border-radius: var(--raio-padrao);
+            font-size: 12px; font-weight: bold; background: #fafafa; margin: 0; transition: 0.2s;
         }
         .radio-group input:checked + label {
             background: var(--azul-marinho); color: var(--ouro-brilhante); border-color: var(--azul-marinho);
         }
 
         .btn {
-            width: 100%; padding: 16px; border-radius: var(--raio-padrao); border: none;
+            width: 100%; min-height: 48px; padding: 12px; border-radius: var(--raio-padrao); border: none;
             font-weight: bold; cursor: pointer; text-transform: uppercase;
             font-size: 14px; margin-top: 10px; transition: 0.2s;
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .btn-outline { background: #fff; color: var(--azul-marinho); border: 2px solid var(--azul-marinho); }
         .btn-primary { background: var(--azul-marinho); color: #fff; }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn:disabled { background: #ccc !important; cursor: not-allowed; }
+        .btn:disabled { background: #ccc !important; cursor: not-allowed; opacity: 0.7; }
 
+        /* Modal Acessível */
         .modal {
             display: none; position: fixed; inset: 0;
             background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
             z-index: 10000; backdrop-filter: blur(4px);
         }
-        
         .modal-content {
             background: #fff; padding: 25px; border-radius: 12px; 
-            width: 95%; max-width: 400px;
-            max-height: 90vh;
-            display: flex; flex-direction: column; text-align: center;
-            overflow: hidden;
+            width: 95%; max-width: 400px; max-height: 90vh;
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
         #historyContent {
-            display: none; text-align: left; 
-            max-height: 380px; /* GARANTE QUE A LISTA SEJA LONGA NO CELULAR */
-            overflow-y: auto; margin: 15px 0;
-            border-top: 1px solid #eee;
-            border-bottom: 1px solid #eee;
+            margin: 15px 0; overflow-y: auto; border-top: 1px solid #eee;
         }
-
         .historico-item {
-            padding: 10px 5px; 
-            border-bottom: 1px solid #f9f9f9;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 12px 5px; border-bottom: 1px solid #f9f9f9;
+            font-size: 14px; display: flex; justify-content: space-between;
         }
 
-        .footer { text-align: center; margin-top: 25px; font-size: 11px; color: #888; }
+        .footer { text-align: center; margin-top: 25px; font-size: 12px; color: #666; font-weight: 500; }
         
         .spinner-inline {
             width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3);
@@ -140,6 +131,10 @@
             display: none;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
     </style>
 </head>
 <body>
@@ -149,70 +144,64 @@
         
         <header class="header">
             <div class="logos">
-                <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="Brasão PMRO">
-                <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="Logotipo 1º BPM">
+                <img src="https://rondonia.ro.gov.br/wp-content/uploads/2024/09/Brasao-PMRO-370x523.png" alt="Brasão PMRO" loading="lazy">
+                <img src="https://museu.pm.ro.gov.br/wp-content/uploads/2024/05/1-bpm-3.png" alt="Logotipo 1º BPM" loading="lazy">
             </div>
             <h2>DERSO 1º BPM</h2>
             <div class="divisor"></div>
-            <p class="subtitle">Formulário de Solicitação de Diária Especial de Reforço do Serviço Operacional - DERSO</p>
+            <p class="subtitle">Formulário de Solicitação de Diária Especial de Reforço do Serviço Operacional</p>
         </header>
 
-        <div id="loadingScreen">
-            <div id="loadingContent" style="text-align: center;">
+        <div id="loadingScreen" aria-busy="true">
+            <div style="text-align: center;">
                 <p>Sincronizando dados...</p>
                 <div class="spinner-inline" style="display:block; border-top-color: var(--azul-marinho); margin: 10px auto;"></div>
             </div>
-            <div id="retryBtn" style="display:none; text-align: center;">
-                <p style="color:var(--alerta-vermelho)">Erro de conexão com o servidor.</p>
-                <button class="btn btn-outline" onclick="window.location.reload()">TENTAR NOVAMENTE</button>
-            </div>
         </div>
 
-        <div id="formContent" style="display: none;">
+        <div id="formContent" class="is-hidden">
             <section id="prazoBox" aria-live="polite">
                 <strong id="timerDisplay">⌛ CALCULANDO PRAZO...</strong>
             </section>
 
-            <div id="instMessage" role="note">Carregando tema...</div>
+            <div id="instMessage" role="note"></div>
 
             <form id="dersoForm" novalidate>
                 <div class="form-group">
                     <label for="email" class="required">E-mail Institucional ou Pessoal:</label>
                     <input type="email" id="email" name="email" placeholder="exemplo@pm.ro.gov.br" required>
-                    <span id="erroEmail" class="msg-erro" role="alert">E-mail inválido ou em branco</span>
+                    <span id="erroEmail" class="msg-erro" aria-live="assertive">E-mail inválido ou em branco</span>
                 </div>
 
                 <div class="form-group">
                     <label for="matricula" class="required">Matrícula (apenas números):</label>
-                    <input type="text" id="matricula" name="matricula" placeholder="Ex: 12345 ou 100012345" required maxlength="15">
-                    <span id="erroMatricula" class="msg-erro" role="alert">⚠️ MATRÍCULA NÃO LOCALIZADA OU EM BRANCO</span>
+                    <input type="text" id="matricula" name="matricula" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 100012345" required maxlength="15">
+                    <span id="erroMatricula" class="msg-erro" aria-live="assertive">⚠️ MATRÍCULA NÃO LOCALIZADA</span>
                 </div>
 
                 <div class="form-group">
                     <label for="nome">Nome Completo:</label>
-                    <input type="text" id="nome" name="nome" readonly style="background: #fdfdfd; color: #555;" placeholder="Identificação automática">
+                    <input type="text" id="nome" name="nome" readonly placeholder="Identificação automática">
                 </div>
 
-                <div class="form-group">
-                    <label class="required">Tipo de Folga:</label>
-                    <div class="radio-group" id="radioFolgaGroup" role="radiogroup">
+                <fieldset class="form-group">
+                    <legend class="required" id="labelFolga">Tipo de Folga:</legend>
+                    <div class="radio-group" id="radioFolgaGroup" role="radiogroup" aria-labelledby="labelFolga">
                         <input type="radio" id="f24" name="folga" value="24H" required><label for="f24">24H</label>
                         <input type="radio" id="f48" name="folga" value="48H"><label for="f48">48H</label>
                         <input type="radio" id="f72" name="folga" value="72H"><label for="f72">72H</label>
-                        <input type="radio" id="f96" name="folga" value="96H"><label for="f96">96H</label>
                         <input type="radio" id="fLE" name="folga" value="FOLGA LE"><label for="fLE">FOLGA LE</label>
                         <input type="radio" id="f1" name="folga" value="1ª Folga"><label for="f1">1ª FOLGA</label>
-                        <input type="radio" id="f2" name="folga" value="2ª Folga"><label for="f2">2ª FOLGA</label>
-                        <input type="radio" id="fExp" name="folga" value="Expediente"><label for="fExp">EXPEDIENTE</label>
+                        <input type="radio" id="fExp" name="folga" value="Expediente"><label for="fExp">EXP.</label>
                     </div>
-                    <span id="erroFolga" class="msg-erro" role="alert">Selecione o tipo de folga</span>
-                </div>
+                    <span id="erroFolga" class="msg-erro" aria-live="assertive">Selecione o tipo de folga</span>
+                </fieldset>
 
                 <div class="form-group">
-                    <label for="data" class="required">Data:</label>
+                    <label for="data" class="required">Data da Folga:</label>
                     <input type="date" id="data" name="data" required>
                     <small id="periodoLabel" style="display:block; margin-top:5px; color:#666; font-size:11px;"></small>
-                    <span id="erroData" class="msg-erro" role="alert">Data já solicitada ou em branco</span>
+                    <span id="erroData" class="msg-erro" aria-live="assertive">Data inválida ou já solicitada</span>
                 </div>
 
                 <button type="button" class="btn btn-outline" id="btnHistory">📂 VER MINHAS SOLICITAÇÕES</button>
@@ -226,168 +215,184 @@
         <footer class="footer" id="footerText"></footer>
     </div>
 
-    <div id="modalMsg" class="modal" onclick="closeModal(event)">
+    <div id="modalMsg" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-content">
-            <div id="modalIcon" style="font-size: 50px; margin-bottom: 10px;"></div>
-            <h3 id="modalTitle"></h3>
-            <p id="modalText" style="color: #666; margin: 15px 0;"></p>
+            <div id="modalIcon" style="font-size: 50px; margin-bottom: 10px; text-align: center;"></div>
+            <h3 id="modalTitle" style="text-align: center; margin: 0;"></h3>
+            <p id="modalText" style="color: #666; margin: 15px 0; text-align: center;"></p>
             <div id="historyContent"></div> 
-            <button class="btn btn-primary" onclick="closeModal()">FECHAR</button>
+            <button class="btn btn-primary" id="btnCloseModal">FECHAR</button>
         </div>
     </div>
 
     <script>
+        /**
+         * CONFIGURAÇÕES E CONSTANTES
+         */
         const CONFIG = {
-            URL: "https://script.google.com/macros/s/AKfycbz-11arycDKX6Vwo26KmTeIqfjMMuIiPUpf5SjKd3PyIVqqttbRWTmNoMP8Y4iAXweUMQ/exec",
-            REGEX_EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            API_URL: "https://script.google.com/macros/s/AKfycbz-11arycDKX6Vwo26KmTeIqfjMMuIiPUpf5SjKd3PyIVqqttbRWTmNoMP8Y4iAXweUMQ/exec",
+            FETCH_TIMEOUT: 15000, // 15 segundos
+            REGEX_EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            VERSION: "2.1.0"
         };
 
-        const STATE = { employeeList: {}, userSolicitations: [], isSubmitting: false };
-        const $ = (id) => document.getElementById(id);
+        const STATE = { 
+            employeeList: {}, 
+            isSubmitting: false, 
+            isClosed: false 
+        };
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            console.log("[DERSO] Sistema iniciado.");
+        // Objeto DOM Centralizado
+        const DOM = {
+            form: document.getElementById('dersoForm'),
+            email: document.getElementById('email'),
+            matricula: document.getElementById('matricula'),
+            nome: document.getElementById('nome'),
+            data: document.getElementById('data'),
+            btnEnviar: document.getElementById('btnEnviar'),
+            btnHistory: document.getElementById('btnHistory'),
+            barra: document.getElementById('barraProgresso'),
+            modal: document.getElementById('modalMsg'),
+            modalText: document.getElementById('modalText'),
+            modalTitle: document.getElementById('modalTitle'),
+            modalIcon: document.getElementById('modalIcon'),
+            historyContent: document.getElementById('historyContent'),
+            loading: document.getElementById('loadingScreen'),
+            formContent: document.getElementById('formContent')
+        };
+
+        /**
+         * INICIALIZAÇÃO
+         */
+        window.addEventListener("load", async () => {
             try {
                 const [dResp, lResp] = await Promise.all([
-                    fetch(`${CONFIG.URL}?action=datas`).then(r => r.json()),
-                    fetch(`${CONFIG.URL}?action=lista`).then(r => r.json())
+                    fetchWithTimeout(`${CONFIG.API_URL}?action=datas`),
+                    fetchWithTimeout(`${CONFIG.API_URL}?action=lista`)
                 ]);
                 
                 STATE.employeeList = lResp;
-                $('loadingScreen').style.display = "none";
-                $('formContent').style.display = "block";
+                DOM.loading.classList.add('is-hidden');
+                DOM.formContent.classList.remove('is-hidden');
                 
                 applyInstitutionalTheme();
                 startCountdown(dResp.fechamento);
-                setupFormListeners();
-                console.log("[DERSO] Dados sincronizados com sucesso.");
+                setupApp();
             } catch (e) {
-                console.error("[DERSO] Erro na carga inicial:", e);
-                $('loadingContent').style.display = "none";
-                $('retryBtn').style.display = "block";
+                console.error("Erro na carga inicial:", e);
+                DOM.loading.innerHTML = `<p style="color:red; text-align:center">Falha na conexão. <br><button onclick="location.reload()" class="btn btn-outline">Tentar Novamente</button></p>`;
             }
         });
 
-        function applyInstitutionalTheme() {
-            const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
-            const instDiv = document.getElementById("instMessage");
-            const aplicar = (msg) => instDiv.innerHTML = msg;
-
-            const temas = {
-                "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história, bravura e compromisso.`),
-                "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
-                "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
-                "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear() - 1889} anos de Proclamação.`),
-                "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
-                "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição e compromisso.`)
-            };
-
-            const chave = `${mes+1}-${dia}`;
-            if (temas[chave]) {
-                temas[chave]();
-            } else {
-                const mensais = {
-                    0: () => aplicar("🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos."),
-                    1: () => aplicar("🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos."),
-                    2: () => aplicar("🌷 Março: Homenagem às mulheres da Corporação que honram a farda."),
-                    3: () => aplicar("🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar."),
-                    4: () => aplicar("🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão."),
-                    5: () => aplicar("🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade."),
-                    6: () => aplicar("👮 Julho: Disciplina e prontidão no policiamento ostensivo."),
-                    7: () => aplicar("👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional."),
-                    8: () => aplicar("🇧🇷 Setembro: Renovando nosso juramento de servir e proteger o Brasil."),
-                    9: () => aplicar("🎗️ Outubro: Prevenção é o melhor caminho para a saúde."),
-                    10: () => aplicar(`📜 Novembro: Compromisso republicano e respeito à diversidade. ${hoje.getFullYear() - 1889}º ano da República.`),
-                    11: () => aplicar("🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. ✨")
-                };
-                if (mensais[mes]) mensais[mes]();
+        // Fetch com AbortController (Timeout)
+        async function fetchWithTimeout(url, options = {}) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), CONFIG.FETCH_TIMEOUT);
+            
+            try {
+                const response = await fetch(url, { ...options, signal: controller.signal });
+                clearTimeout(id);
+                if (!response.ok) throw new Error("Erro na rede");
+                return await response.json();
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
             }
         }
 
-        function setupFormListeners() {
+        function setupApp() {
+            // Regras de Data
             const hoje = new Date();
             const inicio = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
             const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 2, 0);
             
-            $('data').min = inicio.toISOString().split('T')[0];
-            $('data').max = fim.toISOString().split('T')[0];
-            $('periodoLabel').innerText = `Período permitido: ${inicio.toLocaleDateString('pt-BR')} a ${fim.toLocaleDateString('pt-BR')}`;
+            DOM.data.min = inicio.toISOString().split('T')[0];
+            DOM.data.max = fim.toISOString().split('T')[0];
+            document.getElementById('periodoLabel').textContent = `Período: ${inicio.toLocaleDateString('pt-BR')} a ${fim.toLocaleDateString('pt-BR')}`;
 
-            $('matricula').addEventListener("blur", () => {
-                let val = $('matricula').value.replace(/\D/g,'');
-                if(!val) return;
-                const std = val.startsWith("1000") ? val : "1000" + val;
-                $('matricula').value = std;
-                const nome = STATE.employeeList[std];
-                $('nome').value = nome || "";
-                $('erroMatricula').style.display = nome ? "none" : "block";
-                updateProgress();
-            });
+            // Listeners
+            DOM.matricula.addEventListener("input", e => e.target.value = e.target.value.replace(/\D/g, ""));
+            DOM.matricula.addEventListener("blur", handleMatriculaBlur);
+            DOM.form.addEventListener("input", updateProgress);
+            DOM.btnHistory.onclick = fetchHistory;
+            DOM.form.onsubmit = handleSubmit;
+            document.getElementById('btnCloseModal').onclick = () => DOM.modal.style.display = 'none';
 
-            $('dersoForm').addEventListener("input", updateProgress);
-            $('btnHistory').onclick = fetchHistory;
-            $('dersoForm').onsubmit = handleSubmit;
-            
+            // Footer
             const now = new Date();
-            $('footerText').textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+            document.getElementById('footerText').textContent = `1º BPM - Versão ${CONFIG.VERSION} - ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+        }
+
+        /**
+         * LÓGICA DE NEGÓCIO
+         */
+        function handleMatriculaBlur() {
+            let val = DOM.matricula.value;
+            if(!val) return;
+            const std = val.startsWith("1000") ? val : "1000" + val;
+            DOM.matricula.value = std;
+            
+            const nomeEncontrado = STATE.employeeList[std];
+            DOM.nome.value = nomeEncontrado || "";
+            document.getElementById('erroMatricula').style.display = nomeEncontrado ? "none" : "block";
+            updateProgress();
         }
 
         async function handleSubmit(e) {
             e.preventDefault();
-            if (STATE.isSubmitting || !validateAll()) return;
+            if (STATE.isSubmitting || STATE.isClosed || !validateForm()) return;
 
             setLoading(true);
             try {
-                const resp = await fetch(CONFIG.URL, { method: 'POST', body: new URLSearchParams(new FormData($('dersoForm'))) });
-                const res = await resp.json();
+                const formData = new URLSearchParams(new FormData(DOM.form));
+                const res = await fetchWithTimeout(CONFIG.API_URL, { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
                 if (res.success) {
-                    showModal("SUCESSO!", "Solicitação gravada com sucesso.", "✔", "#2E7D32");
-                    // Limpa apenas os campos de data e folga
-                    $('data').value = "";
+                    showModal("SUCESSO", "Solicitação gravada.", "✔", "#2E7D32");
+                    DOM.data.value = "";
                     document.querySelectorAll('input[name="folga"]').forEach(r => r.checked = false);
                 } else {
-                    showModal("ERRO", res.message, "⚠️", "#D32F2F");
+                    showModal("AVISO", res.message, "⚠️", "#D32F2F");
                 }
             } catch (err) {
-                showModal("ERRO", "Falha de comunicação com o servidor.", "❌", "#D32F2F");
+                showModal("ERRO", "O servidor demorou a responder. Verifique sua conexão.", "❌", "#D32F2F");
             } finally {
                 setLoading(false);
                 updateProgress();
             }
         }
 
-        function validateAll() {
+        function validateForm() {
             let errorField = null;
-            const dataVal = $('data').value;
-            const dataBr = dataVal ? dataVal.split('-').reverse().join('/') : "";
-            
-            document.querySelectorAll('.msg-erro').forEach(m => m.style.display = 'none');
+            const errors = document.querySelectorAll('.msg-erro');
+            errors.forEach(m => m.style.display = 'none');
             document.querySelectorAll('input').forEach(i => i.classList.remove('campo-erro'));
 
-            if (!CONFIG.REGEX_EMAIL.test($('email').value)) {
-                $('erroEmail').style.display = 'block';
-                $('email').classList.add('campo-erro');
-                errorField = errorField || $('email');
+            if (!CONFIG.REGEX_EMAIL.test(DOM.email.value)) {
+                document.getElementById('erroEmail').style.display = 'block';
+                DOM.email.classList.add('campo-erro');
+                errorField = DOM.email;
             }
-
-            if (!$('nome').value) {
-                $('erroMatricula').style.display = 'block';
-                $('matricula').classList.add('campo-erro');
-                errorField = errorField || $('matricula');
+            if (!DOM.nome.value) {
+                document.getElementById('erroMatricula').style.display = 'block';
+                DOM.matricula.classList.add('campo-erro');
+                errorField = errorField || DOM.matricula;
             }
-
             if (!document.querySelector('input[name="folga"]:checked')) {
-                $('erroFolga').style.display = 'block';
-                errorField = errorField || $('radioFolgaGroup');
+                document.getElementById('erroFolga').style.display = 'block';
+                errorField = errorField || document.getElementById('radioFolgaGroup');
             }
-
-            if (!dataVal) {
-                $('erroData').style.display = 'block';
-                $('data').classList.add('campo-erro');
-                errorField = errorField || $('data');
+            if (!DOM.data.value) {
+                document.getElementById('erroData').style.display = 'block';
+                DOM.data.classList.add('campo-erro');
+                errorField = errorField || DOM.data;
             }
 
             if (errorField) {
+                errorField.focus();
                 errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return false;
             }
@@ -396,58 +401,52 @@
 
         function updateProgress() {
             const fields = [
-                CONFIG.REGEX_EMAIL.test($('email').value),
-                $('nome').value !== "",
+                CONFIG.REGEX_EMAIL.test(DOM.email.value),
+                DOM.nome.value !== "",
                 !!document.querySelector('input[name="folga"]:checked'),
-                $('data').value !== ""
+                DOM.data.value !== ""
             ];
             const perc = (fields.filter(Boolean).length / 4) * 100;
-            $('barraProgresso').style.width = perc + "%";
-            $('barraProgresso').classList.toggle('barra-completa', perc === 100);
+            DOM.barra.style.width = perc + "%";
+            DOM.barra.classList.toggle('barra-completa', perc === 100);
         }
 
         function setLoading(active) {
             STATE.isSubmitting = active;
-            $('btnEnviar').disabled = active;
-            $('spinEnviar').style.display = active ? 'block' : 'none';
-            $('txtEnviar').innerText = active ? 'ENVIANDO...' : 'ENVIAR SOLICITAÇÃO';
+            DOM.btnEnviar.disabled = active;
+            document.getElementById('spinEnviar').style.display = active ? 'block' : 'none';
+            document.getElementById('txtEnviar').textContent = active ? 'PROCESSANDO...' : 'ENVIAR SOLICITAÇÃO';
         }
 
         function showModal(title, text, icon, color, isHistory = false) {
-            $('modalTitle').innerText = title;
-            $('modalText').innerText = text;
-            $('modalIcon').innerText = icon;
-            $('modalIcon').style.color = color;
-            $('modalMsg').style.display = 'flex';
-            $('historyContent').style.display = isHistory ? 'block' : 'none';
-        }
-
-        function closeModal(e) { 
-            if(!e || e.target.id === 'modalMsg' || e.type === 'click') {
-                $('modalMsg').style.display = 'none'; 
-            }
+            DOM.modalTitle.textContent = title;
+            DOM.modalText.textContent = text;
+            DOM.modalIcon.textContent = icon;
+            DOM.modalIcon.style.color = color;
+            DOM.historyContent.classList.toggle('is-hidden', !isHistory);
+            DOM.modal.style.display = 'flex';
         }
 
         async function fetchHistory() {
-            const mat = $('matricula').value;
-            if(!mat || !STATE.employeeList[mat]) return showModal("AVISO", "Digite sua matrícula para consultar.", "🔍", "#FFD700");
+            const mat = DOM.matricula.value;
+            if(!mat || !DOM.nome.value) {
+                return showModal("AVISO", "Identifique-se primeiro com sua matrícula.", "🔍", "#FFD700");
+            }
             
-            showModal("BUSCANDO...", "Aguarde...", "📂", "#FFD700");
+            showModal("BUSCANDO", "Aguarde...", "📂", "#FFD700");
             try {
-                const resp = await fetch(`${CONFIG.URL}?action=historico&matricula=${mat}`).then(r => r.json());
-                STATE.userSolicitations = resp.dados || [];
-                
-                let html = STATE.userSolicitations.map(i => `
+                const resp = await fetchWithTimeout(`${CONFIG.API_URL}?action=historico&matricula=${mat}`);
+                const html = resp.dados.map(i => `
                     <div class="historico-item">
                         <span>📅 <b>${i.data}</b></span>
-                        <span style="color: var(--azul-marinho)">${i.folga}</span>
+                        <span style="color:var(--azul-marinho)">${i.folga}</span>
                     </div>
-                `).join('') || "<div style='text-align:center;padding:20px'>Nenhum registro encontrado.</div>";
+                `).join('') || "<p style='text-align:center; padding:10px'>Nenhum registro.</p>";
                 
-                $('historyContent').innerHTML = html;
-                showModal(resp.nome, "Suas solicitações atuais:", "📋", "#FFD700", true);
+                DOM.historyContent.innerHTML = html;
+                showModal(resp.nome, "Seu Histórico:", "📋", "#FFD700", true);
             } catch (e) { 
-                showModal("ERRO", "Falha ao carregar histórico.", "❌", "#D32F2F"); 
+                showModal("ERRO", "Falha ao carregar dados.", "❌", "#D32F2F"); 
             }
         }
 
@@ -456,16 +455,36 @@
             const timer = setInterval(() => {
                 const diff = end - new Date().getTime();
                 if (diff <= 0) {
-                    $('timerDisplay').innerHTML = "<b>⛔ PRAZO ENCERRADO</b>";
-                    $('dersoForm').style.opacity = "0.5";
-                    $('dersoForm').style.pointerEvents = "none";
+                    STATE.isClosed = true;
+                    document.getElementById('timerDisplay').textContent = "⛔ PRAZO ENCERRADO";
+                    DOM.form.style.opacity = "0.5";
+                    DOM.form.style.pointerEvents = "none";
                     return clearInterval(timer);
                 }
                 const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000),
                       m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
-                if (diff < 3600000) $('prazoBox').classList.add('timer-urgente');
-                $('timerDisplay').innerHTML = `🚨 Encerra em: <b>${d}d ${h}h ${m}m ${s}s</b>`;
+                document.getElementById('timerDisplay').innerHTML = `Encerra em: <b>${d}d ${h}h ${m}m ${s}s</b>`;
             }, 1000);
+        }
+
+        function applyInstitutionalTheme() {
+            const hoje = new Date(), mes = hoje.getMonth();
+            const instDiv = document.getElementById("instMessage");
+            const mensais = {
+                0: "Janeiro: Planejamento estratégico e segurança.",
+                1: "Fevereiro: Nossa missão é a sua tranquilidade.",
+                2: "Março: Homenagem às mulheres da Corporação.",
+                3: "Abril: Renovação e fortalecimento institucional.",
+                4: "Maio: Família e Segurança: bases da sociedade.",
+                5: "Junho: Valorizando nossas tradições culturais.",
+                6: "Julho: Disciplina e prontidão operacional.",
+                7: "Agosto: Compromisso com o cidadão rondoniense.",
+                8: "Setembro: Renovando o juramento de servir.",
+                9: "Outubro: Prevenção é saúde e segurança.",
+                10: "Novembro: Compromisso republicano e ético.",
+                11: "Dezembro: Planejamento para um final de ano seguro."
+            };
+            instDiv.textContent = mensais[mes] || "1º BPM: O Sentinela da Capital.";
         }
     </script>
 </body>
