@@ -592,40 +592,52 @@
 }
 
     function applyInstitutionalTheme() {
-        const hoje = new Date(), mes = hoje.getMonth(), dia = hoje.getDate();
-        const instDiv = document.getElementById("instMessage");
-        const aplicar = (msg) => instDiv.innerHTML = msg;
+    const hoje = new Date();
+    const diaAtual = hoje.getDate();
+    const mesAtual = hoje.getMonth(); // 0-11
+    
+    // Define o mês de referência (Mês seguinte para a mensagem mensal)
+    const dataRef = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+    const mesReferencia = dataRef.getMonth(); 
+    const anoReferencia = dataRef.getFullYear();
 
-        const temas = {
-            "1-4": () => aplicar(`🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história, bravura e compromisso.`),
-            "5-1": () => aplicar("🛠️ Dia do Trabalhador: O serviço público é a engrenagem que move a cidadania."),
-            "9-7": () => aplicar("🇧🇷 7 de Setembro: A independência se constrói com ordem, progresso e segurança."),
-            "11-15": () => aplicar(`📜 15 de Novembro: A República se fortalece com instituições sólidas. ${hoje.getFullYear() - 1889} anos de Proclamação.`),
-            "11-20": () => aplicar("✊ Consciência Negra: A união e o respeito às raízes constroem uma sociedade justa. ⚖️"),
-            "12-7": () => aplicar(`🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de tradição e compromisso.`)
-        };
+    const instDiv = document.getElementById("instMessage");
+    const aplicar = (msg) => instDiv.innerHTML = msg;
 
-        const chave = `${mes+1}-${dia}`;
-        if (temas[chave]) {
-            temas[chave]();
-        } else {
-            const mensais = {
-                0: "🎭 Janeiro: Planejamento estratégico para garantir a segurança em grandes eventos.",
-                1: "🎊 Fevereiro: Foco e prevenção. Nossa missão é garantir a tranquilidade de todos.",
-                2: "🌷 Março: Homenagem às mulheres da Corporação que honram a farda.",
-                3: "🕊️ Abril: Tempo de renovação, reflexão e fortalecimento da união familiar.",
-                4: "🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão.",
-                5: "🔥 Junho: Valorizando a cultura e as tradições que formam nossa identidade.",
-                6: "👮 Julho: Disciplina e prontidão no policiamento ostensivo.",
-                7: "👔 Agosto: A presença familiar é o alicerce para o equilíbrio do profissional.",
-                8: "🇧🇷 Setembro: Renovando nosso juramento de servir e proteger o Brasil.",
-                9: "🎗️ Outubro: Prevenção é o melhor caminho para a saúde.",
-                10: `📜 Novembro: Compromisso republicano e respeito à diversidade. ${hoje.getFullYear() - 1889}º ano da República.`,
-                11: "🎄 Dezembro: Planejamento e compromisso garantem um final de ano seguro. ✨"
-            };
-            aplicar(mensais[mes] || "DERSO 1º BPM");
-        }
+    // 1. DATAS COMEMORATIVAS PONTUAIS (Baseadas no dia de HOJE)
+    const temasPontuais = {
+        "1-4": `🌳 Rondônia: ${hoje.getFullYear() - 1982} anos de história e bravura.`,
+        "5-1": "🛠️ Dia do Trabalhador: O serviço público move a cidadania.",
+        "9-7": "🇧🇷 7 de Setembro: Independência se constrói com Ordem e Progresso.",
+        "12-7": `🛡️ 1º BPM: O Sentinela da Capital. ${hoje.getFullYear() - 1983} anos de compromisso.`
+    };
+
+    const chaveHoje = `${mesAtual + 1}-${diaAtual}`;
+
+    // 2. MENSAGENS DO MÊS DE REFERÊNCIA (Baseadas no mês da ESCALA)
+    const mensais = {
+        0: "🎭 Janeiro: Planejamento estratégico para o novo ano.",
+        1: "🎊 Fevereiro: Foco e prevenção na segurança dos eventos.",
+        2: "🌷 Março: Homenagem às mulheres que honram a farda neste mês.",
+        3: "🕊️ Abril: Tempo de renovação e fortalecimento da união.",
+        4: "🤱 Maio: Mães, a base de tudo. Reconhecemos sua dupla missão.",
+        5: "🔥 Junho: Valorizando a cultura e as tradições de nossa terra.",
+        6: "👮 Julho: Disciplina e prontidão no policiamento ostensivo.",
+        7: "👔 Agosto: A presença familiar é o alicerce do profissional.",
+        8: "🇧🇷 Setembro: Renovando nosso juramento de servir e proteger.",
+        9: "🎗️ Outubro: Prevenção é o melhor caminho para a saúde.",
+        10: `📜 Novembro: Compromisso com os ideais da República.`,
+        11: "🎄 Dezembro: Planejamento garante um final de ano seguro. ✨"
+    };
+
+    // LÓGICA DE EXIBIÇÃO:
+    // Se hoje for uma data especial, mostra a data. Caso contrário, mostra o mês da escala.
+    if (temasPontuais[chaveHoje]) {
+        aplicar(temasPontuais[chaveHoje]);
+    } else {
+        aplicar(mensais[mesReferencia] || "DERSO 1º BPM");
     }
+}
 
     function setupEvents() {
         DOM.email.oninput = (e) => {
