@@ -177,6 +177,13 @@
     color: var(--critico-vermelho);
 }
 
+#prazoBox.estado-verde { border-color: var(--sucesso-verde); background:#f1f8f4; }
+   
+#prazoBox.estado-alerta { border-color:#f0ad4e; background:#fff7ed; }
+   
+#prazoBox.estado-critico { border-color:var(--critico-vermelho); background:#fdecea; }
+   
+
 /* Texto principal de status / timer */
 #timerDisplay {
     font-size: 16px;
@@ -465,7 +472,7 @@
             <p class="subtitle">Formulário de Solicitação de Diária Especial de Reforço do Serviço Operacional</p>
         </header>
 
-        <div id="loadingScreen" style="text-align: center; padding: 50px 0;">
+        <div id="loadingScreen" style="text-align: center; padding: 50px 0;role="status" aria-live="polite;">
             <p>Sincronizando dados com o sistema...</p>
         </div>
 
