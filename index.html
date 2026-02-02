@@ -514,9 +514,7 @@
         DOM.footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - versão ${CONFIG.VERSAO} - em ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
     }
 
-    function monitorarPrazos(dataAbertura, dataFechamento) {
-    const abertura = new Date(dataAbertura).getTime();
-    const fechamento = new Date(dataFechamento).getTime();
+    monitorarPrazos("2026-02-02T08:00:00", "2026-02-02T23:59:59");
     const hoje = new Date();
     
     // --- LÓGICA DO MÊS SEGUINTE ---
