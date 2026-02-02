@@ -517,12 +517,13 @@
     function monitorarPrazos(dataAbertura, dataFechamento) {
     const abertura = new Date(dataAbertura).getTime();
     const fechamento = new Date(dataFechamento).getTime();
-    
+
+       
+       
     // FORÇAR ABERTURA: Define o 'hoje' exatamente como o momento da abertura
     const hoje = new Date(dataAbertura); 
-    
-    // O resto do seu código segue igual..
-    const hoje = new Date();
+
+       
     
     // --- LÓGICA DO MÊS SEGUINTE ---
     const mesSeguinte = hoje.getMonth() + 1;
