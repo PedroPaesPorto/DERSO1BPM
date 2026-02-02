@@ -86,12 +86,13 @@
         font-weight: 900;
     }
 
-    .divisor {
-        width: 80px;
+   .divisor {
+        width: 85%; /* Aumenta para cobrir a extensão da frase */
+        max-width: 420px; /* Garante que não fique larga demais em telas grandes */
         height: 3px;
-        background: var(--ouro-brilhante);
-        margin: 15px auto;
-        border-radius: 2px;
+       background: linear-gradient(90deg, transparent, var(--ouro-brilhante), transparent);
+        margin: 12px auto 20px auto; 
+        border-radius: 5px;
     }
 
     .subtitle {
