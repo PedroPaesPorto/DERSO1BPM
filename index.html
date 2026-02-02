@@ -410,12 +410,21 @@
         line-height: 1.6;
     }
 
-   .footer::before {
-    content: "—";
+.footer::before {
+    content: "";
     display: block;
-    margin-bottom: 5px;
-    color: var(--ouro-brilhante);
+    height: 2px;
+    width: 60%;
+    margin: 0 auto 10px auto;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--ouro-brilhante),
+        transparent
+    );
+    border-radius: 2px;
 }
+
 
 
     /* --- MODO NOTURNO MELHORADO --- */
