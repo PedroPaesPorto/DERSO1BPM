@@ -1,4 +1,18 @@
+import { DOM } from "./dom.js";
+import { CONFIG } from "./config.js";
+
 export function updateFooter() {
-        const now = new Date();
-        DOM.footer.textContent = `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - versão ${CONFIG.VERSAO} - em ${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+
+    if (!DOM.footer) {
+        console.warn("Elemento footer não encontrado.");
+        return;
     }
+
+    const now = new Date();
+
+    const mes = String(now.getMonth() + 1).padStart(2, "0");
+    const ano = now.getFullYear();
+
+    DOM.footer.textContent =
+        `Desenvolvido na 1ª Cia do 1º BPM pelo PVSA Pedro Porto - versão ${CONFIG.VERSAO} - em ${mes}/${ano}`;
+}
