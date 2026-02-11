@@ -1,3 +1,10 @@
+import { DOM } from "./dom.js";
+import { CONFIG } from "./config.js";
+import { registrarLog } from "./logger.js";
+import { showModal } from "./modal.js";
+import { updateProgress } from "./progress.js";
+
+
 export  async function handleSubmit(e) {
     e.preventDefault();
     DOM.btnEnviar.disabled = true;
@@ -21,7 +28,7 @@ export  async function handleSubmit(e) {
             updateProgress();
         } else {
             registrarLog("ENVIO_NEGADO", `Servidor recusou: ${response.message}`, "AVISO");
-            if (response.message.includes("duplicada")) {
+            if (response.message && response.message.includes("duplicada")) {
                 showModal("SOLICITAÇÃO DUPLICADA", "Você já solicitou folga para esta data.", "🚫", "orange");
                 
                 // Limpa apenas a data e folga também em caso de duplicidade para ele tentar outra
