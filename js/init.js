@@ -8,30 +8,58 @@ import { setupEvents } from "./events.js";
 import { updateFooter } from "./footer.js";
 
 export async function init() {
-    registrarLog("SISTEMA", "Iniciando carregamento DERSO...");
+
+    registrarLog("SISTEMA", "Iniciando carregamento DERSO...", "INFO");
+
+    if (!DOM.loading || !DOM.formContent) {
+        console.error("Elementos principais do DOM não encontrados.");
+        return;
+    }
 
     try {
-        const [dResp, lResp] = await Promise.all([
-            fetch(`${CONFIG.API_URL}?action=datas`).then(r => r.json()),
-            fetch(`${CONFIG.API_URL}?action=lista`).then(r => r.json())
+
+        const [datasResp, listaResp] = await Promise.all([
+            fetch(`${CONFIG.API_URL}?action=datas`),
+            fetch(`${CONFIG.API_URL}?action=lista`)
         ]);
 
-        STATE.employeeList = lResp;
+        if (!datasResp.ok || !listaResp.ok) {
+            throw new Error("Erro na resposta da API");
+        }
 
-        DOM.loading.classList.add('is-hidden');
-        DOM.formContent.classList.remove('is-hidden');
+        const dResp = await datasResp.json();
+        const lResp = await listaResp.json();
 
-        registrarLog("SISTEMA", "Dados sincronizados", "SUCESSO");
+        STATE.employeeList = lResp || {};
+
+        DOM.loading.classList.add("is-hidden");
+        DOM.formContent.classList.remove("is-hidden");
+
+        registrarLog("SISTEMA", "Dados sincronizados com sucesso", "SUCESSO");
 
         applyInstitutionalTheme();
-        monitorarPrazos(dResp.abertura, dResp.fechamento);
-        setupEvents();
-        updateFooter();
         applyDarkModeStyles();
 
+        if (dResp?.abertura && dResp?.fechamento) {
+            monitorarPrazos(dResp.abertura, dResp.fechamento);
+        } else {
+            registrarLog(
+                "PRAZO",
+                "Datas de abertura/fechamento não recebidas",
+                "AVISO"
+            );
+        }
+
+        setupEvents();
+        updateFooter();
+
     } catch (e) {
+
         registrarLog("FALHA_CRITICA", e.message, "ERRO");
-        DOM.loading.innerHTML = "Falha crítica de comunicação.";
+
+        DOM.loading.innerHTML =
+            "Falha crítica de comunicação com o servidor.";
+
+        console.error("Erro na inicialização:", e);
     }
 }
-
