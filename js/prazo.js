@@ -1,3 +1,6 @@
+import { DOM } from "./dom.js";
+import { STATE } from "./state.js";
+
 export function monitorarPrazos(dataAbertura, dataFechamento) {
     const abertura = new Date(dataAbertura).getTime();
     const fechamento = new Date(dataFechamento).getTime();
