@@ -1,3 +1,5 @@
+import { DOM } from "./dom.js";
+
 export function updateProgress() {
         const fields = [
             /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(DOM.email.value),
