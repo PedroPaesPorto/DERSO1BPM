@@ -108,8 +108,8 @@ export function applyInstitutionalTheme(matriculaLogada = null) {
         7: "👔 Agosto: Família é alicerce da missão profissional.",
         8: "🇧🇷 Setembro: Renovamos nosso juramento de servir e proteger.",
         9: "🎗️ Outubro: Prevenção é compromisso com a vida.",
-        10: "📜 Novembro: Compromisso com os ideais republicanos. ${hoje.getFullYear() - 1983} º ano da República. ",
-        11: "🎄 Dezembro: Planejamento garante um final de ano seguro."
+       10: `📜 Novembro: Compromisso com os ideais republicanos. ${hoje.getFullYear() - 1983}º ano da República.`,
+       11: "🎄 Dezembro: Planejamento garante um final de ano seguro."
     };
 
     aplicar(mensais[mesReferencia] || "DERSO 1º BPM");
